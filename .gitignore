@@ -1,8 +1,16 @@
+
 .svn/
+
 .settings/
+
 src/main/webapp/*
+
 !src/main/webapp/WEB-INF/
+
 tools/release/node_modules/
+
 npm-debug.log
+
 target/
+
 *.bak
