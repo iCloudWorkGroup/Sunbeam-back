@@ -201,7 +201,6 @@
 			<artifactId>fastjson</artifactId>
 			<version>1.1.41</version>
 		</dependency>
-		<!-- 
 		<dependency>
 			<groupId>com.excel</groupId>
 			<artifactId>acmrutil</artifactId>
@@ -210,8 +209,8 @@
 		<dependency>
 			<groupId>com.excel</groupId>
 			<artifactId>excelutil</artifactId>
-			<version>5.0</version>
-		</dependency> -->
+			<version>7.1</version>
+		</dependency>
 		<!-- <dependency> <groupId>javax.servlet</groupId> <artifactId>servlet-api</artifactId> 
 			<version>3.0.1</version> <scope>provided</scope> </dependency> -->
 		<dependency>
