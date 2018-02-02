@@ -1,0 +1,24 @@
+language: java
+jdk:
+- oraclejdk7
+before_install:
+- openssl aes-256-cbc -K $encrypted_ad87d421c370_key -iv $encrypted_ad87d421c370_iv
+  -in tools/deploy/id_rsa.enc -out ~/.ssh/id_rsa -d
+- chmod 600 ~/.ssh/id_rsa
+- eval $(ssh-agent)
+- ssh-add ~/.ssh/id_rsa
+- echo skipped
+before_script:
+- mv -fv tools/deploy/ssh_config ~/.ssh/config
+notifications:
+  email:
+    recipients:
+    - jinhr@acmr.com.cn
+after_script:
+- git remote add deploy root@spreadsheet:/usr/local/codelib/table.git
+- git push deploy $TRAVIS_BRANCH
+after_success:
+- mvn clean test jacoco:report coveralls:report
+cache:
+  directories:
+    - $HOME/.m2

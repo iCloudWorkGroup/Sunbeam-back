@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"  
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context   
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd 
+	http://www.springframework.org/schema/mvc
+	http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+	<mvc:annotation-driven /> 
+	<!-- 方法解析器，controller根据页面传来的method的值决定调用哪个函数，默认调用list函数
+	<bean id="methodNameResolver"
+		class="org.springframework.web.servlet.mvc.multiaction.ParameterMethodNameResolver">
+		<property name="paramName" value="m" />
+		<property name="defaultMethodName" value="main" />
+	</bean> -->
+	<mvc:default-servlet-handler/>
+	<!-- 静态资源文件，不会被Spring MVC拦截 -->
+	<mvc:resources location="/resources/" mapping="/resources/**"/>
+    
+	<!-- 指定Sping组件扫描的基本包路径 -->
+	<context:component-scan base-package="com.acmr" >
+		<!-- 这里只扫描Controller，不可重复加载Service -->
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
+	<!-- 视图解析器 -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/jsp/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+
+	<!-- 请求拦截器，拦截每一个mvc请求进行通用业务处理-->
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/*" />
+			<bean class="com.acmr.excel.interceptor.CorsInterceptor">
+			</bean>
+		</mvc:interceptor>
+	</mvc:interceptors>
+	<!--文件上传-->
+	<bean id="multipartResolver"  class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize">  
+			<value>55242880</value>  
+		</property>
+		<property name="defaultEncoding">  
+			<value>utf-8</value>  
+		</property>
+	</bean>
+</beans>
