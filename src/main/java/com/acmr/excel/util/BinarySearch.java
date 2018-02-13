@@ -1,5 +1,6 @@
 package com.acmr.excel.util;
 
+import java.util.AbstractList;
 import java.util.List;
 
 import acmr.excel.pojo.ExcelColumn;
@@ -7,6 +8,7 @@ import acmr.excel.pojo.ExcelRow;
 
 import com.acmr.excel.model.complete.Glx;
 import com.acmr.excel.model.complete.Gly;
+import com.acmr.excel.model.position.RowCol;
 /**
  * 二分查找又称折半查找，它是一种效率较高的查找方法。 　　【二分查找要求】：1.必须采用顺序存储结构 2.必须按关键字大小有序排列。
  * 
@@ -87,6 +89,47 @@ public class BinarySearch {
 				}
 				start = index;
 			} else if (glyList.get(index).getTop() > top) {
+				end = index;
+			} else {
+				// System.out.println(array[index] + "找到了，在数组下标为" + index +
+				// "的地方,查找了" + count + "次。");
+				result = index;
+				break;
+			}
+		}
+		return result;
+	}
+	/**
+	 * 二分查询
+	 * 
+	 * @param glyList
+	 * @param top
+	 * @return
+	 */
+
+	public static int binarySearch(List<RowCol> objList, int top) {
+		int index = 0; // 检索的时候
+		int start = 0; // 用start和end两个索引控制它的查询范围
+		int end = objList.size() - 1;
+		int result = -1;
+		// count = 0;
+		for (int i = 0; i < objList.size(); i++) {
+			// count++;
+			index = (start + end) / 2;
+			if (objList.size() - 1 == i) {
+				// System.out.println(num + "找到了，在数组下标为" + end + "的地方,查找了" +
+				// count + "次。");
+				result = end;
+				break;
+			} else if (objList.get(index).getTop() < top) {
+				if (objList.get(index + 1).getTop() > top) {
+					// System.out.println(array[index] + "找到了，在数组下标为" + index +
+					// "的地方,查找了" + count + "次。");
+					result = index;
+					break;
+				}
+				start = index;
+			} else if (objList.get(index).getTop() > top) {
 				end = index;
 			} else {
 				// System.out.println(array[index] + "找到了，在数组下标为" + index +

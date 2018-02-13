@@ -695,7 +695,7 @@ public class ExcelService {
 	 * @return
 	 */
 
-	public SpreadSheet positionExcel(ExcelSheet excelSheet, SpreadSheet spreadSheet, int height,ReturnParam returnParam) {
+	public SpreadSheet positionExcel(ExcelSheet excelSheet, SpreadSheet spreadSheet, int height,ReturnParam returnParam,int end) {
 		spreadSheet.setName(excelSheet.getName());
 		List<Gly> glyList = spreadSheet.getSheet().getGlY();
 		List<Glx> glxList = spreadSheet.getSheet().getGlX();
@@ -730,10 +730,10 @@ public class ExcelService {
 		returnParam.setMaxColPixel(maxLeft);
 		// int oldrowBeginIndex = BinarySearch.rowsBinarySearch(startPixel,
 		// glyList, 0, glyList.size()-1);
-		int rowBeginIndex = BinarySearch.rowsBinarySearch(glyList, startPixel);
+		int rowBeginIndex = 0;
 		// int oldrowEndIndex = BinarySearch.rowsBinarySearch(endPixel, glyList,
 		// 0, glyList.size()-1);
-		int rowEndIndex = BinarySearch.rowsBinarySearch(glyList, endPixel);
+		int rowEndIndex = end;
 		
 		List<OneCell> newCellList = new ArrayList<OneCell>();
 		spreadSheet.getSheet().setCells(newCellList);

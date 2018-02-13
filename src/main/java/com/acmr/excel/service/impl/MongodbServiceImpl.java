@@ -24,11 +24,15 @@ import acmr.excel.pojo.ExcelColumn;
 import acmr.excel.pojo.ExcelRow;
 import acmr.excel.pojo.ExcelSheet;
 
+import com.acmr.excel.model.complete.Gly;
 import com.acmr.excel.model.mongo.MExcel;
 import com.acmr.excel.model.mongo.MExcelCell;
 import com.acmr.excel.model.mongo.MExcelColumn;
 import com.acmr.excel.model.mongo.MExcelRow;
+import com.acmr.excel.model.position.RowCol;
+import com.acmr.excel.model.position.RowColList;
 import com.acmr.excel.service.StoreService;
+import com.acmr.excel.util.BinarySearch;
 import com.acmr.excel.util.masterworker.Master;
 import com.acmr.excel.util.masterworker.Worker;
 import com.mongodb.BasicDBObject;
@@ -81,14 +85,14 @@ public class MongodbServiceImpl {
 	public ExcelSheet getSheetBySort(int rowBeginSort, int rowEndSort,
 			String excelId) {
 		MExcel mExcel = mongoTemplate.findOne(new Query(Criteria.where("_id").is(excelId)), MExcel.class, excelId);
-		long rb1 = System.currentTimeMillis();
+		//long rb1 = System.currentTimeMillis();
 		List<MExcelRow> mRowList = mongoTemplate.find(new Query(Criteria.where("rowSort").gte(rowBeginSort)
 						.lte(rowEndSort)), MExcelRow.class, excelId);
-		long rb2 = System.currentTimeMillis();
-		long cb1 = System.currentTimeMillis();
+		//long rb2 = System.currentTimeMillis();
+		//long cb1 = System.currentTimeMillis();
 		List<MExcelColumn> mColList = mongoTemplate.find(new Query(Criteria.where("colSort").gte(0).lte(mExcel.getMaxcol())), 
 				MExcelColumn.class, excelId);
-		long cb2 = System.currentTimeMillis();
+		//long cb2 = System.currentTimeMillis();
 //		System.out.println("row=========================="+(rb2 - rb1));
 //		System.out.println("col=========================="+(cb2 - cb1));
 		ExcelSheet excelSheet = new ExcelSheet();
@@ -104,10 +108,10 @@ public class MongodbServiceImpl {
 		for (int i = 0; i < mRowList.size(); i++) {
 			ExcelRow row = mRowList.get(i).getExcelRow();
 			excelSheet.getRows().add(row);
-			long ceb1 = System.currentTimeMillis();
+			//long ceb1 = System.currentTimeMillis();
 			List<MExcelCell> cellList = mongoTemplate.find(new Query(Criteria.where("rowId").is(row.getCode())), MExcelCell.class,
 					excelId);
-			long ceb2 = System.currentTimeMillis();
+			//long ceb2 = System.currentTimeMillis();
 			//System.out.println("cell=========================="+(ceb2 - ceb1));
 			for (MExcelCell mc : cellList) {
 				MExcelColumn mec = colMap.get(mc.getColId());
@@ -116,6 +120,51 @@ public class MongodbServiceImpl {
 		}
 		return excelSheet;
 	}
+	
+	
+	public int getEndIndex(String excelId,int length) {
+		//long ceb1 = System.currentTimeMillis();
+		RowColList rowColList = mongoTemplate.findOne(new Query(Criteria.where("_id").is("rcList")), RowColList.class, excelId);
+		//long ceb2 = System.currentTimeMillis();
+		//System.out.println("获得rcList的时间为:" + (ceb2-ceb1));
+		List<RowCol> rcList = rowColList.getRcList();
+		for(int i=0;i < rcList.size();i++) {
+			rcList.get(i).setTop(getTop(rcList, i));
+		}
+		int minTop = rcList.get(0).getTop();
+		RowCol rowColTop = rcList.get(rcList.size() - 1);
+		int maxTop = rowColTop.getTop() + rowColTop.getLength();
+		int startAlaisPixel = 0;                                 
+		int Offset = startAlaisPixel - minTop;
+		int startPixel = Offset < 200 ? Offset : startAlaisPixel - 200;
+		int endPixel = 0;
+		if (maxTop < length) {
+			endPixel = maxTop;
+		} else {
+			endPixel = startPixel + length + 200;
+		}
+		int end = BinarySearch.binarySearch(rcList, endPixel);
+		return end;
+	}
+	
+	private int getTop(List<RowCol> rowColList, int i) {
+		if (i == 0) {
+			return 0;
+		}
+		RowCol rowCol = rowColList.get(i - 1);
+		int tempHeight = rowCol.getLength();
+//		if(gly.isHidden()){
+//			tempHeight = -1;
+//		}
+		return rowCol.getTop() + tempHeight + 1;
+	}
+	
+	
+	
+	
+	
+	
+	
 
 	public boolean saveExcelBook(ExcelBook excelBook, String excelId) {
 		if (excelBook == null) {
@@ -131,30 +180,40 @@ public class MongodbServiceImpl {
 		set(excelId, mExcel);
 		List<ExcelColumn> cols = excelSheet.getCols();
 		List<MExcelColumn> tempCols = new ArrayList<MExcelColumn>();
+	
 		for (int i = 0; i < cols.size(); i++) {
 			MExcelColumn mc = new MExcelColumn();
 			mc.setExcelColumn(cols.get(i));
 			mc.setColSort(i);
 			tempCols.add(mc);
 		}
-//		IndexOperations iro = mongoTemplate.indexOps(excelId);
-//		Index rIndex = new Index();
-//		rIndex.on("rowSort", Direction.ASC);
-//		iro.ensureIndex(rIndex);
-//		IndexOperations cellIO = mongoTemplate.indexOps(excelId);
-//		Index cellIndex = new Index();
-//		cellIndex.on("rowId", Direction.ASC);
-//		cellIO.ensureIndex(cellIndex);
-//		IndexOperations io = mongoTemplate.indexOps(excelId);
-//		Index index = new Index();
-//		index.on("colSort", Direction.ASC);
-//		io.ensureIndex(index);
+		IndexOperations iro = mongoTemplate.indexOps(excelId);
+		Index rIndex = new Index();
+		rIndex.on("rowSort", Direction.ASC);
+		iro.ensureIndex(rIndex);
+		IndexOperations cellIO = mongoTemplate.indexOps(excelId);
+		Index cellIndex = new Index();
+		cellIndex.on("rowId", Direction.ASC);
+		cellIO.ensureIndex(cellIndex);
+		IndexOperations io = mongoTemplate.indexOps(excelId);
+		Index index = new Index();
+		index.on("colSort", Direction.ASC);
+		io.ensureIndex(index);
 		long b1 = System.currentTimeMillis();
 		mongoTemplate.insert(tempCols, excelId);
 		long b2 = System.currentTimeMillis();
-		
 		tempCols = null;
 		List<ExcelRow> rows = excelSheet.getRows();
+		RowColList rcList = new RowColList();
+		rcList.setId("rcList");
+		for (int i = 0; i < rows.size(); i++) {
+			RowCol rc = new RowCol();
+			ExcelRow row = rows.get(i);
+			rc.setAlias(row.getCode());
+			rc.setLength(row.getHeight());
+			rcList.getRcList().add(rc);
+		}
+		mongoTemplate.insert(rcList, excelId);
 		Master master = new Master(new Worker(), Runtime.getRuntime().availableProcessors(), mongoTemplate, excelId);
 		for (int i = 0; i < rows.size(); i++) {
 			List<Object> tempList = new ArrayList<Object>();
@@ -185,7 +244,7 @@ public class MongodbServiceImpl {
 		}
 		long end = System.currentTimeMillis() - start;
 		System.out.println("存储时间为:" + end);
-		System.out.println("cpu线程数:  " + Runtime.getRuntime().availableProcessors());
+		//System.out.println("cpu线程数:  " + Runtime.getRuntime().availableProcessors());
 		return true;
 	}
 	public static void main(String[] args) {

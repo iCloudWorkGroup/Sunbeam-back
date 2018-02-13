@@ -401,20 +401,22 @@ public class ExcelController extends BaseController {
 	 */
 	@RequestMapping(value="/reload")
 	public void position(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+		long b1 = System.currentTimeMillis();
 		//long b1 = System.currentTimeMillis();
 		String excelId = req.getHeader("excelId");
 		Position position = getJsonDataParameter(req, Position.class);
 		int height = position.getBottom();
-		long mget1 = System.currentTimeMillis();
-		ExcelSheet excelSheet = mongodbServiceImpl.getSheetBySort(0,100, excelId);
-		long mget2 = System.currentTimeMillis();
+		int end = mongodbServiceImpl.getEndIndex(excelId,height);
+		//long mget1 = System.currentTimeMillis();
+		ExcelSheet excelSheet = mongodbServiceImpl.getSheetBySort(0,end, excelId);
+		//long mget2 = System.currentTimeMillis();
 		//System.out.println("==========================="+(mget2 - mget1));
 		ReturnParam returnParam = new ReturnParam();
 		JsonReturn data = new JsonReturn("");
 		CompleteExcel excel = new CompleteExcel();
 		SpreadSheet spreadSheet = new SpreadSheet();
 		if (excelSheet != null) {
-			spreadSheet = excelService.positionExcel(excelSheet, spreadSheet,height, returnParam);
+			spreadSheet = excelService.positionExcel(excelSheet, spreadSheet,height, returnParam,end);
 			data.setAliasColCounter(excelSheet.getMaxcol()+1+"");
 			data.setAliasRowCounter(excelSheet.getMaxrow()+1+"");
 		}
@@ -438,6 +440,8 @@ public class ExcelController extends BaseController {
 //		System.out.println("position =====================" +(b2-b1));
 //		System.out.println("mget ========================" + (mget2-mget1));
 //		System.out.println("mset ========================" + (mset2-mset1));
+		long b2 = System.currentTimeMillis();
+		System.out.println("reload=====================" + (b2 - b1));
 		this.sendJson(resp, data);
 		
 	}
