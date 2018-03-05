@@ -1,18 +1,14 @@
 package com.acmr.excel.controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
-
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import acmr.excel.pojo.ExcelBook;
-import acmr.excel.pojo.ExcelSheet;
 
 import com.acmr.excel.controller.excelbase.BaseController;
 import com.acmr.excel.model.Constant;
@@ -24,13 +20,16 @@ import com.acmr.excel.model.complete.ReturnParam;
 import com.acmr.excel.model.complete.SpreadSheet;
 import com.acmr.excel.model.copy.Copy;
 import com.acmr.excel.model.position.OpenExcel;
+import com.acmr.excel.model.position.RowCol;
 import com.acmr.excel.service.ExcelService;
 import com.acmr.excel.service.PasteService;
-import com.acmr.excel.service.StoreService;
 import com.acmr.excel.service.impl.MongodbServiceImpl;
 import com.acmr.excel.util.AnsycDataReturn;
 import com.acmr.excel.util.JsonReturn;
 import com.acmr.excel.util.StringUtil;
+
+import acmr.excel.pojo.ExcelBook;
+import acmr.excel.pojo.ExcelSheet;
 
 /**
  * SHEET操作
@@ -202,61 +201,68 @@ public class SheetController extends BaseController {
 			return;
 		}
 		OpenExcel openExcel = getJsonDataParameter(req, OpenExcel.class);
-		int memStep = (int)mongodbServiceImpl.get(null, null, null);
+		int memStep = 0 ;
+				//(int)mongodbServiceImpl.get(null, null, null);
 		int cStep = 0;
 		if(!StringUtil.isEmpty(curStep)){
 			cStep = Integer.valueOf(curStep);
 		}
 		int rowBegin = openExcel.getTop();
 		int rowEnd = openExcel.getBottom();
-		ExcelBook excelBook = (ExcelBook) mongodbServiceImpl.get(null, null, null);
-		
+		int colBegin = openExcel.getColBegin();
+		int colEnd = openExcel.getColEnd() == 0 ? 2000 : openExcel.getColEnd() ;
+		rowBegin = mongodbServiceImpl.getIndexByPixel(excelId, rowBegin, "rList");
+		rowEnd = mongodbServiceImpl.getIndexByPixel(excelId, rowEnd, "rList");
+		colBegin = mongodbServiceImpl.getIndexByPixel(excelId, colBegin, "cList");
+		colEnd = mongodbServiceImpl.getIndexByPixel(excelId, colEnd, "cList");
+		List<RowCol> rowList = mongodbServiceImpl.getRCList(excelId, "rList");
+		List<RowCol> colList = mongodbServiceImpl.getRCList(excelId, "cList");
 		if (cStep == memStep) {
-			if (excelBook != null) {
-				ExcelSheet excelSheet = excelBook.getSheets().get(0);
+			ExcelSheet excelSheet = mongodbServiceImpl.getSheetBySort(rowBegin,rowEnd,colBegin,colEnd, excelId);
+			if (excelSheet != null) {
 				ReturnParam returnParam = new ReturnParam();
 				CompleteExcel excel = new CompleteExcel();
 				SpreadSheet spreadSheet = new SpreadSheet();
 				excel.getSpreadSheet().add(spreadSheet);
-				spreadSheet = excelService.openExcel(spreadSheet, excelSheet,rowBegin, rowEnd,returnParam);
+				spreadSheet = excelService.openExcel(spreadSheet, excelSheet, rowBegin, rowEnd, colBegin, colEnd, returnParam, rowList, colList);
 				data.setReturncode(Constant.SUCCESS_CODE);
 				data.setReturndata(excel);
 				data.setDataRowStartIndex(returnParam.getDataRowStartIndex());
-				data.setMaxRowPixel(returnParam.getMaxRowPixel());
-				mongodbServiceImpl.set(excelId,excelBook);
+				data.setMaxRowPixel(rowList.get(rowList.size()-1).getTop());
 			} else {
 				data.setReturncode(Constant.CACHE_INVALID_CODE);
 				data.setReturndata(Constant.CACHE_INVALID_MSG);
 			}
-		}else{
-			for (int i = 0; i < 100; i++) {
-				int mStep = (int)mongodbServiceImpl.get(null, null, null);
-				if(cStep == mStep){
-					if (excelBook != null) {
-						ExcelSheet excelSheet = excelBook.getSheets().get(0);
-						ReturnParam returnParam = new ReturnParam();
-						CompleteExcel excel = new CompleteExcel();
-						SpreadSheet spreadSheet = new SpreadSheet();
-						excel.getSpreadSheet().add(spreadSheet);
-						spreadSheet = excelService.openExcel(spreadSheet, excelSheet,rowBegin, rowEnd,returnParam);
-						data.setReturncode(Constant.SUCCESS_CODE);
-						data.setReturndata(excel);
-						data.setDataRowStartIndex(returnParam.getDataRowStartIndex());
-						data.setMaxRowPixel(returnParam.getMaxRowPixel());
-						mongodbServiceImpl.set(excelId, excelBook);
-					} else {
-						data.setReturncode(Constant.CACHE_INVALID_CODE);
-						data.setReturndata(Constant.CACHE_INVALID_MSG);
-					}
-				}else{
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
 		}
+//		else{
+//			for (int i = 0; i < 100; i++) {
+//				int mStep = (int)mongodbServiceImpl.get(null, null, null);
+//				if(cStep == mStep){
+//					if (excelBook != null) {
+//						ExcelSheet excelSheet = excelBook.getSheets().get(0);
+//						ReturnParam returnParam = new ReturnParam();
+//						CompleteExcel excel = new CompleteExcel();
+//						SpreadSheet spreadSheet = new SpreadSheet();
+//						excel.getSpreadSheet().add(spreadSheet);
+//						spreadSheet = excelService.openExcel(spreadSheet, excelSheet,rowBegin, rowEnd,colBegin,colEnd,returnParam);
+//						data.setReturncode(Constant.SUCCESS_CODE);
+//						data.setReturndata(excel);
+//						data.setDataRowStartIndex(returnParam.getDataRowStartIndex());
+//						data.setMaxRowPixel(returnParam.getMaxRowPixel());
+//						mongodbServiceImpl.set(excelId, excelBook);
+//					} else {
+//						data.setReturncode(Constant.CACHE_INVALID_CODE);
+//						data.setReturndata(Constant.CACHE_INVALID_MSG);
+//					}
+//				}else{
+//					try {
+//						Thread.sleep(100);
+//					} catch (InterruptedException e) {
+//						e.printStackTrace();
+//					}
+//				}
+//			}
+//		}
 		if("".equals(data.getReturndata())){
 			data.setReturncode(-1);
 		}

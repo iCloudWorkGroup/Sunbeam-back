@@ -25,6 +25,7 @@ import acmr.excel.pojo.ExcelRow;
 import acmr.excel.pojo.ExcelSheet;
 
 import com.acmr.excel.model.complete.Gly;
+import com.acmr.excel.model.complete.ReturnParam;
 import com.acmr.excel.model.mongo.MExcel;
 import com.acmr.excel.model.mongo.MExcelCell;
 import com.acmr.excel.model.mongo.MExcelColumn;
@@ -81,16 +82,35 @@ public class MongodbServiceImpl {
 		List<MExcel> result = mongoTemplate.find(query, MExcel.class, id);
 		return result.get(0).getStep();
 	}
-
-	public ExcelSheet getSheetBySort(int rowBeginSort, int rowEndSort,
-			String excelId) {
+	
+	
+	public void getParam(String excelId,ReturnParam returnParam) {
+		RowColList rowColList = mongoTemplate.findOne(new Query(Criteria.where("_id").is("rList")), RowColList.class, excelId);
+		List<RowCol> rcList = rowColList.getRcList();
+		for(int i=0;i < rcList.size();i++) {
+			rcList.get(i).setTop(getTop(rcList, i));
+		}
+		RowColList colList = mongoTemplate.findOne(new Query(Criteria.where("_id").is("cList")), RowColList.class, excelId);
+		List<RowCol> cList = colList.getRcList();
+		for(int i=0;i < cList.size();i++) {
+			cList.get(i).setTop(getTop(cList, i));
+		}
+		returnParam.setMaxPixel(rcList.get(rcList.size()-1).getTop());
+		returnParam.setMaxPixel(rcList.get(rcList.size()-1).getTop());
+		returnParam.setMaxColPixel(cList.get(cList.size()-1).getTop());
+	}
+	
+	
+	
+	
+	public ExcelSheet getSheetBySort(int rowBeginSort, int rowEndSort,int colBegin,int colEnd ,String excelId) {
 		MExcel mExcel = mongoTemplate.findOne(new Query(Criteria.where("_id").is(excelId)), MExcel.class, excelId);
 		//long rb1 = System.currentTimeMillis();
 		List<MExcelRow> mRowList = mongoTemplate.find(new Query(Criteria.where("rowSort").gte(rowBeginSort)
 						.lte(rowEndSort)), MExcelRow.class, excelId);
 		//long rb2 = System.currentTimeMillis();
 		//long cb1 = System.currentTimeMillis();
-		List<MExcelColumn> mColList = mongoTemplate.find(new Query(Criteria.where("colSort").gte(0).lte(mExcel.getMaxcol())), 
+		List<MExcelColumn> mColList = mongoTemplate.find(new Query(Criteria.where("colSort").gte(colBegin).lte(colEnd)), 
 				MExcelColumn.class, excelId);
 		//long cb2 = System.currentTimeMillis();
 //		System.out.println("row=========================="+(rb2 - rb1));
@@ -113,18 +133,23 @@ public class MongodbServiceImpl {
 					excelId);
 			//long ceb2 = System.currentTimeMillis();
 			//System.out.println("cell=========================="+(ceb2 - ceb1));
+			List<ExcelCell> cells = new ArrayList<>();
+			row.setCells(cells);
 			for (MExcelCell mc : cellList) {
 				MExcelColumn mec = colMap.get(mc.getColId());
-				row.getCells().set(mec.getColSort(), mc.getExcelCell());
+				//System.out.println(mc.getColId() + "=====" + mec);
+				if(mec == null) continue;
+				cells.add(mec.getColSort(), mc.getExcelCell());
+				
 			}
 		}
 		return excelSheet;
 	}
 	
 	
-	public int getEndIndex(String excelId,int length) {
+	public int getRowEndIndex(String excelId,int length) {
 		//long ceb1 = System.currentTimeMillis();
-		RowColList rowColList = mongoTemplate.findOne(new Query(Criteria.where("_id").is("rcList")), RowColList.class, excelId);
+		RowColList rowColList = mongoTemplate.findOne(new Query(Criteria.where("_id").is("rList")), RowColList.class, excelId);
 		//long ceb2 = System.currentTimeMillis();
 		//System.out.println("获得rcList的时间为:" + (ceb2-ceb1));
 		List<RowCol> rcList = rowColList.getRcList();
@@ -147,6 +172,51 @@ public class MongodbServiceImpl {
 		return end;
 	}
 	
+	
+	public int getIndexByPixel(String excelId,int pixel,String type) {
+		RowColList rowColList = mongoTemplate.findOne(new Query(Criteria.where("_id").is(type)), RowColList.class, excelId);
+		List<RowCol> rcList = rowColList.getRcList();
+		for(int i=0;i < rcList.size();i++) {
+			rcList.get(i).setTop(getTop(rcList, i));
+		}
+		return BinarySearch.binarySearch(rowColList.getRcList(), pixel);
+	}
+	
+	public List<RowCol> getRCList(String excelId,String type){
+		RowColList rowColList = mongoTemplate.findOne(new Query(Criteria.where("_id").is(type)), RowColList.class, excelId);
+		List<RowCol> rcList = rowColList.getRcList();
+		for(int i=0;i < rcList.size();i++) {
+			rcList.get(i).setTop(getTop(rcList, i));
+		}
+		return rcList;
+	}
+	
+	
+	
+	public int getColEndIndex(String excelId,int length) {
+		//long ceb1 = System.currentTimeMillis();
+		RowColList colList = mongoTemplate.findOne(new Query(Criteria.where("_id").is("cList")), RowColList.class, excelId);
+		//long ceb2 = System.currentTimeMillis();
+		//System.out.println("获得rcList的时间为:" + (ceb2-ceb1));
+		List<RowCol> cList = colList.getRcList();
+		for(int i=0;i < cList.size();i++) {
+			cList.get(i).setTop(getTop(cList, i));
+		}
+		int minTop = cList.get(0).getTop();
+		RowCol colTop = cList.get(cList.size() - 1);
+		int maxTop = colTop.getTop() + colTop.getLength();
+		int startAlaisPixel = 0;                                 
+		int Offset = startAlaisPixel - minTop;
+		int startPixel = Offset < 200 ? Offset : startAlaisPixel - 200;
+		int endPixel = 0;
+		if (maxTop < length) {
+			endPixel = maxTop;
+		} else {
+			endPixel = startPixel + length + 200;
+		}
+		int end = BinarySearch.binarySearch(cList, endPixel);
+		return end;
+	}
 	private int getTop(List<RowCol> rowColList, int i) {
 		if (i == 0) {
 			return 0;
@@ -204,16 +274,26 @@ public class MongodbServiceImpl {
 		long b2 = System.currentTimeMillis();
 		tempCols = null;
 		List<ExcelRow> rows = excelSheet.getRows();
-		RowColList rcList = new RowColList();
-		rcList.setId("rcList");
+		RowColList rList = new RowColList();
+		rList.setId("rList");
 		for (int i = 0; i < rows.size(); i++) {
 			RowCol rc = new RowCol();
 			ExcelRow row = rows.get(i);
 			rc.setAlias(row.getCode());
 			rc.setLength(row.getHeight());
-			rcList.getRcList().add(rc);
+			rList.getRcList().add(rc);
 		}
-		mongoTemplate.insert(rcList, excelId);
+		mongoTemplate.insert(rList, excelId);
+		RowColList cList = new RowColList();
+		cList.setId("cList");
+		for (int i = 0; i < cols.size(); i++) {
+			RowCol rc = new RowCol();
+			ExcelColumn col = cols.get(i);
+			rc.setAlias(col.getCode());
+			rc.setLength(col.getWidth());
+			cList.getRcList().add(rc);
+		}
+		mongoTemplate.insert(cList, excelId);
 		Master master = new Master(new Worker(), Runtime.getRuntime().availableProcessors(), mongoTemplate, excelId);
 		for (int i = 0; i < rows.size(); i++) {
 			List<Object> tempList = new ArrayList<Object>();
@@ -233,6 +313,7 @@ public class MongodbServiceImpl {
 				mcell.setExcelCell(cells.get(j));
 				tempList.add(mcell);
 			}
+			cells.clear();
 				master.submit(tempList);
 		}
 		master.execute();
