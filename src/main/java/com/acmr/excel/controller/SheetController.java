@@ -193,6 +193,7 @@ public class SheetController extends BaseController {
 	 */
 	@RequestMapping("/area")
 	public void openexcel(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		long b1 = System.currentTimeMillis();
 		String excelId = req.getHeader("excelId");
 		String curStep = req.getHeader("step");
 		JsonReturn data = new JsonReturn("");
@@ -209,16 +210,27 @@ public class SheetController extends BaseController {
 		}
 		int rowBegin = openExcel.getTop();
 		int rowEnd = openExcel.getBottom();
-		int colBegin = openExcel.getColBegin();
-		int colEnd = openExcel.getColEnd() == 0 ? 2000 : openExcel.getColEnd() ;
-		rowBegin = mongodbServiceImpl.getIndexByPixel(excelId, rowBegin, "rList");
-		rowEnd = mongodbServiceImpl.getIndexByPixel(excelId, rowEnd, "rList");
-		colBegin = mongodbServiceImpl.getIndexByPixel(excelId, colBegin, "cList");
-		colEnd = mongodbServiceImpl.getIndexByPixel(excelId, colEnd, "cList");
+		int colBegin = openExcel.getLeft();
+		int colEnd = openExcel.getRight() == 0 ? 2000 : openExcel.getRight() ;
+//		rowBegin = mongodbServiceImpl.getIndexByPixel(excelId, rowBegin, "rList");
+//		rowEnd = mongodbServiceImpl.getIndexByPixel(excelId, rowEnd, "rList");
+//		colBegin = mongodbServiceImpl.getIndexByPixel(excelId, colBegin, "cList");
+//		colEnd = mongodbServiceImpl.getIndexByPixel(excelId, colEnd, "cList");
 		List<RowCol> rowList = mongodbServiceImpl.getRCList(excelId, "rList");
 		List<RowCol> colList = mongodbServiceImpl.getRCList(excelId, "cList");
+		rowBegin = mongodbServiceImpl.getIndex(rowList, rowBegin);
+		rowEnd = mongodbServiceImpl.getIndex(rowList, rowEnd);
+		colBegin = mongodbServiceImpl.getIndex(colList, colBegin);
+		colEnd = mongodbServiceImpl.getIndex(colList, colEnd);
+//		long ba = 0;
+//		long ba2 = 0;
+//		long ba3 = 0;
+//		long ba4 = 0;
 		if (cStep == memStep) {
+//			ba = System.currentTimeMillis();
 			ExcelSheet excelSheet = mongodbServiceImpl.getSheetBySort(rowBegin,rowEnd,colBegin,colEnd, excelId);
+//			ba2 = System.currentTimeMillis();
+			
 			if (excelSheet != null) {
 				ReturnParam returnParam = new ReturnParam();
 				CompleteExcel excel = new CompleteExcel();
@@ -234,6 +246,8 @@ public class SheetController extends BaseController {
 				data.setReturndata(Constant.CACHE_INVALID_MSG);
 			}
 		}
+//		System.out.println("getSheetBySort =========" +(ba2-ba) );
+//		System.out.println("excelService.openExcel =========" +(ba4-ba3) );
 //		else{
 //			for (int i = 0; i < 100; i++) {
 //				int mStep = (int)mongodbServiceImpl.get(null, null, null);
@@ -266,6 +280,9 @@ public class SheetController extends BaseController {
 		if("".equals(data.getReturndata())){
 			data.setReturncode(-1);
 		}
+		long b2 = System.currentTimeMillis();
+		System.out.println("openexcel=====================" + (b2 - b1));
+//		System.out.println("========================================================");
 		this.sendJson(resp, data);
 	}
 	

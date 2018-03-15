@@ -9,6 +9,8 @@ public class MExcelCell implements Serializable {
 	private String id;
 	private String rowId;
 	private String colId;
+	private int crSort;
+	private int cclSort;
 
 	private ExcelCell excelCell;
 
@@ -43,5 +45,22 @@ public class MExcelCell implements Serializable {
 	public void setColId(String colId) {
 		this.colId = colId;
 	}
+
+	public int getCrSort() {
+		return crSort;
+	}
+
+	public void setCrSort(int crSort) {
+		this.crSort = crSort;
+	}
+
+	public int getCclSort() {
+		return cclSort;
+	}
+
+	public void setCclSort(int cclSort) {
+		this.cclSort = cclSort;
+	}
+
 
 }

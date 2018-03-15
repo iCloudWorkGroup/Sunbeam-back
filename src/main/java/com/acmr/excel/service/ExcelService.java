@@ -92,16 +92,25 @@ public class ExcelService {
 		if (rowEnd > gly.getTop() + gly.getHeight()) {
 			addRow(glyList, rowEnd, excelSheet);
 		}
-		bookToOlExcelGlxList(excelSheet, glxList);
+		//bookToOlExcelGlxList(excelSheet, glxList);
+		for (int i = colBegin; i <= colEnd; i++) {
+			Glx glx = new Glx();
+			glx.setAliasX(cList.get(i).getAlias());
+			glx.setWidth(cList.get(i).getLength());
+			glx.setLeft(cList.get(i).getTop());
+			glx.setIndex(i);
+			glxList.add(glx);
+		}
 		List<ExcelRow> rowList = excelSheet.getRows();
 //		int rowBeginIndex = rowBegin;
 //		int rowEndIndex = rowEnd;
 		List<OneCell> newCellList = new ArrayList<OneCell>();
 		spreadSheet.getSheet().setCells(newCellList);
-		bookToOlExcelCellList(0, rowList.size()-1,rowList, glyList,glxList, excelSheet, newCellList);
+		bookToOlExcelCellList2(0, rowList.size()-1,colBegin,colEnd,rowList, glyList,glxList, excelSheet, newCellList);
 		//spreadSheet.getSheet().setGlY(glyList.subList(rowBeginIndex, rowEndIndex + 1));
 		returnParam.setDataRowStartIndex(rowBegin);
 		Gly maxGly = glyList.get(glyList.size()-1);
+		
 		returnParam.setMaxRowPixel(maxGly.getTop()+maxGly.getHeight());
 		return spreadSheet;
 	}
@@ -375,6 +384,144 @@ public class ExcelService {
 			ExcelSheet excelSheet, List<OneCell> newCellList) {
 		getCellList(rowBeginIndex, rowEndIndex, rowList, glyList, glxList, excelSheet, newCellList);
 	}
+	private void bookToOlExcelCellList2(int rowBeginIndex, int rowEndIndex,int colBeginIndex,int colEndIndex,
+			List<ExcelRow> rowList, List<Gly> glyList, List<Glx> glxList,
+			ExcelSheet excelSheet, List<OneCell> newCellList) {
+		for (int i = rowBeginIndex; i <= rowEndIndex; i++) {
+			ExcelRow excelRow = rowList.get(i);
+			if (excelRow != null) {
+				List<ExcelCell> cellList = excelRow.getCells();
+				int z = 0;
+				for (int j = colBeginIndex; j <= colEndIndex; j++) {
+					ExcelCell excelCell = cellList.get(j);
+					if (excelCell != null) {
+						OneCell cell = new OneCell();
+						String highLight = excelCell.getExps().get(Constant.HIGHLIGHT);
+						if ("true".equals(highLight)) {
+							cell.setHighlight(true);
+						} else {
+							cell.setHighlight(false);
+						}
+						setCellProperty(excelCell, cell, i, z, glyList,glxList, excelSheet);
+						z++;
+//						if (excelSheet.getCols().get(j).isColumnhidden() || excelSheet.getRows().get(i).isRowhidden()) {
+//							int colspan = excelCell.getColspan();
+//							int rowspan = excelCell.getRowspan();
+//							if (colspan > 1 || rowspan > 1) {
+//								int[] mfCell = excelSheet.getMergFirstCell(i, j);
+////								int tempY = mfCell[0];
+//								int tempX = mfCell[1];
+//								boolean flag = true;
+////								for (int k = tempY; k < tempY + rowspan; k++) {
+////									if (!excelSheet.getRows().get(k).isRowhidden()) {
+////										flag = false;
+////									}
+////								}
+//								for (int k = tempX; k < tempX + colspan; k++) {
+//									if (!excelSheet.getCols().get(k).isColumnhidden()) {
+//										flag = false;
+//									}
+//								}
+//								if (flag) {
+//									cell.setHidden(true);
+//								}
+//							}else{
+//								cell.setHidden(true);
+//							}
+//						}
+						newCellList.add(cell);
+					}
+				}
+				Map<String, String> colMap = excelRow.getExps();
+				Content content = glyList.get(i).getOperProp().getContent();
+				String alignCol = colMap.get("align_vertical");
+				content.setAlignCol(alignCol);
+				String alignRow = colMap.get("align_level");
+				content.setAlignRow(alignRow);
+				String bd = colMap.get("font_weight");
+				if (bd != null) {
+					content.setBd(Boolean.valueOf(bd));
+				}else{
+					content.setBd(null);
+				}
+				String color = colMap.get("font_color");
+				content.setColor(color);
+				content.setFamily(colMap.get("font_family"));
+				String italic = colMap.get("font_italic");
+				if (italic != null) {
+					content.setItalic(Boolean.valueOf(italic));
+				} else {
+					content.setItalic(null);
+				}
+				content.setSize(colMap.get("font_size"));
+				content.setRgbColor(null);
+				content.setTexts(null);
+				CustomProp customProp = glyList.get(i).getOperProp().getCustomProp();
+				Format format = glyList.get(i).getOperProp().getFormate();
+				customProp.setBackground(colMap.get("fill_bgcolor"));
+				format.setType(colMap.get("format"));
+				format.setCurrencySign(colMap.get("currency"));
+				format.setDateFormat(colMap.get("dateFormat"));
+				String decimalPoint = colMap.get("decimalPoint");
+				if (decimalPoint != null) {
+					format.setDecimal(Integer.valueOf(decimalPoint));
+				} else {
+					format.setDecimal(null);
+				}
+				String thousandPoint = colMap.get("thousandPoint");
+				if (thousandPoint != null) {
+					format.setThousands(Boolean.valueOf(thousandPoint));
+				} else {
+					format.setThousands(null);
+				}
+				
+				customProp.setComment(colMap.get("comment"));
+				Border border = glyList.get(i).getOperProp().getBorder();
+				String bottom = colMap.get("bottom");
+				String top = colMap.get("top");
+				String left = colMap.get("left");
+				String right = colMap.get("right");
+				String all = colMap.get("all");
+				String outer = colMap.get("outer");
+				String none = colMap.get("none");
+				if(bottom != null){
+					border.setBottom(Boolean.valueOf(bottom));
+				}else{
+					border.setBottom(null);
+				}
+				if(top != null){
+					border.setTop(Boolean.valueOf(top));
+				}else{
+					border.setTop(null);
+				}
+				if(left != null){
+					border.setLeft(Boolean.valueOf(left));
+				}else{
+					border.setLeft(null);
+				}
+				if(right != null){
+					border.setRight(Boolean.valueOf(right));
+				}else{
+					border.setRight(null);
+				}
+				if(all != null){
+					border.setAll(Boolean.valueOf(all));
+				}else{
+					border.setAll(null);
+				}
+				if(outer != null){
+					border.setOuter(Boolean.valueOf(outer));
+				}else{
+					border.setOuter(null);
+				}
+				if(none != null){
+					border.setNone(Boolean.valueOf(none));
+				}else{
+					border.setNone(null);
+				}
+			}
+		}
+	}
 
 	/**
 	 * 获得普通单元格
@@ -394,7 +541,7 @@ public class ExcelService {
 			ExcelRow excelRow = rowList.get(i);
 			if (excelRow != null) {
 				List<ExcelCell> cellList = excelRow.getCells();
-				for (int j = 0; j <= cellList.size()-1; j++) {
+				for (int j = 0; j <= glxList.size()-1; j++) {
 					ExcelCell excelCell = cellList.get(j);
 					if (excelCell != null) {
 						OneCell cell = new OneCell();

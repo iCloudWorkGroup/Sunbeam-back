@@ -1,11 +1,14 @@
 package com.acmr.excel.model.position;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class OpenExcel {
 	private String excelId;
 	private int top;
 	private int bottom;
-	private int colBegin;
-	private int colEnd;
+	private int left;
+	private int right;
 
 	public String getExcelId() {
 		return excelId;
@@ -15,7 +18,6 @@ public class OpenExcel {
 		this.excelId = excelId;
 	}
 
-	
 	public int getTop() {
 		return top;
 	}
@@ -32,20 +34,28 @@ public class OpenExcel {
 		this.bottom = bottom;
 	}
 
-	public int getColBegin() {
-		return colBegin;
+	public int getLeft() {
+		return left;
 	}
 
-	public void setColBegin(int colBegin) {
-		this.colBegin = colBegin;
+	public void setLeft(int left) {
+		this.left = left;
 	}
 
-	public int getColEnd() {
-		return colEnd;
+	public int getRight() {
+		return right;
 	}
 
-	public void setColEnd(int colEnd) {
-		this.colEnd = colEnd;
+	public void setRight(int right) {
+		this.right = right;
 	}
+	
+	public static void main(String[] args) {
+		List<String> arr = new ArrayList<>(100);
+		arr.add(60,"a");
+	}
+	
+	
+	
 
 }

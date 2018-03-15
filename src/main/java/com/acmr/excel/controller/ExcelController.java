@@ -406,8 +406,9 @@ public class ExcelController extends BaseController {
 		String excelId = req.getHeader("excelId");
 		Position position = getJsonDataParameter(req, Position.class);
 		int height = position.getBottom();
+		int right = position.getRight();
 		int rowEnd = mongodbServiceImpl.getRowEndIndex(excelId,height);
-		int colEnd = mongodbServiceImpl.getColEndIndex(excelId,2206);
+		int colEnd = mongodbServiceImpl.getColEndIndex(excelId,right);
 		//long mget1 = System.currentTimeMillis();
 		ExcelSheet excelSheet = mongodbServiceImpl.getSheetBySort(0,rowEnd,0,colEnd, excelId);
 		//long mget2 = System.currentTimeMillis();
@@ -424,8 +425,7 @@ public class ExcelController extends BaseController {
 		}
 		excel.getSpreadSheet().add(spreadSheet);
 		data.setReturncode(200);
-		data.setMaxPixel(returnParam.getMaxPixel());
-		data.setMaxRowPixel(returnParam.getMaxRowPixel());
+		data.setMaxRowPixel(returnParam.getMaxPixel());
 		data.setMaxColPixel(returnParam.getMaxColPixel());
 		data.setReturndata(excel);
 		// data.setStartAlaisX(startAlais.getAlaisX());

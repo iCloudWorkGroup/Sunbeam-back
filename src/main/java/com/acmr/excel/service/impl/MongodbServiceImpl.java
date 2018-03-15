@@ -103,18 +103,71 @@ public class MongodbServiceImpl {
 	
 	
 	
-	public ExcelSheet getSheetBySort(int rowBeginSort, int rowEndSort,int colBegin,int colEnd ,String excelId) {
-		MExcel mExcel = mongoTemplate.findOne(new Query(Criteria.where("_id").is(excelId)), MExcel.class, excelId);
-		//long rb1 = System.currentTimeMillis();
-		List<MExcelRow> mRowList = mongoTemplate.find(new Query(Criteria.where("rowSort").gte(rowBeginSort)
-						.lte(rowEndSort)), MExcelRow.class, excelId);
-		//long rb2 = System.currentTimeMillis();
-		//long cb1 = System.currentTimeMillis();
-		List<MExcelColumn> mColList = mongoTemplate.find(new Query(Criteria.where("colSort").gte(colBegin).lte(colEnd)), 
-				MExcelColumn.class, excelId);
-		//long cb2 = System.currentTimeMillis();
+//	public ExcelSheet getSheetBySort(int rowBeginSort, int rowEndSort,int colBegin,int colEnd ,String excelId) {
+//		MExcel mExcel = mongoTemplate.findOne(new Query(Criteria.where("_id").is(excelId)), MExcel.class, excelId);
+//		long rb1 = System.currentTimeMillis();
+//		List<MExcelRow> mRowList = mongoTemplate.find(new Query(Criteria.where("rowSort").gte(rowBeginSort)
+//						.lte(rowEndSort)), MExcelRow.class, excelId);
+//		long rb2 = System.currentTimeMillis();
+//		long cb1 = System.currentTimeMillis();
+//		List<MExcelColumn> mColList = mongoTemplate.find(new Query(Criteria.where("colSort").gte(colBegin).lte(colEnd)), 
+//				MExcelColumn.class, excelId);
+//		long cb2 = System.currentTimeMillis();
+//		ExcelSheet excelSheet = new ExcelSheet();
+//		Map<String, MExcelColumn> colMap = new HashMap<String, MExcelColumn>();
+//		for (MExcelColumn mc : mColList) {
+//			ExcelColumn col = mc.getExcelColumn();
+//			excelSheet.getCols().add(col);
+//			colMap.put(col.getCode(), mc);
+//		}
+//		excelSheet.setMaxcol(mExcel.getMaxcol());
+//		excelSheet.setMaxrow(mExcel.getMaxrow());
+//		excelSheet.setName(mExcel.getSheetName());
+//		long cell1 = System.currentTimeMillis();
+//		
+//		for (int i = 0; i < mRowList.size(); i++) {
+//			ExcelRow row = mRowList.get(i).getExcelRow();
+//			excelSheet.getRows().add(row);
+//			long ceb1 = System.currentTimeMillis();
+////			List<MExcelCell> cellList = mongoTemplate.find(new Query(Criteria.where("rowId").is(row.getCode())), MExcelCell.class,
+////					excelId);
+//			List<MExcelCell> cellList = mongoTemplate.find(new Query(Criteria.where("crSort").gte(rowBeginSort)
+//					.lte(rowEndSort)), MExcelCell.class,
+//					excelId);
+//			long ceb2 = System.currentTimeMillis();
+//			System.out.println("查询cell=========================="+(ceb2 - ceb1));
+//			List<ExcelCell> cells = new ArrayList<>();
+//			row.setCells(cells);
+//			long cc1 = System.currentTimeMillis();
+//			for (MExcelCell mc : cellList) {
+//				MExcelColumn mec = colMap.get(mc.getColId());
+//				//System.out.println(mc.getColId() + "=====" + mec);
+//				if (mec == null) {
+//					cells.add(null);
+//				}else {
+//					cells.add(mc.getExcelCell());
+//				}
+//			}
+//			long cc2 = System.currentTimeMillis();
+//			System.out.println("组装cell=========================="+(cc2 - cc1));
+//		}
+//		long cell2 = System.currentTimeMillis();
 //		System.out.println("row=========================="+(rb2 - rb1));
 //		System.out.println("col=========================="+(cb2 - cb1));
+//		System.out.println("cell=========================="+(cell2 - cell1));
+//		System.out.println("==================================================");
+//		return excelSheet;
+//	}
+	public ExcelSheet getSheetBySort(int rowBeginSort, int rowEndSort,int colBegin,int colEnd ,String excelId) {
+		MExcel mExcel = mongoTemplate.findOne(new Query(Criteria.where("_id").is(excelId)), MExcel.class, excelId);
+//		long rb1 = System.currentTimeMillis();
+		List<MExcelRow> mRowList = mongoTemplate.find(new Query(Criteria.where("rowSort").gte(rowBeginSort)
+						.lte(rowEndSort)), MExcelRow.class, excelId);
+//		long rb2 = System.currentTimeMillis();
+//		long cb1 = System.currentTimeMillis();
+		List<MExcelColumn> mColList = mongoTemplate.find(new Query(Criteria.where("colSort").gte(colBegin).lte(colEnd)), 
+				MExcelColumn.class, excelId);
+//		long cb2 = System.currentTimeMillis();
 		ExcelSheet excelSheet = new ExcelSheet();
 		Map<String, MExcelColumn> colMap = new HashMap<String, MExcelColumn>();
 		for (MExcelColumn mc : mColList) {
@@ -125,27 +178,44 @@ public class MongodbServiceImpl {
 		excelSheet.setMaxcol(mExcel.getMaxcol());
 		excelSheet.setMaxrow(mExcel.getMaxrow());
 		excelSheet.setName(mExcel.getSheetName());
+		
 		for (int i = 0; i < mRowList.size(); i++) {
 			ExcelRow row = mRowList.get(i).getExcelRow();
 			excelSheet.getRows().add(row);
-			//long ceb1 = System.currentTimeMillis();
-			List<MExcelCell> cellList = mongoTemplate.find(new Query(Criteria.where("rowId").is(row.getCode())), MExcelCell.class,
-					excelId);
-			//long ceb2 = System.currentTimeMillis();
-			//System.out.println("cell=========================="+(ceb2 - ceb1));
 			List<ExcelCell> cells = new ArrayList<>();
+			for (int j = 0; j < 100; j++) {
+				cells.add(null);
+			}
 			row.setCells(cells);
+		}
+//			long ceb1 = System.currentTimeMillis();
+//			List<MExcelCell> cellList = mongoTemplate.find(new Query(Criteria.where("rowId").is(row.getCode())), MExcelCell.class,
+//					excelId);
+			List<MExcelCell> cellList = mongoTemplate.find(new Query(Criteria.where("crSort").gte(rowBeginSort)
+					.lte(rowEndSort)), MExcelCell.class,
+					excelId);
+//			long ceb2 = System.currentTimeMillis();
+//			System.out.println("查询cell=========================="+(ceb2 - ceb1));
+			
+//			long cc1 = System.currentTimeMillis();
 			for (MExcelCell mc : cellList) {
 				MExcelColumn mec = colMap.get(mc.getColId());
 				//System.out.println(mc.getColId() + "=====" + mec);
-				if(mec == null) continue;
-				cells.add(mec.getColSort(), mc.getExcelCell());
-				
+				if (mec == null) {
+					//excelSheet.getRows().get(mc.getCrSort()).add(null);
+				}else {
+					ExcelRow row = excelSheet.getRows().get(mc.getCrSort()-rowBeginSort);
+					row.getCells().set(mc.getCclSort(),mc.getExcelCell());
+				}
 			}
-		}
+//			long cc2 = System.currentTimeMillis();
+//			System.out.println("组装cell=========================="+(cc2 - cc1));
+//		
+//		System.out.println("row=========================="+(rb2 - rb1));
+//		System.out.println("col=========================="+(cb2 - cb1));
+//		System.out.println("==================================================");
 		return excelSheet;
 	}
-	
 	
 	public int getRowEndIndex(String excelId,int length) {
 		//long ceb1 = System.currentTimeMillis();
@@ -190,7 +260,9 @@ public class MongodbServiceImpl {
 		}
 		return rcList;
 	}
-	
+	public int getIndex(List<RowCol> rowColList,int pixel) {
+		return BinarySearch.binarySearch(rowColList, pixel);
+	}
 	
 	
 	public int getColEndIndex(String excelId,int length) {
@@ -269,6 +341,14 @@ public class MongodbServiceImpl {
 		Index index = new Index();
 		index.on("colSort", Direction.ASC);
 		io.ensureIndex(index);
+		IndexOperations crio = mongoTemplate.indexOps(excelId);
+		Index crindex = new Index();
+		crindex.on("crSort", Direction.ASC);
+		crio.ensureIndex(crindex);
+		IndexOperations ccio = mongoTemplate.indexOps(excelId);
+		Index ccindex = new Index();
+		ccindex.on("cclSort", Direction.ASC);
+		ccio.ensureIndex(ccindex);
 		long b1 = System.currentTimeMillis();
 		mongoTemplate.insert(tempCols, excelId);
 		long b2 = System.currentTimeMillis();
@@ -311,10 +391,12 @@ public class MongodbServiceImpl {
 				mcell.setRowId(rid + "");
 				mcell.setColId(cid + "");
 				mcell.setExcelCell(cells.get(j));
+				mcell.setCrSort(i);
+				mcell.setCclSort(j);
 				tempList.add(mcell);
 			}
 			cells.clear();
-				master.submit(tempList);
+			master.submit(tempList);
 		}
 		master.execute();
 		long start = System.currentTimeMillis();
