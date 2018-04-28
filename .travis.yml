@@ -1,0 +1,20 @@
+language: java
+jdk:
+- oraclejdk8
+before_install:
+- openssl aes-256-cbc -K $encrypted_5f9b7d84be10_key -iv $encrypted_5f9b7d84be10_iv
+  -in tools/deploy/id_rsa.enc -out ~/.ssh/id_rsa -d
+- chmod 600 ~/.ssh/id_rsa
+- eval $(ssh-agent)
+- ssh-add ~/.ssh/id_rsa
+before_script:
+- mv -fv tools/deploy/ssh_config ~/.ssh/config
+after_script:
+- git remote add deploy root@sunbeam:/usr/local/codelib/sunbeam-back.git
+- git push deploy $TRAVIS_BRANCH
+after_success:
+- mvn clean test jacoco:report coveralls:report
+cache:
+  directories:
+  - "$HOME/.m2"
+

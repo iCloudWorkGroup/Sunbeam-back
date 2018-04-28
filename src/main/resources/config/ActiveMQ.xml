@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 查找最新的schemaLocation 访问 http://www.springframework.org/schema/ -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:amq="http://activemq.apache.org/schema/core"
+	xmlns:jms="http://www.springframework.org/schema/jms"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans   
+	http://www.springframework.org/schema/beans/spring-beans-4.0.xsd   
+	http://www.springframework.org/schema/context   
+	http://www.springframework.org/schema/context/spring-context-4.0.xsd
+	http://www.springframework.org/schema/jms
+	http://www.springframework.org/schema/jms/spring-jms-4.0.xsd
+	http://activemq.apache.org/schema/core
+	http://activemq.apache.org/schema/core/activemq-core-5.8.0.xsd">
+	<!--<amq:broker id="activeMQBroker">
+
+		<amq:transportConnectors>
+			<amq:transportConnector uri="tcp://localhost:61616" />
+		</amq:transportConnectors>
+	</amq:broker>-->
+	<context:property-placeholder location="classpath:properties/param.properties" />
+	<amq:connectionFactory id="amqConnectionFactory"
+		brokerURL="${activemq.server}" userName="admin" password="admin" />
+
+	<bean id="connectionFactory"
+		class="org.springframework.jms.connection.CachingConnectionFactory">
+		<constructor-arg ref="amqConnectionFactory" />
+		<property name="sessionCacheSize" value="100" />
+	</bean>
+	
+	<!-- ====Producer side start====-->
+	
+	<!-- 定义JmsTemplate的Queue类型 -->
+	<bean id="jmsQueueTemplate" class="org.springframework.jms.core.JmsTemplate">
+		<constructor-arg ref="connectionFactory" />
+		<!-- 非pub/sub模型（发布/订阅），即队列模式 -->
+		<property name="pubSubDomain" value="false" />
+	</bean>
+	<!-- ====Producer side end====-->
+
+	
+	<!-- ====Consumer side start====-->
+	
+	<!-- 定义Queue监听器 -->
+	<jms:listener-container destination-type="queue" container-type="simple" connection-factory="connectionFactory" 
+							acknowledge="auto" concurrency="2">
+		<jms:listener destination="${activemq.queueName}" ref="queueReceiver" method="onMessage"/>
+	<!--	<jms:listener destination="test.queue" ref="queueReceiver2"/>-->
+	</jms:listener-container>
+	
+	<!-- 定义Topic监听器 -->
+	<!-- ====Consumer side end==== -->
+</beans>  
