@@ -106,7 +106,7 @@ public class MongodbServiceImpl {
 		returnParam.setMaxColPixel(cList.get(cList.size()-1).getTop());
 	}
 	
-	public ExcelSheet getSheetBySort(int rowBeginSort, int rowEndSort,int colBegin,int colEnd ,String excelId,List<RowCol> newRcList,List<RowCol> newClList) {
+	public ExcelSheet getSheetBySort(int rowBeginSort, int rowEndSort,int colBegin,int colEnd ,String excelId,List<RowCol> sortRclist,List<RowCol> sortClList) {
 		MExcel mExcel = mongoTemplate.findOne(new Query(Criteria.where("_id").is(excelId)), MExcel.class, excelId);//查找sheet属性
 		ExcelSheet excelSheet = new ExcelSheet();
 		excelSheet.setMaxcol(mExcel.getMaxcol());
@@ -115,10 +115,10 @@ public class MongodbServiceImpl {
 		List<String> rList = new ArrayList<String>();
 		List<String> cList = new ArrayList<String>();
 		for(int i = rowBeginSort;i<rowEndSort+1;i++){
-			rList.add(newRcList.get(i).getAlias());
+			rList.add(sortRclist.get(i).getAlias());
 		}
 		for(int j = colBegin;j<colEnd+1;j++){
-			cList.add(newClList.get(j).getAlias());
+			cList.add(sortClList.get(j).getAlias());
 		}
 	
 		//查找行样式
@@ -172,8 +172,8 @@ public class MongodbServiceImpl {
 		return excelSheet;
 	}
 	
-	public int getRowEndIndex(String excelId,int length,List<RowCol> newRcList) {
-		newRcList.clear();
+	public int getRowEndIndex(String excelId,int length,List<RowCol> sortRcList) {
+		sortRcList.clear();
 		RowColList rowColList = mongoTemplate.findOne(new Query(Criteria.where("_id").is("rList")), RowColList.class, excelId);
 		//long ceb2 = System.currentTimeMillis();
 		//System.out.println("获得rcList的时间为:" + (ceb2-ceb1));
@@ -191,22 +191,22 @@ public class MongodbServiceImpl {
 		}
 		
 		//重新整理行，将行安装展示先后顺序重新排列
-		newRcList.add(rowCol);
+		sortRcList.add(rowCol);
 		boolean flag = true;
 		while(flag){
 			rowCol = map.get(rowCol.getAlias());
-			newRcList.add(rowCol);
-			if(newRcList.size()==rcList.size()){//跳出循环
+			sortRcList.add(rowCol);
+			if(sortRcList.size()==rcList.size()){//跳出循环
 				break;
 			}
 			 
 		}
 		
-		for(int i=0;i < newRcList.size();i++) {
-			newRcList.get(i).setTop(getTop(newRcList, i));
+		for(int i=0;i < sortRcList.size();i++) {
+			sortRcList.get(i).setTop(getTop(sortRcList, i));
 		}
 		
-		RowCol rowColTop = newRcList.get(rcList.size() - 1);
+		RowCol rowColTop = sortRcList.get(rcList.size() - 1);
 		int maxTop = rowColTop.getTop() + rowColTop.getLength();
 		
 		int endPixel = 0;
@@ -217,7 +217,7 @@ public class MongodbServiceImpl {
 		} else {
 			endPixel =  length + 200;
 		}
-		int end = BinarySearch.binarySearch(newRcList, endPixel);
+		int end = BinarySearch.binarySearch(sortRcList, endPixel);
 		return end;
 	}
 	
@@ -244,8 +244,8 @@ public class MongodbServiceImpl {
 	}
 	
 	
-	public int getColEndIndex(String excelId,int length,List<RowCol> newClList) {
-		newClList.clear();
+	public int getColEndIndex(String excelId,int length,List<RowCol> sortClList) {
+		sortClList.clear();
 		RowColList colList = mongoTemplate.findOne(new Query(Criteria.where("_id").is("cList")), RowColList.class, excelId);
 		//long ceb2 = System.currentTimeMillis();
 		//System.out.println("获得rcList的时间为:" + (ceb2-ceb1));
@@ -264,22 +264,22 @@ public class MongodbServiceImpl {
 		}
 		
 		//重新整理行，将行安装展示先后顺序重新排列
-		newClList.add(rowCol);
+		sortClList.add(rowCol);
 		boolean flag = true;
 		while(flag){
 			rowCol = map.get(rowCol.getAlias());
-			newClList.add(rowCol);
-			if(newClList.size()==cList.size()){//跳出循环
+			sortClList.add(rowCol);
+			if(sortClList.size()==cList.size()){//跳出循环
 				break;
 			}
 			 
 		}
 		
-		for(int i=0;i < newClList.size();i++) {
-			newClList.get(i).setTop(getTop(newClList, i));
+		for(int i=0;i < sortClList.size();i++) {
+			sortClList.get(i).setTop(getTop(sortClList, i));
 		}
 		
-		RowCol colTop = newClList.get(newClList.size() - 1);
+		RowCol colTop = sortClList.get(sortClList.size() - 1);
 		int maxTop = colTop.getTop() + colTop.getLength();
 		int endPixel = 0;
 		if(length == 0){
@@ -289,7 +289,7 @@ public class MongodbServiceImpl {
 		} else {
 			endPixel = length + 200;
 		}
-		int end = BinarySearch.binarySearch(newClList, endPixel);
+		int end = BinarySearch.binarySearch(sortClList, endPixel);
 		return end;
 	}
 	
@@ -508,11 +508,11 @@ public class MongodbServiceImpl {
 	
 	/***
 	 * 得到经过排序之后的列
-	 * @param newClList
+	 * @param sortClList
 	 * @param newClMap
 	 * @param excelId
 	 */
-	public void getColList(List<RowCol> newClList,Map<String,RowCol> newClMap,String excelId){
+	public void getColList(List<RowCol> sortClList,Map<String,RowCol> newClMap,String excelId){
 		
 		RowColList colList = mongoTemplate.findOne(new Query(Criteria.where("_id").is("cList")), RowColList.class, excelId);
 		List<RowCol> cList = colList.getRcList();
@@ -530,31 +530,31 @@ public class MongodbServiceImpl {
 		}
 		
 		//重新整理行，将行安装展示先后顺序重新排列
-		newClList.add(rowCol);
+		sortClList.add(rowCol);
 		boolean flag = true;
 		while(flag){
 			rowCol = map.get(rowCol.getAlias());
-			newClList.add(rowCol);
-			if(newClList.size()==cList.size()){//跳出循环
+			sortClList.add(rowCol);
+			if(sortClList.size()==cList.size()){//跳出循环
 				break;
 			}
 			 
 		}
 		
-		for(int i=0;i < newClList.size();i++) {
-			newClList.get(i).setTop(getTop(newClList, i));
-			newClMap.put(newClList.get(i).getAlias(), newClList.get(i));
+		for(int i=0;i < sortClList.size();i++) {
+			sortClList.get(i).setTop(getTop(sortClList, i));
+			newClMap.put(sortClList.get(i).getAlias(), sortClList.get(i));
 		}
 		
 	}
 	
     /***
      * 得到排序之后的行 
-     * @param newRcList
+     * @param sortRclist
      * @param newRcMap
      * @param excelId
      */
-   public void getRowList(List<RowCol> newRcList,Map<String,RowCol> newRcMap,String excelId){
+   public void getRowList(List<RowCol> sortRclist,Map<String,RowCol> newRcMap,String excelId){
 		
 		RowColList rowColList = mongoTemplate.findOne(new Query(Criteria.where("_id").is("rList")), RowColList.class, excelId);
 		//long ceb2 = System.currentTimeMillis();
@@ -573,27 +573,27 @@ public class MongodbServiceImpl {
 		}
 		
 		//重新整理行，将行安装展示先后顺序重新排列
-		newRcList.add(rowCol);
+		sortRclist.add(rowCol);
 		boolean flag = true;
 		while(flag){
 			rowCol = map.get(rowCol.getAlias());
-			newRcList.add(rowCol);
-			if(newRcList.size()==rcList.size()){//跳出循环
+			sortRclist.add(rowCol);
+			if(sortRclist.size()==rcList.size()){//跳出循环
 				break;
 			}
 			 
 		}
 		
-		for(int i=0;i < newRcList.size();i++) {
-			newRcList.get(i).setTop(getTop(newRcList, i));
-			newRcMap.put(newRcList.get(i).getAlias(), newRcList.get(i));
+		for(int i=0;i < sortRclist.size();i++) {
+			sortRclist.get(i).setTop(getTop(sortRclist, i));
+			newRcMap.put(sortRclist.get(i).getAlias(), sortRclist.get(i));
 		}
 		
 	}
 	
-	public int getIndexByPixel(List<RowCol> newRcList,int pixel){
+	public int getIndexByPixel(List<RowCol> sortRclist,int pixel){
 		
-		RowCol rowColTop = newRcList.get(newRcList.size() - 1);
+		RowCol rowColTop = sortRclist.get(sortRclist.size() - 1);
 		int maxTop = rowColTop.getTop() + rowColTop.getLength();
 		
 		int endPixel = 0;
@@ -604,7 +604,7 @@ public class MongodbServiceImpl {
 		} else {
 			endPixel =  pixel;
 		}
-		int end = BinarySearch.binarySearch(newRcList, endPixel);
+		int end = BinarySearch.binarySearch(sortRclist, endPixel);
 		return end;
 	}
 	/**
@@ -614,12 +614,15 @@ public class MongodbServiceImpl {
 	 * @param colBegin
 	 * @param colEnd
 	 * @param excelId
-	 * @param newRcList
-	 * @param newClList
+	 * @param sortRclist
+	 * @param sortClList
 	 * @return
 	 */
-	public MExcelSheet getSheetByIndex(int rowBeginIndex, int rowEndIndex,int colBeginIndex,int colEndIndex ,String excelId,List<RowCol> newRcList,List<RowCol> newClList) {
-		MExcel mExcel = mongoTemplate.findOne(new Query(Criteria.where("_id").is(excelId)), MExcel.class, excelId);//查找sheet属性
+	public MExcelSheet getSheetByIndex(int rowBeginIndex, int rowEndIndex,
+			int colBeginIndex,int colEndIndex ,String excelId,List<RowCol> sortRclist,
+			List<RowCol> sortClList) {
+		MExcel mExcel = mongoTemplate.findOne(new Query(Criteria.where("_id").is(excelId)), 
+				MExcel.class, excelId);//查找sheet属性
 		MExcelSheet excelSheet = new MExcelSheet();
 		excelSheet.setMaxcol(mExcel.getMaxcol());
 		excelSheet.setMaxrow(mExcel.getMaxrow());
@@ -627,10 +630,10 @@ public class MongodbServiceImpl {
 		List<String> rList = new ArrayList<String>();
 		List<String> cList = new ArrayList<String>();
 		for(int i = rowBeginIndex;i<rowEndIndex+1;i++){
-			rList.add(newRcList.get(i).getAlias());
+			rList.add(sortRclist.get(i).getAlias());
 		}
 		for(int j = colBeginIndex;j<colEndIndex+1;j++){
-			cList.add(newClList.get(j).getAlias());
+			cList.add(sortClList.get(j).getAlias());
 		}
 	
 		//查找行样式

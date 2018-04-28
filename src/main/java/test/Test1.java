@@ -25,12 +25,12 @@ public class Test1 {
 		
 		/*List<String> list = new ArrayList<String>();
 		list.set(2, "a");*/
-		List<RowCol> list = new ArrayList<RowCol>();
+	/*	List<RowCol> list = new ArrayList<RowCol>();
 		RowCol rc = new RowCol();
 		rc.setAlias("1");
 		list.add(rc);
 		RowCol rc1 = new RowCol();
-		rc1.setAlias("1");
+		rc1.setAlias("1");*/
 		
 		
 		

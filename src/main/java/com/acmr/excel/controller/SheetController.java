@@ -217,31 +217,31 @@ public class SheetController extends BaseController {
 		int colBegin = openExcel.getLeft();
 		int colEnd = openExcel.getRight() == 0 ? 2000 : openExcel.getRight() ;
 		
-		List<RowCol> newRcList = new ArrayList<RowCol>();//存贮整理顺序后的行
-		List<RowCol> newClList = new ArrayList<RowCol>();//存储整理顺序后的列
+		List<RowCol> sortRcList = new ArrayList<RowCol>();//存贮整理顺序后的行
+		List<RowCol> sortClList = new ArrayList<RowCol>();//存储整理顺序后的列
 		Map<String,RowCol> newRcMap = new HashMap<String,RowCol>();
 		Map<String,RowCol> newClMap = new HashMap<String,RowCol>();
-		mongodbServiceImpl.getRowList(newRcList, newRcMap, excelId);
-		mongodbServiceImpl.getColList(newClList, newClMap, excelId);
-		int rowBeginIndex = mongodbServiceImpl.getIndexByPixel(newRcList, rowBegin);
-		int rowEndIndex = mongodbServiceImpl.getIndexByPixel(newRcList,rowEnd);
-		int colBeginIndex = mongodbServiceImpl.getIndexByPixel(newClList,colBegin);
-		int colEndIndex = mongodbServiceImpl.getIndexByPixel(newClList,colEnd);
+		mongodbServiceImpl.getRowList(sortRcList, newRcMap, excelId);
+		mongodbServiceImpl.getColList(sortClList, newClMap, excelId);
+		int rowBeginIndex = mongodbServiceImpl.getIndexByPixel(sortRcList, rowBegin);
+		int rowEndIndex = mongodbServiceImpl.getIndexByPixel(sortRcList,rowEnd);
+		int colBeginIndex = mongodbServiceImpl.getIndexByPixel(sortClList,colBegin);
+		int colEndIndex = mongodbServiceImpl.getIndexByPixel(sortClList,colEnd);
 
 		if (cStep == memStep) {
 
-			ExcelSheet excelSheet = mongodbServiceImpl.getSheetBySort(rowBeginIndex,rowEndIndex,colBeginIndex,colEndIndex, excelId,newRcList,newClList);
+			ExcelSheet excelSheet = mongodbServiceImpl.getSheetBySort(rowBeginIndex,rowEndIndex,colBeginIndex,colEndIndex, excelId,sortRcList,sortClList);
 			
 			if (excelSheet != null) {
 				ReturnParam returnParam = new ReturnParam();
 				CompleteExcel excel = new CompleteExcel();
 				SpreadSheet spreadSheet = new SpreadSheet();
 				excel.getSpreadSheet().add(spreadSheet);
-				spreadSheet = excelService.openExcel(spreadSheet, excelSheet, rowBeginIndex, rowEndIndex, colBeginIndex, colEndIndex, returnParam, newRcList, newClList);
+				spreadSheet = excelService.openExcel(spreadSheet, excelSheet, rowBeginIndex, rowEndIndex, colBeginIndex, colEndIndex, returnParam, sortRcList, sortClList);
 				data.setReturncode(Constant.SUCCESS_CODE);
 				data.setReturndata(excel);
 				data.setDataRowStartIndex(returnParam.getDataRowStartIndex());
-				data.setMaxRowPixel(newRcList.get(newRcList.size()-1).getTop());
+				data.setMaxRowPixel(sortRcList.get(sortRcList.size()-1).getTop());
 			} else {
 				data.setReturncode(Constant.CACHE_INVALID_CODE);
 				

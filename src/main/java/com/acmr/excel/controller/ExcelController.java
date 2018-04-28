@@ -345,14 +345,13 @@ public class ExcelController extends BaseController {
 		List<MultipartFile> files = ((MultipartHttpServletRequest) req).getFiles("file");
 		ExcelBook excel = new ExcelBook();
 		InputStream is = files.get(0).getInputStream();
-		long b3 = System.currentTimeMillis();
 		if (ExcelUtil.isExcel2003(is)) {
 			excel.LoadExcel(files.get(0).getInputStream(), XLSTYPE.XLS);
 		} else {
 			excel.LoadExcel(files.get(0).getInputStream(), XLSTYPE.XLSX);
 		}
 		long b4 = System.currentTimeMillis();
-		System.out.println("转换为excel对象===============" + (b4-b3));
+		
 		ExcelSheet excelSheet = excel.getSheets().get(0);
 		List<ExcelColumn> colList = excelSheet.getCols();
 		int colSize = colList.size();
@@ -363,13 +362,11 @@ public class ExcelController extends BaseController {
 		}
 		String excelId = UUIDUtil.getUUID();
 		excelSheet.getExps().put("ifUpload", "true");
-//		memcachedClient.set(excelId, 60 * 60 * 1, excel);
-//		memcachedClient.set(excelId + "init", 60 * 60 * 1, excel);
+
 		JsonReturn data = new JsonReturn("");
-		long b1 = System.currentTimeMillis();
+		
 		boolean result =  mongodbServiceImpl.saveExcelBook(excel, excelId);
-		long b2 = System.currentTimeMillis();
-		System.out.println("保存excel时间===============" + (b2-b1));
+		
 		if(result){
 			data.setReturncode(200);
 			data.setReturndata(excelId);
@@ -378,8 +375,6 @@ public class ExcelController extends BaseController {
 			resp.setStatus(413);
 		}
 		
-		// ExcelBook excelBook = (ExcelBook)memcachedClient.get(excelId);
-		// System.out.println("upload========================="+JSON.toJSONString(excelBook));
 		this.sendJson(resp, data);
 	}
 	
@@ -404,17 +399,16 @@ public class ExcelController extends BaseController {
 	@RequestMapping(value="/reload")
 	public void position(HttpServletRequest req, HttpServletResponse resp) throws Exception {
 		
-		long b1 = System.currentTimeMillis();
 		String excelId = req.getHeader("excelId");
 		Position position = getJsonDataParameter(req, Position.class);
 		int height = position.getBottom();
 		int right = position.getRight();
-		List<RowCol> newRcList = new ArrayList<RowCol>();//存贮整理顺序后的行
-		List<RowCol> newClList = new ArrayList<RowCol>();//存储整理顺序后的列
-		int rowEnd = mongodbServiceImpl.getRowEndIndex(excelId,height,newRcList);
-		int colEnd = mongodbServiceImpl.getColEndIndex(excelId,right,newClList);
+		List<RowCol> sortRcList = new ArrayList<RowCol>();//存贮整理顺序后的行
+		List<RowCol> sortClList = new ArrayList<RowCol>();//存储整理顺序后的列
+		int rowEnd = mongodbServiceImpl.getRowEndIndex(excelId,height,sortRcList);
+		int colEnd = mongodbServiceImpl.getColEndIndex(excelId,right,sortClList);
 		
-		ExcelSheet excelSheet = mongodbServiceImpl.getSheetBySort(0,rowEnd,0,colEnd, excelId,newRcList,newClList);
+		ExcelSheet excelSheet = mongodbServiceImpl.getSheetBySort(0,rowEnd,0,colEnd, excelId,sortRcList,sortClList);
 		
 		ReturnParam returnParam = new ReturnParam();
 		JsonReturn data = new JsonReturn("");
@@ -436,7 +430,7 @@ public class ExcelController extends BaseController {
 		mongodbServiceImpl.update(excelId, 0, "step");
 	
 		long b2 = System.currentTimeMillis();
-		System.out.println("reload=====================" + (b2 - b1));
+		
 		this.sendJson(resp, data);
 		
 	}
