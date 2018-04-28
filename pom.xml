@@ -17,7 +17,7 @@
 		<repository>
 			<id>nexus-releases</id>
 			<name>Nexus Release Repository</name>
-			<url>http://excel-inc.acmr.com.cn:20064/nexus/content/repositories/releases/</url>
+			<url>http://192.168.1.228:8080/nexus/content/repositories/releases/</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>
@@ -219,7 +219,8 @@
 			<version>3.0.1</version>
 		</dependency>
 		<!-- <dependency> <groupId>com.acmr</groupId> <artifactId>data</artifactId> 
-			<version>1.0.0</version> </dependency> <dependency> <groupId>com.acmr</groupId> 
+			<version>1.0.0</version> </depen
+			dency> <dependency> <groupId>com.acmr</groupId> 
 			<artifactId>acmrdb</artifactId> <version>1.0.0</version> </dependency> -->
 		<!-- <dependency> <groupId>memcached</groupId> <artifactId>memcached</artifactId> 
 			<version>1.0.0</version> </dependency> -->
@@ -260,11 +261,11 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.3</version>
-				<configuration>
+			<!-- 	<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
 					<encoding>utf8</encoding>
-				</configuration>
+				</configuration> -->
 			</plugin>
 			<plugin>
 

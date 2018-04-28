@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -49,6 +50,7 @@ import com.acmr.excel.model.complete.SpreadSheet;
 import com.acmr.excel.model.history.VersionHistory;
 import com.acmr.excel.model.position.OpenExcel;
 import com.acmr.excel.model.position.Position;
+import com.acmr.excel.model.position.RowCol;
 import com.acmr.excel.service.ExcelService;
 import com.acmr.excel.service.HandleExcelService;
 import com.acmr.excel.service.StoreService;
@@ -401,18 +403,19 @@ public class ExcelController extends BaseController {
 	 */
 	@RequestMapping(value="/reload")
 	public void position(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+		
 		long b1 = System.currentTimeMillis();
-		//long b1 = System.currentTimeMillis();
 		String excelId = req.getHeader("excelId");
 		Position position = getJsonDataParameter(req, Position.class);
 		int height = position.getBottom();
 		int right = position.getRight();
-		int rowEnd = mongodbServiceImpl.getRowEndIndex(excelId,height);
-		int colEnd = mongodbServiceImpl.getColEndIndex(excelId,right);
-		//long mget1 = System.currentTimeMillis();
-		ExcelSheet excelSheet = mongodbServiceImpl.getSheetBySort(0,rowEnd,0,colEnd, excelId);
-		//long mget2 = System.currentTimeMillis();
-		//System.out.println("==========================="+(mget2 - mget1));
+		List<RowCol> newRcList = new ArrayList<RowCol>();//存贮整理顺序后的行
+		List<RowCol> newClList = new ArrayList<RowCol>();//存储整理顺序后的列
+		int rowEnd = mongodbServiceImpl.getRowEndIndex(excelId,height,newRcList);
+		int colEnd = mongodbServiceImpl.getColEndIndex(excelId,right,newClList);
+		
+		ExcelSheet excelSheet = mongodbServiceImpl.getSheetBySort(0,rowEnd,0,colEnd, excelId,newRcList,newClList);
+		
 		ReturnParam returnParam = new ReturnParam();
 		JsonReturn data = new JsonReturn("");
 		CompleteExcel excel = new CompleteExcel();
@@ -424,24 +427,14 @@ public class ExcelController extends BaseController {
 			data.setAliasRowCounter(excelSheet.getMaxrow()+1+"");
 		}
 		excel.getSpreadSheet().add(spreadSheet);
-		data.setReturncode(200);
 		data.setMaxRowPixel(returnParam.getMaxPixel());
 		data.setMaxColPixel(returnParam.getMaxColPixel());
 		data.setReturndata(excel);
-		// data.setStartAlaisX(startAlais.getAlaisX());
-		// data.setStartAlaisY(startAlais.getAlaisY());
-		// data.setDataColStartIndex(returnParam.getDataColStartIndex());
-		// data.setDataRowStartIndex(returnParam.getDataRowStartIndex());
 		data.setDisplayColStartAlias(spreadSheet.getSheet().getGlX().get(0).getAliasX());
 		data.setDisplayRowStartAlias(spreadSheet.getSheet().getGlY().get(0).getAliasY());
 		
-		//long mset1 = System.currentTimeMillis();
 		mongodbServiceImpl.update(excelId, 0, "step");
-		//long mset2 = System.currentTimeMillis();
-		//long b2 = System.currentTimeMillis();
-//		System.out.println("position =====================" +(b2-b1));
-//		System.out.println("mget ========================" + (mget2-mget1));
-//		System.out.println("mset ========================" + (mset2-mset1));
+	
 		long b2 = System.currentTimeMillis();
 		System.out.println("reload=====================" + (b2 - b1));
 		this.sendJson(resp, data);

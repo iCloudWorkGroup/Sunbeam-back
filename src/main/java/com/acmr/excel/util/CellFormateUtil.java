@@ -688,8 +688,7 @@ public class CellFormateUtil {
 					}
 				}
 				content.setDisplayTexts(excelCell.getText());
-//				String displayText = ExcelFormat.getShowText(excelCell);
-//				content.setDisplayTexts(displayText);
+
 			}
 			break;
 		}

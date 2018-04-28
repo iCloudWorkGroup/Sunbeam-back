@@ -7,20 +7,14 @@ import acmr.excel.pojo.ExcelCell;
 public class MExcelCell implements Serializable {
 
 	private String id;
-	private String rowId;
-	private String colId;
-	private int crSort;
-	private int cclSort;
+	private String rowId;//开始行
+	private String colId;//开始列
+	private int rowspan;//合并几行,为了恢复方便
+	private int colspan;//合并几列
 
 	private ExcelCell excelCell;
 
-	public ExcelCell getExcelCell() {
-		return excelCell;
-	}
 
-	public void setExcelCell(ExcelCell excelCell) {
-		this.excelCell = excelCell;
-	}
 
 	public String getId() {
 		return id;
@@ -46,21 +40,28 @@ public class MExcelCell implements Serializable {
 		this.colId = colId;
 	}
 
-	public int getCrSort() {
-		return crSort;
+	public int getRowspan() {
+		return rowspan;
 	}
 
-	public void setCrSort(int crSort) {
-		this.crSort = crSort;
+	public void setRowspan(int rowspan) {
+		this.rowspan = rowspan;
 	}
 
-	public int getCclSort() {
-		return cclSort;
+	public int getColspan() {
+		return colspan;
 	}
 
-	public void setCclSort(int cclSort) {
-		this.cclSort = cclSort;
+	public void setColspan(int colspan) {
+		this.colspan = colspan;
 	}
 
+	public ExcelCell getExcelCell() {
+		return excelCell;
+	}
+
+	public void setExcelCell(ExcelCell excelCell) {
+		this.excelCell = excelCell;
+	}
 
 }

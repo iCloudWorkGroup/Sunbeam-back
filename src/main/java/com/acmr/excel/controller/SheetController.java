@@ -1,7 +1,10 @@
 package com.acmr.excel.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -19,6 +22,7 @@ import com.acmr.excel.model.complete.CompleteExcel;
 import com.acmr.excel.model.complete.ReturnParam;
 import com.acmr.excel.model.complete.SpreadSheet;
 import com.acmr.excel.model.copy.Copy;
+import com.acmr.excel.model.mongo.MExcelSheet;
 import com.acmr.excel.model.position.OpenExcel;
 import com.acmr.excel.model.position.RowCol;
 import com.acmr.excel.service.ExcelService;
@@ -203,7 +207,7 @@ public class SheetController extends BaseController {
 		}
 		OpenExcel openExcel = getJsonDataParameter(req, OpenExcel.class);
 		int memStep = 0 ;
-				//(int)mongodbServiceImpl.get(null, null, null);
+		
 		int cStep = 0;
 		if(!StringUtil.isEmpty(curStep)){
 			cStep = Integer.valueOf(curStep);
@@ -212,77 +216,45 @@ public class SheetController extends BaseController {
 		int rowEnd = openExcel.getBottom();
 		int colBegin = openExcel.getLeft();
 		int colEnd = openExcel.getRight() == 0 ? 2000 : openExcel.getRight() ;
-//		rowBegin = mongodbServiceImpl.getIndexByPixel(excelId, rowBegin, "rList");
-//		rowEnd = mongodbServiceImpl.getIndexByPixel(excelId, rowEnd, "rList");
-//		colBegin = mongodbServiceImpl.getIndexByPixel(excelId, colBegin, "cList");
-//		colEnd = mongodbServiceImpl.getIndexByPixel(excelId, colEnd, "cList");
-		List<RowCol> rowList = mongodbServiceImpl.getRCList(excelId, "rList");
-		List<RowCol> colList = mongodbServiceImpl.getRCList(excelId, "cList");
-		rowBegin = mongodbServiceImpl.getIndex(rowList, rowBegin);
-		rowEnd = mongodbServiceImpl.getIndex(rowList, rowEnd);
-		colBegin = mongodbServiceImpl.getIndex(colList, colBegin);
-		colEnd = mongodbServiceImpl.getIndex(colList, colEnd);
-//		long ba = 0;
-//		long ba2 = 0;
-//		long ba3 = 0;
-//		long ba4 = 0;
+		
+		List<RowCol> newRcList = new ArrayList<RowCol>();//存贮整理顺序后的行
+		List<RowCol> newClList = new ArrayList<RowCol>();//存储整理顺序后的列
+		Map<String,RowCol> newRcMap = new HashMap<String,RowCol>();
+		Map<String,RowCol> newClMap = new HashMap<String,RowCol>();
+		mongodbServiceImpl.getRowList(newRcList, newRcMap, excelId);
+		mongodbServiceImpl.getColList(newClList, newClMap, excelId);
+		int rowBeginIndex = mongodbServiceImpl.getIndexByPixel(newRcList, rowBegin);
+		int rowEndIndex = mongodbServiceImpl.getIndexByPixel(newRcList,rowEnd);
+		int colBeginIndex = mongodbServiceImpl.getIndexByPixel(newClList,colBegin);
+		int colEndIndex = mongodbServiceImpl.getIndexByPixel(newClList,colEnd);
+
 		if (cStep == memStep) {
-//			ba = System.currentTimeMillis();
-			ExcelSheet excelSheet = mongodbServiceImpl.getSheetBySort(rowBegin,rowEnd,colBegin,colEnd, excelId);
-//			ba2 = System.currentTimeMillis();
+
+			ExcelSheet excelSheet = mongodbServiceImpl.getSheetBySort(rowBeginIndex,rowEndIndex,colBeginIndex,colEndIndex, excelId,newRcList,newClList);
 			
 			if (excelSheet != null) {
 				ReturnParam returnParam = new ReturnParam();
 				CompleteExcel excel = new CompleteExcel();
 				SpreadSheet spreadSheet = new SpreadSheet();
 				excel.getSpreadSheet().add(spreadSheet);
-				spreadSheet = excelService.openExcel(spreadSheet, excelSheet, rowBegin, rowEnd, colBegin, colEnd, returnParam, rowList, colList);
+				spreadSheet = excelService.openExcel(spreadSheet, excelSheet, rowBeginIndex, rowEndIndex, colBeginIndex, colEndIndex, returnParam, newRcList, newClList);
 				data.setReturncode(Constant.SUCCESS_CODE);
 				data.setReturndata(excel);
 				data.setDataRowStartIndex(returnParam.getDataRowStartIndex());
-				data.setMaxRowPixel(rowList.get(rowList.size()-1).getTop());
+				data.setMaxRowPixel(newRcList.get(newRcList.size()-1).getTop());
 			} else {
 				data.setReturncode(Constant.CACHE_INVALID_CODE);
+				
 				data.setReturndata(Constant.CACHE_INVALID_MSG);
 			}
 		}
-//		System.out.println("getSheetBySort =========" +(ba2-ba) );
-//		System.out.println("excelService.openExcel =========" +(ba4-ba3) );
-//		else{
-//			for (int i = 0; i < 100; i++) {
-//				int mStep = (int)mongodbServiceImpl.get(null, null, null);
-//				if(cStep == mStep){
-//					if (excelBook != null) {
-//						ExcelSheet excelSheet = excelBook.getSheets().get(0);
-//						ReturnParam returnParam = new ReturnParam();
-//						CompleteExcel excel = new CompleteExcel();
-//						SpreadSheet spreadSheet = new SpreadSheet();
-//						excel.getSpreadSheet().add(spreadSheet);
-//						spreadSheet = excelService.openExcel(spreadSheet, excelSheet,rowBegin, rowEnd,colBegin,colEnd,returnParam);
-//						data.setReturncode(Constant.SUCCESS_CODE);
-//						data.setReturndata(excel);
-//						data.setDataRowStartIndex(returnParam.getDataRowStartIndex());
-//						data.setMaxRowPixel(returnParam.getMaxRowPixel());
-//						mongodbServiceImpl.set(excelId, excelBook);
-//					} else {
-//						data.setReturncode(Constant.CACHE_INVALID_CODE);
-//						data.setReturndata(Constant.CACHE_INVALID_MSG);
-//					}
-//				}else{
-//					try {
-//						Thread.sleep(100);
-//					} catch (InterruptedException e) {
-//						e.printStackTrace();
-//					}
-//				}
-//			}
-//		}
+
 		if("".equals(data.getReturndata())){
 			data.setReturncode(-1);
 		}
 		long b2 = System.currentTimeMillis();
 		System.out.println("openexcel=====================" + (b2 - b1));
-//		System.out.println("========================================================");
+
 		this.sendJson(resp, data);
 	}
 	

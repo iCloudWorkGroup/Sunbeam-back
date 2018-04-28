@@ -9,18 +9,6 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import acmr.excel.pojo.ExcelBook;
-import acmr.excel.pojo.ExcelCell;
-import acmr.excel.pojo.ExcelCellStyle;
-import acmr.excel.pojo.ExcelColor;
-import acmr.excel.pojo.ExcelColumn;
-import acmr.excel.pojo.ExcelFont;
-import acmr.excel.pojo.ExcelFormat;
-import acmr.excel.pojo.ExcelRow;
-import acmr.excel.pojo.ExcelSheet;
-import acmr.excel.pojo.ExcelSheetFreeze;
-import acmr.excel.pojo.Excelborder;
-
 import com.acmr.excel.dao.ExcelDao;
 import com.acmr.excel.model.Constant;
 import com.acmr.excel.model.OnlineExcel;
@@ -37,10 +25,19 @@ import com.acmr.excel.model.complete.OperProp;
 import com.acmr.excel.model.complete.ReturnParam;
 import com.acmr.excel.model.complete.SpreadSheet;
 import com.acmr.excel.model.position.RowCol;
-import com.acmr.excel.util.BinarySearch;
 import com.acmr.excel.util.CellFormateUtil;
 import com.acmr.excel.util.ExcelUtil;
-import com.acmr.excel.util.StringUtil;
+
+import acmr.excel.pojo.ExcelBook;
+import acmr.excel.pojo.ExcelCell;
+import acmr.excel.pojo.ExcelCellStyle;
+import acmr.excel.pojo.ExcelColor;
+import acmr.excel.pojo.ExcelColumn;
+import acmr.excel.pojo.ExcelFont;
+import acmr.excel.pojo.ExcelRow;
+import acmr.excel.pojo.ExcelSheet;
+import acmr.excel.pojo.ExcelSheetFreeze;
+import acmr.excel.pojo.Excelborder;
 
 
 
@@ -68,32 +65,24 @@ public class ExcelService {
 	 * @return CompleteExcel对象
 	 */
 
-	public SpreadSheet openExcel(SpreadSheet spreadSheet,ExcelSheet excelSheet, int rowBegin, int rowEnd,int colBegin,int colEnd,ReturnParam returnParam,
+	public SpreadSheet openExcel(SpreadSheet spreadSheet,ExcelSheet excelSheet, int rowBeginIndex, int rowEndIndex,int colBeginIndex,int colEndIndex,ReturnParam returnParam,
 			List<RowCol> rList,List<RowCol> cList) {
 		List<Gly> glyList = spreadSheet.getSheet().getGlY();
 		List<Glx> glxList = spreadSheet.getSheet().getGlX();
-		//bookToOlExcelGlyList(excelSheet, glyList);
-		for(int i = rowBegin;i<= rowEnd;i++) {
+		for(int i = rowBeginIndex;i<= rowEndIndex;i++) {
 			Gly gly = new Gly();
 			gly.setAliasY(rList.get(i).getAlias());
-//			gly.setOriginHeight(rowList.get(i).getHeight());
-//			boolean hidden = excelRow.isRowhidden();
-//			if(hidden){
-//				gly.setHidden(true);
-//				gly.setHeight(0);
-//			}else{
-				gly.setHeight(rList.get(i).getLength());
-//			}
+			gly.setHeight(rList.get(i).getLength());
 			gly.setTop(rList.get(i).getTop());
 			gly.setIndex(i);
 			glyList.add(gly);
 		}
-		Gly gly = glyList.get(glyList.size()-1);
+		/*Gly gly = glyList.get(glyList.size()-1);
 		if (rowEnd > gly.getTop() + gly.getHeight()) {
 			addRow(glyList, rowEnd, excelSheet);
-		}
+		}*/
 		//bookToOlExcelGlxList(excelSheet, glxList);
-		for (int i = colBegin; i <= colEnd; i++) {
+		for (int i = colBeginIndex; i <= colEndIndex; i++) {
 			Glx glx = new Glx();
 			glx.setAliasX(cList.get(i).getAlias());
 			glx.setWidth(cList.get(i).getLength());
@@ -106,9 +95,9 @@ public class ExcelService {
 //		int rowEndIndex = rowEnd;
 		List<OneCell> newCellList = new ArrayList<OneCell>();
 		spreadSheet.getSheet().setCells(newCellList);
-		bookToOlExcelCellList2(0, rowList.size()-1,colBegin,colEnd,rowList, glyList,glxList, excelSheet, newCellList);
+		bookToOlExcelCellList2(rowList, glyList,glxList, excelSheet, newCellList,rowBeginIndex,colBeginIndex);
 		//spreadSheet.getSheet().setGlY(glyList.subList(rowBeginIndex, rowEndIndex + 1));
-		returnParam.setDataRowStartIndex(rowBegin);
+		returnParam.setDataRowStartIndex(rowBeginIndex);
 		Gly maxGly = glyList.get(glyList.size()-1);
 		
 		returnParam.setMaxRowPixel(maxGly.getTop()+maxGly.getHeight());
@@ -120,7 +109,7 @@ public class ExcelService {
 		int index = glyList.size() - 1;
 		Gly gly = glyList.get(index);
 		int top = gly.getTop();
-		int length = rowEnd - top - 19;
+		int length = rowEnd - top - gly.getHeight();
 		int rowNum = (length / 20) + 1;
 		for (int i = 0; i < rowNum; i++) {
 			ExcelRow row = excelSheet.addRow();
@@ -220,14 +209,8 @@ public class ExcelService {
 			ExcelRow excelRow = rowList.get(i);
 			Gly gly = new Gly();
 			gly.setAliasY(rowList.get(i).getCode());
-//			gly.setOriginHeight(rowList.get(i).getHeight());
-//			boolean hidden = excelRow.isRowhidden();
-//			if(hidden){
-//				gly.setHidden(true);
-//				gly.setHeight(0);
-//			}else{
-				gly.setHeight(excelRow.getHeight());
-//			}
+			gly.setHeight(excelRow.getHeight());
+
 			gly.setTop(getRowTop(glyList, i));
 			gly.setIndex(i);
 			glyList.add(gly);
@@ -373,9 +356,7 @@ public class ExcelService {
 		}
 		Gly gly = glyList.get(i - 1);
 		int tempHeight = gly.getHeight();
-//		if(gly.isHidden()){
-//			tempHeight = -1;
-//		}
+
 		return gly.getTop() + tempHeight + 1;
 	}
 
@@ -384,15 +365,16 @@ public class ExcelService {
 			ExcelSheet excelSheet, List<OneCell> newCellList) {
 		getCellList(rowBeginIndex, rowEndIndex, rowList, glyList, glxList, excelSheet, newCellList);
 	}
-	private void bookToOlExcelCellList2(int rowBeginIndex, int rowEndIndex,int colBeginIndex,int colEndIndex,
-			List<ExcelRow> rowList, List<Gly> glyList, List<Glx> glxList,
-			ExcelSheet excelSheet, List<OneCell> newCellList) {
-		for (int i = rowBeginIndex; i <= rowEndIndex; i++) {
+	private void bookToOlExcelCellList2(List<ExcelRow> rowList, List<Gly> glyList, List<Glx> glxList,ExcelSheet excelSheet, List<OneCell> newCellList
+			,int rowBeginIndex,int colBeginIndex) {
+		for (int i = 0; i < rowList.size(); i++) {
+			rowBeginIndex = i+rowBeginIndex;
 			ExcelRow excelRow = rowList.get(i);
 			if (excelRow != null) {
 				List<ExcelCell> cellList = excelRow.getCells();
-				int z = 0;
-				for (int j = colBeginIndex; j <= colEndIndex; j++) {
+				
+				for (int j = 0; j < cellList.size(); j++) {
+					colBeginIndex = j+colBeginIndex;
 					ExcelCell excelCell = cellList.get(j);
 					if (excelCell != null) {
 						OneCell cell = new OneCell();
@@ -402,33 +384,8 @@ public class ExcelService {
 						} else {
 							cell.setHighlight(false);
 						}
-						setCellProperty(excelCell, cell, i, z, glyList,glxList, excelSheet);
-						z++;
-//						if (excelSheet.getCols().get(j).isColumnhidden() || excelSheet.getRows().get(i).isRowhidden()) {
-//							int colspan = excelCell.getColspan();
-//							int rowspan = excelCell.getRowspan();
-//							if (colspan > 1 || rowspan > 1) {
-//								int[] mfCell = excelSheet.getMergFirstCell(i, j);
-////								int tempY = mfCell[0];
-//								int tempX = mfCell[1];
-//								boolean flag = true;
-////								for (int k = tempY; k < tempY + rowspan; k++) {
-////									if (!excelSheet.getRows().get(k).isRowhidden()) {
-////										flag = false;
-////									}
-////								}
-//								for (int k = tempX; k < tempX + colspan; k++) {
-//									if (!excelSheet.getCols().get(k).isColumnhidden()) {
-//										flag = false;
-//									}
-//								}
-//								if (flag) {
-//									cell.setHidden(true);
-//								}
-//							}else{
-//								cell.setHidden(true);
-//							}
-//						}
+						setCellProperty(excelCell, cell, i, j, glyList,glxList, excelSheet);
+
 						newCellList.add(cell);
 					}
 				}
@@ -557,14 +514,10 @@ public class ExcelService {
 							int rowspan = excelCell.getRowspan();
 							if (colspan > 1 || rowspan > 1) {
 								int[] mfCell = excelSheet.getMergFirstCell(i, j);
-//								int tempY = mfCell[0];
+
 								int tempX = mfCell[1];
 								boolean flag = true;
-//								for (int k = tempY; k < tempY + rowspan; k++) {
-//									if (!excelSheet.getRows().get(k).isRowhidden()) {
-//										flag = false;
-//									}
-//								}
+
 								for (int k = tempX; k < tempX + colspan; k++) {
 									if (!excelSheet.getCols().get(k).isColumnhidden()) {
 										flag = false;
@@ -755,61 +708,24 @@ public class ExcelService {
 			content.setBd(false);
 		}
 		content.setItalic(excelFont.isItalic());
-//		ExcelColor fontColor = excelFont.getColor();
-//		if (fontColor != null) {
-//			int[] rgb = fontColor.getRGBInt();
-//			content.setColor(ExcelUtil.getRGB(rgb));
-//			content.setColor("rgb(0,0,0)");
-//		}
 		content.setSize(excelFont.getSize() / 20 + "");
 		content.setTexts(excelCell.getText());
+		
 		CustomProp customProp = cell.getCustomProp();
 		Format formate = cell.getFormat();
-		//if ("true".equals(excelSheet.getExps().get("ifUpload"))) {
-		//if (excelCell.getExps().get("format") == null || "normal".equals(excelCell.getExps().get("format")) ) {
-		//if (("".equals(excelCell.getShowText())|| excelCell.getShowText() == null) && !"".equals(excelCell.getText())) {
-			CellFormateUtil.setShowText(excelCell, content,formate);
-//			System.out.println(excelCell.getText());
-//			String displayText = ExcelFormat.getShowText(excelCell);
-//			content.setDisplayTexts(displayText);
-//		} else {
-//			String format = excelCell.getExps().get("format");
-//			formate.setType(format);
-//			formate.setThousands(Boolean.valueOf(excelCell.getExps().get("thousandPoint")));
-//			if ("date".equals(format)) {
-//				formate.setDateFormat(excelCell.getExps().get("dataFormate"));
-//			}
-//			String decimalPoint = excelCell.getExps().get("decimalPoint");
-//			if (!StringUtil.isEmpty(decimalPoint)) {
-//				formate.setDecimal(Integer.valueOf(decimalPoint));
-//			}
-//			formate.setCurrencySign(excelCell.getExps().get("currencySymbol"));
-//			//excelCell.getShowText();
-//			String showText = excelCell.getExps().get("displayText");
-//			if(showText == null){
-//				content.setDisplayTexts("");
-//			}else{
-//				content.setDisplayTexts(showText);
-//			}
-//		}
-		
-		//if(!StringUtil.isEmpty(excelCell.getMemo())){
-			customProp.setComment(excelCell.getMemo());
-		//}
-		
+
+		CellFormateUtil.setShowText(excelCell, content,formate);
+
+		customProp.setComment(excelCell.getMemo());
 		
 		ExcelColor fontColor = excelFont.getColor();
 		if (fontColor != null) {
 			int[] rgb = fontColor.getRGBInt();
 			content.setColor(ExcelUtil.getRGB(rgb));
-			//content.setColor("rgb(0,0,0)");
+			
 		}
-		// ExcelColor bgColor = excelCellStyle.getBgcolor();
+		
 		ExcelColor fgColor = excelCellStyle.getFgcolor();
-		// if(bgColor != null){
-		// int[] rgb = bgColor.getRGBInt();
-		// customProp.setBackground(ExcelUtil.getRGB(rgb));
-		// }else if(bgColor == null && fgColor != null){
 		if (fgColor != null) {
 			int[] rgb = fgColor.getRGBInt();
 			customProp.setBackground(ExcelUtil.getRGB(rgb));
@@ -826,29 +742,21 @@ public class ExcelService {
 		} else {
 			int firstRow = firstMergeCell[0];
 			int firstCol = firstMergeCell[1];
-			occupy.setRow(firstRow);
-			occupy.setCol(firstCol);
+			occupy.setRow(Integer.valueOf(glyList.get(firstRow).getAliasY())-1);
+			occupy.setCol(Integer.valueOf(glxList.get(firstCol).getAliasX())-1);
 			for (int m = firstRow; m < firstRow + rowspan; m++) {
 				occupy.getY().add(glyList.get(m).getAliasY());
 			}
 			for (int m = firstCol; m < firstCol + colspan; m++) {
-//				System.out.println("=============="+i);
-//				System.out.println("=============="+j);
+
 				occupy.getX().add(glxList.get(m).getAliasX());
 			}
 		}
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+	
 	}
-
+	
+	
 	/**
 	 * 非冻结定位还原excel
 	 * 
