@@ -128,8 +128,8 @@ public class HandleExcelService {
 
 	public int getMaxSheetOfOneExcel(CompleteExcel excel) {
 		int max = -1;
-		if (excel.getSpreadSheet() != null && excel.getSpreadSheet().size() > 0) {
-			for (SpreadSheet oneSheet : excel.getSpreadSheet()) {
+		if (excel.getSheets() != null && excel.getSheets().size() > 0) {
+			for (SheetElement oneSheet : excel.getSheets()) {
 				if (oneSheet.getSort() > max) {
 					max = oneSheet.getSort();
 				}
@@ -180,8 +180,8 @@ public class HandleExcelService {
 			SheetElement sheetElement, String startX, String startY,
 			String endX, String endY) {
 		// 查找受影响的相关行列
-		List<Glx> xlist = sheetElement.getGlX();
-		List<Gly> ylist = sheetElement.getGlY();
+		List<Glx> xlist = sheetElement.getGridLineCol();
+		List<Gly> ylist = sheetElement.getGridLineRow();
 		int startx = Integer.valueOf(startX);
 		int starty = Integer.valueOf(startY);
 		int endx = startx;
@@ -212,7 +212,9 @@ public class HandleExcelService {
 
 	public List<Integer> getExistsCellInThisArea(CompleteExcel excel,
 			int sheetId, String startX, String startY, String endX, String endY) {
-		// 获取相应sheet
+		// 1,判断是否存在这个cell,将cell的索引放入list
+		List<Integer> existsCell = new ArrayList<Integer>();
+	/*	// 获取相应sheet
 		SpreadSheet sheet = excel.getSpreadSheet().get(sheetId - 1);
 		SheetElement sheetElement = sheet.getSheet();
 		// 查询符合坐标范围的单元格区域
@@ -220,8 +222,7 @@ public class HandleExcelService {
 		List<Gly> fitY = new ArrayList<>();
 		getAreaXYList(fitX, fitY, sheetElement, startX, startY, endX, endY);
 		// 查找cell
-		// 1,判断是否存在这个cell,将cell的索引放入list
-		List<Integer> existsCell = new ArrayList<Integer>();
+		
 		// 2,根据y轴查询
 		StrandY posiY = sheetElement.getPosi().getStrandY();
 		Map<String, Map<String, Integer>> posiMapY = posiY.getAliasY();
@@ -235,7 +236,7 @@ public class HandleExcelService {
 				}
 			}
 
-		}
+		}*/
 		return existsCell;
 	}
 
@@ -253,7 +254,7 @@ public class HandleExcelService {
 	public List<Integer> getExistsCellInThisRowOrCol(RC rc, SheetElement se,
 			String index) {
 		List<Integer> result = new ArrayList<>();
-		Map<String, Integer> map = null;
+		/*Map<String, Integer> map = null;
 		if (rc.equals(RC.col)) {
 			map = se.getPosi().getStrandY().getAliasY().get(index);
 		} else {
@@ -263,7 +264,7 @@ public class HandleExcelService {
 			for (String key : map.keySet()) {
 				result.add(map.get(key));
 			}
-		}
+		}*/
 		return result;
 	}
 

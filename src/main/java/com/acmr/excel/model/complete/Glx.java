@@ -2,21 +2,43 @@ package com.acmr.excel.model.complete;
 
 import java.io.Serializable;
 
+/***
+ * 返回到页面的列属性
+ * @author liucb
+ *
+ */
 public class Glx implements Serializable {
-	private String aliasX;
+	private String alias;
 	private int left;
 	private int width;
 	private int originWidth;
-	private int index;
+	private int sort;
 	private boolean hidden;
-	private OperProp operProp = new OperProp();
+	private OperProp props = new OperProp();
 
-	public OperProp getOperProp() {
-		return operProp;
+    
+	public String getAlias() {
+		return alias;
 	}
 
-	public void setOperProp(OperProp operProp) {
-		this.operProp = operProp;
+	public void setAlias(String alias) {
+		this.alias = alias;
+	}
+
+	public int getSort() {
+		return sort;
+	}
+
+	public void setSort(int sort) {
+		this.sort = sort;
+	}
+
+	public OperProp getProps() {
+		return props;
+	}
+
+	public void setProps(OperProp props) {
+		this.props = props;
 	}
 
 	public int getOriginWidth() {
@@ -25,14 +47,6 @@ public class Glx implements Serializable {
 
 	public void setOriginWidth(int originWidth) {
 		this.originWidth = originWidth;
-	}
-
-	public String getAliasX() {
-		return aliasX;
-	}
-
-	public void setAliasX(String aliasX) {
-		this.aliasX = aliasX;
 	}
 
 	public int getLeft() {
@@ -51,13 +65,6 @@ public class Glx implements Serializable {
 		this.width = width;
 	}
 
-	public int getIndex() {
-		return index;
-	}
-
-	public void setIndex(int index) {
-		this.index = index;
-	}
 
 	public boolean isHidden() {
 		return hidden;

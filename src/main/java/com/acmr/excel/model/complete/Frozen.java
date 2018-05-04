@@ -7,9 +7,9 @@ public class Frozen implements Serializable{
 	private Integer col;
 	private Integer viewRow;
 	private Integer viewCol;
-
+	private String colAlias;
+	private String rowAlias;
 	
-
 	public Integer getRow() {
 		return row;
 	}
@@ -42,5 +42,20 @@ public class Frozen implements Serializable{
 		this.viewCol = viewCol;
 	}
 
+	public String getColAlias() {
+		return colAlias;
+	}
+
+	public void setColAlias(String colAlias) {
+		this.colAlias = colAlias;
+	}
+
+	public String getRowAlias() {
+		return rowAlias;
+	}
+
+	public void setRowAlias(String rowAlias) {
+		this.rowAlias = rowAlias;
+	}
 	
 }

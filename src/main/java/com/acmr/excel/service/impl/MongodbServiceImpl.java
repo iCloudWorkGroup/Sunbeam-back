@@ -90,7 +90,7 @@ public class MongodbServiceImpl {
 	}
 	
 	
-	public void getParam(String excelId,ReturnParam returnParam) {
+	public void getParam(String excelId) {
 		RowColList rowColList = mongoTemplate.findOne(new Query(Criteria.where("_id").is("rList")), RowColList.class, excelId);
 		List<RowCol> rcList = rowColList.getRcList();
 		for(int i=0;i < rcList.size();i++) {
@@ -101,9 +101,7 @@ public class MongodbServiceImpl {
 		for(int i=0;i < cList.size();i++) {
 			cList.get(i).setTop(getTop(cList, i));
 		}
-		returnParam.setMaxPixel(rcList.get(rcList.size()-1).getTop());
-		returnParam.setMaxPixel(rcList.get(rcList.size()-1).getTop());
-		returnParam.setMaxColPixel(cList.get(cList.size()-1).getTop());
+		
 	}
 	
 	public ExcelSheet getSheetBySort(int rowBeginSort, int rowEndSort,int colBegin,int colEnd ,String excelId,List<RowCol> sortRclist,List<RowCol> sortClList) {

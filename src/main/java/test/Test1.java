@@ -3,13 +3,20 @@ package test;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.acmr.excel.model.position.RowCol;
+import org.apache.xbean.spring.context.ClassPathXmlApplicationContext;
+import org.springframework.context.ApplicationContext;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+
+import com.acmr.excel.model.RowColCell;
+import com.acmr.excel.model.mongo.MExcelCell;
 
 public class Test1 {
 
 	public static void main(String[] args) {
 		
-		/*ApplicationContext applicationContext = new ClassPathXmlApplicationContext("config/applicationContext-core.xml");
+		ApplicationContext applicationContext = new ClassPathXmlApplicationContext("/config/mongodb.xml");
 		MongoTemplate mongoTemplate = (MongoTemplate) applicationContext.getBean("mongoTemplate");
 		//查找关系映射表
 		Criteria criatira = new Criteria();
@@ -21,8 +28,8 @@ public class Test1 {
 		for(RowColCell rcc:list){
 					inlist.add(rcc.getCellId());
 			}
-		List<MExcelCell> cellList = mongoTemplate.find(new Query(Criteria.where("_id").in(inlist)), MExcelCell.class,"d592f68c-0c0a-481f-b7a6-728262715e41");*/
-		
+		List<MExcelCell> cellList = mongoTemplate.find(new Query(Criteria.where("_id").in(inlist)), MExcelCell.class,"d592f68c-0c0a-481f-b7a6-728262715e41");
+		System.out.println(cellList.size());
 		/*List<String> list = new ArrayList<String>();
 		list.set(2, "a");*/
 	/*	List<RowCol> list = new ArrayList<RowCol>();

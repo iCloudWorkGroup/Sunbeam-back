@@ -46,6 +46,7 @@ import com.acmr.excel.model.Constant;
 import com.acmr.excel.model.OnlineExcel;
 import com.acmr.excel.model.complete.CompleteExcel;
 import com.acmr.excel.model.complete.ReturnParam;
+import com.acmr.excel.model.complete.SheetElement;
 import com.acmr.excel.model.complete.SpreadSheet;
 import com.acmr.excel.model.history.VersionHistory;
 import com.acmr.excel.model.position.OpenExcel;
@@ -303,7 +304,7 @@ public class ExcelController extends BaseController {
 	 */
 
 	public void openExcelByAlais(HttpServletRequest req,HttpServletResponse resp) throws IOException {
-		String excelId = req.getParameter("excelId");
+		/*String excelId = req.getParameter("excelId");
 		// int sheetId = Integer.valueOf(req.getParameter("sheetId"));
 		String rowBegin = req.getParameter("rowBeginAlais");
 		String rowEnd = req.getParameter("rowEndAlais");
@@ -316,7 +317,7 @@ public class ExcelController extends BaseController {
 			ReturnParam returnParam = new ReturnParam();
 			CompleteExcel excel = new CompleteExcel();
 			SpreadSheet spreadSheet = new SpreadSheet();
-			excel.getSpreadSheet().add(spreadSheet);
+			excel.getSheets().add(spreadSheet);
 			spreadSheet = excelService.openExcelByAlais(spreadSheet,
 					excelSheet, rowBegin, rowEnd, returnParam);
 			data.setReturncode(Constant.SUCCESS_CODE);
@@ -327,7 +328,7 @@ public class ExcelController extends BaseController {
 			data.setReturndata(Constant.CACHE_INVALID_MSG);
 		}
 		// System.out.println("openexcel====================="+JSON.toJSONString(data));
-		this.sendJson(resp, data);
+		this.sendJson(resp, data);*/
 	}
 
 	
@@ -399,7 +400,7 @@ public class ExcelController extends BaseController {
 	@RequestMapping(value="/reload")
 	public void position(HttpServletRequest req, HttpServletResponse resp) throws Exception {
 		
-		String excelId = req.getHeader("excelId");
+		String excelId = req.getHeader("X-Book-Id");
 		Position position = getJsonDataParameter(req, Position.class);
 		int height = position.getBottom();
 		int right = position.getRight();
@@ -410,28 +411,20 @@ public class ExcelController extends BaseController {
 		
 		ExcelSheet excelSheet = mongodbServiceImpl.getSheetBySort(0,rowEnd,0,colEnd, excelId,sortRcList,sortClList);
 		
-		ReturnParam returnParam = new ReturnParam();
-		JsonReturn data = new JsonReturn("");
+		
 		CompleteExcel excel = new CompleteExcel();
-		SpreadSheet spreadSheet = new SpreadSheet();
+		SheetElement sheet = new SheetElement();
 		if (excelSheet != null) {
-			spreadSheet = excelService.positionExcel(excelSheet, spreadSheet,height, returnParam,rowEnd);
-			mongodbServiceImpl.getParam(excelId, returnParam);
-			data.setAliasColCounter(excelSheet.getMaxcol()+1+"");
-			data.setAliasRowCounter(excelSheet.getMaxrow()+1+"");
+			sheet = excelService.positionExcel(excelSheet, sheet,height, rowEnd);
+			
+			
 		}
-		excel.getSpreadSheet().add(spreadSheet);
-		data.setMaxRowPixel(returnParam.getMaxPixel());
-		data.setMaxColPixel(returnParam.getMaxColPixel());
-		data.setReturndata(excel);
-		data.setDisplayColStartAlias(spreadSheet.getSheet().getGlX().get(0).getAliasX());
-		data.setDisplayRowStartAlias(spreadSheet.getSheet().getGlY().get(0).getAliasY());
+		excel.getSheets().add(sheet);
+		
 		
 		mongodbServiceImpl.update(excelId, 0, "step");
 	
-		long b2 = System.currentTimeMillis();
-		
-		this.sendJson(resp, data);
+		this.sendJson(resp, excel);
 		
 	}
 

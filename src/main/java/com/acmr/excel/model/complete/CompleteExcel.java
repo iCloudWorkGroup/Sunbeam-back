@@ -6,14 +6,14 @@ import java.util.List;
 
 public class CompleteExcel implements Serializable {
 	private String name = "新建excel";
-	private List<SpreadSheet> SpreadSheet = new ArrayList<SpreadSheet>();
+	private List<SheetElement> sheets = new ArrayList<SheetElement>();
 
-	public List<SpreadSheet> getSpreadSheet() {
-		return SpreadSheet;
+	public List<SheetElement> getSheets() {
+		return sheets;
 	}
 
-	public void setSpreadSheet(List<SpreadSheet> spreadSheet) {
-		SpreadSheet = spreadSheet;
+	public void setSheets(List<SheetElement> sheets) {
+		this.sheets = sheets;
 	}
 
 	public String getName() {

@@ -12,7 +12,10 @@
 	<properties>
 		<springframework>4.1.4.RELEASE</springframework>
 		<activemq>5.9.0</activemq>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+	
+	 
 	<repositories>
 		<repository>
 			<id>nexus-releases</id>
@@ -255,8 +258,13 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.3</version>
-			
+				<version>3.6.0</version>
+			   <configuration>
+                    <fork>true</fork>  
+        			<source>1.7</source>  
+        			<target>1.7</target>
+        			<sourceEncoding>UTF-8</sourceEncoding> 
+        		</configuration>
 			</plugin>
 			<plugin>
 

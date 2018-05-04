@@ -20,6 +20,7 @@ import com.acmr.excel.model.OperatorConstant;
 import com.acmr.excel.model.Paste;
 import com.acmr.excel.model.complete.CompleteExcel;
 import com.acmr.excel.model.complete.ReturnParam;
+import com.acmr.excel.model.complete.SheetElement;
 import com.acmr.excel.model.complete.SpreadSheet;
 import com.acmr.excel.model.copy.Copy;
 import com.acmr.excel.model.mongo.MExcelSheet;
@@ -198,9 +199,9 @@ public class SheetController extends BaseController {
 	@RequestMapping("/area")
 	public void openexcel(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		long b1 = System.currentTimeMillis();
-		String excelId = req.getHeader("excelId");
-		String curStep = req.getHeader("step");
-		JsonReturn data = new JsonReturn("");
+		String excelId = req.getHeader("X-Book-Id");
+		String curStep = req.getHeader("X-Step");
+		
 		if(StringUtil.isEmpty(excelId) || StringUtil.isEmpty(curStep)){
 			resp.setStatus(400);
 			return;
@@ -227,35 +228,29 @@ public class SheetController extends BaseController {
 		int rowEndIndex = mongodbServiceImpl.getIndexByPixel(sortRcList,rowEnd);
 		int colBeginIndex = mongodbServiceImpl.getIndexByPixel(sortClList,colBegin);
 		int colEndIndex = mongodbServiceImpl.getIndexByPixel(sortClList,colEnd);
-
+		CompleteExcel excel = new CompleteExcel();
+		SheetElement sheet = new SheetElement();
 		if (cStep == memStep) {
 
 			ExcelSheet excelSheet = mongodbServiceImpl.getSheetBySort(rowBeginIndex,rowEndIndex,colBeginIndex,colEndIndex, excelId,sortRcList,sortClList);
 			
 			if (excelSheet != null) {
-				ReturnParam returnParam = new ReturnParam();
-				CompleteExcel excel = new CompleteExcel();
-				SpreadSheet spreadSheet = new SpreadSheet();
-				excel.getSpreadSheet().add(spreadSheet);
-				spreadSheet = excelService.openExcel(spreadSheet, excelSheet, rowBeginIndex, rowEndIndex, colBeginIndex, colEndIndex, returnParam, sortRcList, sortClList);
-				data.setReturncode(Constant.SUCCESS_CODE);
-				data.setReturndata(excel);
-				data.setDataRowStartIndex(returnParam.getDataRowStartIndex());
-				data.setMaxRowPixel(sortRcList.get(sortRcList.size()-1).getTop());
-			} else {
-				data.setReturncode(Constant.CACHE_INVALID_CODE);
 				
-				data.setReturndata(Constant.CACHE_INVALID_MSG);
+				
+				
+				excel.getSheets().add(sheet);
+				sheet = excelService.openExcel(sheet, excelSheet, rowBeginIndex, rowEndIndex, colBeginIndex, colEndIndex,  sortRcList, sortClList);
+			
+			} else {
+				
 			}
 		}
 
-		if("".equals(data.getReturndata())){
-			data.setReturncode(-1);
-		}
+		
 		long b2 = System.currentTimeMillis();
 		System.out.println("openexcel=====================" + (b2 - b1));
 
-		this.sendJson(resp, data);
+		this.sendJson(resp, sheet);
 	}
 	
 	

@@ -23,6 +23,7 @@ import com.acmr.excel.model.complete.Occupy;
 import com.acmr.excel.model.complete.OneCell;
 import com.acmr.excel.model.complete.OperProp;
 import com.acmr.excel.model.complete.ReturnParam;
+import com.acmr.excel.model.complete.SheetElement;
 import com.acmr.excel.model.complete.SpreadSheet;
 import com.acmr.excel.model.position.RowCol;
 import com.acmr.excel.util.CellFormateUtil;
@@ -65,18 +66,19 @@ public class ExcelService {
 	 * @return CompleteExcel对象
 	 */
 
-	public SpreadSheet openExcel(SpreadSheet spreadSheet,ExcelSheet excelSheet, int rowBeginIndex, int rowEndIndex,int colBeginIndex,int colEndIndex,ReturnParam returnParam,
+	public SheetElement openExcel(SheetElement spreadSheet,ExcelSheet excelSheet, int rowBeginIndex, int rowEndIndex,int colBeginIndex,int colEndIndex,
 			List<RowCol> rList,List<RowCol> cList) {
-		List<Gly> glyList = spreadSheet.getSheet().getGlY();
-		List<Glx> glxList = spreadSheet.getSheet().getGlX();
+		List<Gly> glyList = spreadSheet.getGridLineRow();
+		List<Glx> glxList = spreadSheet.getGridLineCol();
 		for(int i = rowBeginIndex;i<= rowEndIndex;i++) {
 			Gly gly = new Gly();
-			gly.setAliasY(rList.get(i).getAlias());
+			gly.setAlias(rList.get(i).getAlias());
 			gly.setHeight(rList.get(i).getLength());
 			gly.setTop(rList.get(i).getTop());
-			gly.setIndex(i);
+			gly.setSort(i);
 			glyList.add(gly);
 		}
+     
 		/*Gly gly = glyList.get(glyList.size()-1);
 		if (rowEnd > gly.getTop() + gly.getHeight()) {
 			addRow(glyList, rowEnd, excelSheet);
@@ -84,23 +86,20 @@ public class ExcelService {
 		//bookToOlExcelGlxList(excelSheet, glxList);
 		for (int i = colBeginIndex; i <= colEndIndex; i++) {
 			Glx glx = new Glx();
-			glx.setAliasX(cList.get(i).getAlias());
+			glx.setAlias(cList.get(i).getAlias());
 			glx.setWidth(cList.get(i).getLength());
 			glx.setLeft(cList.get(i).getTop());
-			glx.setIndex(i);
+			glx.setSort(i);
 			glxList.add(glx);
 		}
 		List<ExcelRow> rowList = excelSheet.getRows();
-//		int rowBeginIndex = rowBegin;
-//		int rowEndIndex = rowEnd;
+
 		List<OneCell> newCellList = new ArrayList<OneCell>();
-		spreadSheet.getSheet().setCells(newCellList);
+		spreadSheet.setCells(newCellList);
 		bookToOlExcelCellList2(rowList, glyList,glxList, excelSheet, newCellList,rowBeginIndex,colBeginIndex);
 		//spreadSheet.getSheet().setGlY(glyList.subList(rowBeginIndex, rowEndIndex + 1));
-		returnParam.setDataRowStartIndex(rowBeginIndex);
-		Gly maxGly = glyList.get(glyList.size()-1);
+	
 		
-		returnParam.setMaxRowPixel(maxGly.getTop()+maxGly.getHeight());
 		return spreadSheet;
 	}
 	
@@ -115,9 +114,9 @@ public class ExcelService {
 			ExcelRow row = excelSheet.addRow();
 			int tmp = glyList.size();
 			Gly newGly = new Gly();
-			newGly.setIndex(tmp);
+			newGly.setSort(tmp);
 			newGly.setHeight(19);
-			newGly.setAliasY(row.getCode());
+			newGly.setAlias(row.getCode());
 			newGly.setTop(getRowTop(glyList, tmp++));
 			glyList.add(newGly);
 		}
@@ -131,9 +130,9 @@ public class ExcelService {
 			ExcelRow row = excelSheet.addRow();
 			int tmp = glyList.size();
 			Gly newGly = new Gly();
-			newGly.setIndex(tmp);
+			newGly.setSort(tmp);
 			newGly.setHeight(19);
-			newGly.setAliasY(row.getCode());
+			newGly.setAlias(row.getCode());
 			newGly.setTop(getRowTop(glyList, tmp++));
 			glyList.add(newGly);
 		}
@@ -208,11 +207,11 @@ public class ExcelService {
 		for (int i = 0; i < rowList.size(); i++) {
 			ExcelRow excelRow = rowList.get(i);
 			Gly gly = new Gly();
-			gly.setAliasY(rowList.get(i).getCode());
+			gly.setAlias(rowList.get(i).getCode());
 			gly.setHeight(excelRow.getHeight());
 
 			gly.setTop(getRowTop(glyList, i));
-			gly.setIndex(i);
+			gly.setSort(i);
 			glyList.add(gly);
 		}
 
@@ -223,7 +222,7 @@ public class ExcelService {
 		for (int i = 0; i < colList.size(); i++) {
 			ExcelColumn excelColumn = colList.get(i);
 			Glx glx = new Glx();
-			glx.setAliasX(excelColumn.getCode());
+			glx.setAlias(excelColumn.getCode());
 			glx.setOriginWidth(excelColumn.getWidth());
 			boolean hidden = excelColumn.isColumnhidden();
 			if(hidden){
@@ -234,10 +233,10 @@ public class ExcelService {
 			}
 			
 			glx.setLeft(getColLeft(glxList, i));
-			glx.setIndex(i);
+			glx.setSort(i);
 			Map<String, String> colMap = excelColumn.getExps();
 			//Content content = glxList.get(i).getOperProp().getContent();
-			OperProp operProp = glx.getOperProp();
+			OperProp operProp = glx.getProps();
 			Content content = operProp.getContent();
 			String alignCol = colMap.get("align_vertical");
 			content.setAlignCol(alignCol);
@@ -333,7 +332,7 @@ public class ExcelService {
 			operProp.setContent(content);
 			operProp.setBorder(border);
 			operProp.setContent(content);
-			glx.setOperProp(operProp);
+			glx.setProps(operProp);
 			glxList.add(glx);
 		}
 	}
@@ -390,7 +389,7 @@ public class ExcelService {
 					}
 				}
 				Map<String, String> colMap = excelRow.getExps();
-				Content content = glyList.get(i).getOperProp().getContent();
+				Content content = glyList.get(i).getProps().getContent();
 				String alignCol = colMap.get("align_vertical");
 				content.setAlignCol(alignCol);
 				String alignRow = colMap.get("align_level");
@@ -413,8 +412,8 @@ public class ExcelService {
 				content.setSize(colMap.get("font_size"));
 				content.setRgbColor(null);
 				content.setTexts(null);
-				CustomProp customProp = glyList.get(i).getOperProp().getCustomProp();
-				Format format = glyList.get(i).getOperProp().getFormate();
+				CustomProp customProp = glyList.get(i).getProps().getCustomProp();
+				Format format = glyList.get(i).getProps().getFormate();
 				customProp.setBackground(colMap.get("fill_bgcolor"));
 				format.setType(colMap.get("format"));
 				format.setCurrencySign(colMap.get("currency"));
@@ -433,7 +432,7 @@ public class ExcelService {
 				}
 				
 				customProp.setComment(colMap.get("comment"));
-				Border border = glyList.get(i).getOperProp().getBorder();
+				Border border = glyList.get(i).getProps().getBorder();
 				String bottom = colMap.get("bottom");
 				String top = colMap.get("top");
 				String left = colMap.get("left");
@@ -534,7 +533,7 @@ public class ExcelService {
 					}
 				}
 				Map<String, String> colMap = excelRow.getExps();
-				Content content = glyList.get(i).getOperProp().getContent();
+				Content content = glyList.get(i).getProps().getContent();
 				String alignCol = colMap.get("align_vertical");
 				content.setAlignCol(alignCol);
 				String alignRow = colMap.get("align_level");
@@ -557,8 +556,8 @@ public class ExcelService {
 				content.setSize(colMap.get("font_size"));
 				content.setRgbColor(null);
 				content.setTexts(null);
-				CustomProp customProp = glyList.get(i).getOperProp().getCustomProp();
-				Format format = glyList.get(i).getOperProp().getFormate();
+				CustomProp customProp = glyList.get(i).getProps().getCustomProp();
+				Format format = glyList.get(i).getProps().getFormate();
 				customProp.setBackground(colMap.get("fill_bgcolor"));
 				format.setType(colMap.get("format"));
 				format.setCurrencySign(colMap.get("currency"));
@@ -577,7 +576,7 @@ public class ExcelService {
 				}
 				
 				customProp.setComment(colMap.get("comment"));
-				Border border = glyList.get(i).getOperProp().getBorder();
+				Border border = glyList.get(i).getProps().getBorder();
 				String bottom = colMap.get("bottom");
 				String top = colMap.get("top");
 				String left = colMap.get("left");
@@ -735,21 +734,19 @@ public class ExcelService {
 		int colspan = excelCell.getColspan();
 		int[] firstMergeCell = excelSheet.getMergFirstCell(i, j);
 		if (firstMergeCell == null) {
-			occupy.getX().add(glxList.get(j).getAliasX());
-			occupy.getY().add(glyList.get(i).getAliasY());
-			occupy.setRow(Integer.valueOf(glyList.get(i).getAliasY())-1);
-			occupy.setCol(Integer.valueOf(glxList.get(j).getAliasX())-1);
+			occupy.getCol().add(glxList.get(j).getAlias());
+			occupy.getRow().add(glyList.get(i).getAlias());
+		
 		} else {
 			int firstRow = firstMergeCell[0];
 			int firstCol = firstMergeCell[1];
-			occupy.setRow(Integer.valueOf(glyList.get(firstRow).getAliasY())-1);
-			occupy.setCol(Integer.valueOf(glxList.get(firstCol).getAliasX())-1);
+			
 			for (int m = firstRow; m < firstRow + rowspan; m++) {
-				occupy.getY().add(glyList.get(m).getAliasY());
+				occupy.getRow().add(glyList.get(m).getAlias());
 			}
 			for (int m = firstCol; m < firstCol + colspan; m++) {
 
-				occupy.getX().add(glxList.get(m).getAliasX());
+				occupy.getCol().add(glxList.get(m).getAlias());
 			}
 		}
 		
@@ -767,10 +764,10 @@ public class ExcelService {
 	 * @return
 	 */
 
-	public SpreadSheet positionExcel(ExcelSheet excelSheet, SpreadSheet spreadSheet, int height,ReturnParam returnParam,int end) {
+	public SheetElement positionExcel(ExcelSheet excelSheet, SheetElement spreadSheet, int height,int end) {
 		spreadSheet.setName(excelSheet.getName());
-		List<Gly> glyList = spreadSheet.getSheet().getGlY();
-		List<Glx> glxList = spreadSheet.getSheet().getGlX();
+		List<Gly> glyList = spreadSheet.getGridLineRow();
+		List<Glx> glxList = spreadSheet.getGridLineCol();
 		bookToOlExcelGlyList(excelSheet, glyList);
 		if(glyList.size() ==0){
 			addEmptyRow(glyList, height, excelSheet);
@@ -785,8 +782,10 @@ public class ExcelService {
 		int minTop = glyList.get(0).getTop();
 		Gly glyTop = glyList.get(glyList.size() - 1);
 		int maxTop = glyTop.getTop() + glyTop.getHeight();
-		returnParam.setMaxPixel(maxTop);
-		returnParam.setMaxRowPixel(maxTop);
+		
+		spreadSheet.setMaxRowPixel(maxTop);
+		spreadSheet.setMaxRowAlias(glyTop.getAlias());
+		
 		int startAlaisPixel = 0;
 		int Offset = startAlaisPixel - minTop;
 		int startPixel = Offset < 200 ? Offset : startAlaisPixel - 200;
@@ -799,24 +798,25 @@ public class ExcelService {
 		
 		Glx glxLeft = glxList.get(glxList.size() - 1);
 		int maxLeft = glxLeft.getLeft() + glxLeft.getWidth();
-		returnParam.setMaxColPixel(maxLeft);
-		// int oldrowBeginIndex = BinarySearch.rowsBinarySearch(startPixel,
-		// glyList, 0, glyList.size()-1);
+		
+		spreadSheet.setMaxColPixel(maxLeft);
+		spreadSheet.setMaxColAlias(glxLeft.getAlias());
+		
 		int rowBeginIndex = 0;
-		// int oldrowEndIndex = BinarySearch.rowsBinarySearch(endPixel, glyList,
-		// 0, glyList.size()-1);
+		
 		int rowEndIndex = end;
 		
 		List<OneCell> newCellList = new ArrayList<OneCell>();
-		spreadSheet.getSheet().setCells(newCellList);
+		spreadSheet.setCells(newCellList);
 		bookToOlExcelCellList(rowBeginIndex, rowEndIndex,rowList, glyList,glxList, excelSheet, newCellList);
-		spreadSheet.getSheet().setGlY(glyList.subList(rowBeginIndex, rowEndIndex + 1));
-		returnParam.setDataRowStartIndex(rowBeginIndex);
-		returnParam.setDisplayRowStartAlias("1");
-		returnParam.setDisplayColStartAlias("1");
+		spreadSheet.setGridLineRow(glyList.subList(rowBeginIndex, rowEndIndex + 1));
+		
+		spreadSheet.setViewRowAlias("1");
+		spreadSheet.setViewColAlias("1");
+		
 		ExcelSheetFreeze excelfrozen = excelSheet.getFreeze();
 		if (excelfrozen != null) {
-			Frozen frozen = spreadSheet.getSheet().getFrozen();
+			Frozen frozen = spreadSheet.getFrozen();
 			int rf = excelfrozen.getRow();
 			if("fr".equals(excelSheet.getExps().get("fr"))){
 				frozen.setRow(-1);
@@ -829,8 +829,7 @@ public class ExcelService {
 			}else{
 				frozen.setCol(cf);
 			}
-//			frozen.setViewCol(excelfrozen.getFirstcol());
-//			frozen.setViewRow(excelfrozen.getFirstrow());
+
 		}
 		return spreadSheet;
 	}

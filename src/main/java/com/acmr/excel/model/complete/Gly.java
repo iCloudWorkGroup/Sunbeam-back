@@ -2,22 +2,21 @@ package com.acmr.excel.model.complete;
 
 import java.io.Serializable;
 
+/***
+ * 返回到页面的行属性
+ * @author liucb
+ *
+ */
 public class Gly implements Serializable {
-	private String aliasY;
+	private String alias;
 	private int top;
 	private int height;
 	private int originHeight;
-	private int index;
+	private int sort;
 	private boolean hidden;
-	private OperProp operProp = new OperProp();
+	private OperProp props = new OperProp();
 
-	public String getAliasY() {
-		return aliasY;
-	}
 
-	public void setAliasY(String aliasY) {
-		this.aliasY = aliasY;
-	}
 
 	public int getTop() {
 		return top;
@@ -35,20 +34,29 @@ public class Gly implements Serializable {
 		this.height = height;
 	}
 
-	public int getIndex() {
-		return index;
+
+	public String getAlias() {
+		return alias;
 	}
 
-	public void setIndex(int index) {
-		this.index = index;
+	public void setAlias(String alias) {
+		this.alias = alias;
 	}
 
-	public OperProp getOperProp() {
-		return operProp;
+	public int getSort() {
+		return sort;
 	}
 
-	public void setOperProp(OperProp operProp) {
-		this.operProp = operProp;
+	public void setSort(int sort) {
+		this.sort = sort;
+	}
+
+	public OperProp getProps() {
+		return props;
+	}
+
+	public void setProps(OperProp props) {
+		this.props = props;
 	}
 
 	public boolean isHidden() {
