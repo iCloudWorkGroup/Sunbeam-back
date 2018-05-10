@@ -142,8 +142,8 @@ public class BaseController extends MultiActionController {
 	}
 	protected void assembleData(HttpServletRequest req,HttpServletResponse resp,Object object,int reqPath){
 		JsonReturn data = new JsonReturn("");
-		String step = req.getHeader("step");
-		String excelId = req.getHeader("excelId");
+		String step = req.getHeader("X-Step");
+		String excelId = req.getHeader("X-Book-Id");
 		if(StringUtil.isEmpty(step)){
 			step = "1";
 		}

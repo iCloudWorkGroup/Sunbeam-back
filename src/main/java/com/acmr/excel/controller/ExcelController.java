@@ -42,6 +42,7 @@ import acmr.excel.pojo.ExcelSheet;
 
 import com.acmr.cache.MemoryUtil;
 import com.acmr.excel.controller.excelbase.BaseController;
+import com.acmr.excel.dao.base.BaseDao;
 import com.acmr.excel.model.Constant;
 import com.acmr.excel.model.OnlineExcel;
 import com.acmr.excel.model.complete.CompleteExcel;
@@ -49,6 +50,7 @@ import com.acmr.excel.model.complete.ReturnParam;
 import com.acmr.excel.model.complete.SheetElement;
 import com.acmr.excel.model.complete.SpreadSheet;
 import com.acmr.excel.model.history.VersionHistory;
+import com.acmr.excel.model.mongo.MExcel;
 import com.acmr.excel.model.position.OpenExcel;
 import com.acmr.excel.model.position.Position;
 import com.acmr.excel.model.position.RowCol;
@@ -75,12 +77,14 @@ import com.alibaba.fastjson.JSON;
  @Scope("singleton")
 public class ExcelController extends BaseController {
 	private static Logger log = Logger.getLogger(ExcelController.class); 
-	 @Resource
+	@Resource
 	private HandleExcelService handleExcelService;
-	 @Resource
+	@Resource
 	private ExcelService excelService;
-	 @Resource
+	@Resource
 	private MongodbServiceImpl mongodbServiceImpl;
+	@Resource
+	private BaseDao baseDao;
 
 	/**
 	 * excel下载
@@ -404,6 +408,12 @@ public class ExcelController extends BaseController {
 		Position position = getJsonDataParameter(req, Position.class);
 		int height = position.getBottom();
 		int right = position.getRight();
+		
+		MExcel me = new MExcel();
+		me.setId(excelId);
+		me.setStep(0);
+		baseDao.update(excelId, me);
+		
 		List<RowCol> sortRcList = new ArrayList<RowCol>();//存贮整理顺序后的行
 		List<RowCol> sortClList = new ArrayList<RowCol>();//存储整理顺序后的列
 		int rowEnd = mongodbServiceImpl.getRowEndIndex(excelId,height,sortRcList);

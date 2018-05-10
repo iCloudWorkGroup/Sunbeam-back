@@ -13,18 +13,20 @@ import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 import javax.jms.TextMessage;
 
-
-
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import com.acmr.excel.service.CellService;
 import com.acmr.excel.service.HandleExcelService;
+import com.acmr.excel.service.MCellService;
+import com.acmr.excel.service.MExcelService;
 import com.acmr.excel.service.PasteService;
 import com.acmr.excel.service.SheetService;
-import com.acmr.excel.service.StoreService;
 import com.acmr.excel.service.impl.MongodbServiceImpl;
 import com.acmr.mq.Model;
+
+
+
 
 /**
  * @描述 队列消息监听器
@@ -42,6 +44,10 @@ public class QueueReceiver implements MessageListener {
 	private PasteService pasteService;
 	@Resource
 	private SheetService sheetService;
+	@Resource
+	private MExcelService mexcelService;
+	@Resource
+	private MCellService mcellService;
 
 	@Override
 	public synchronized void onMessage(Message message) {
@@ -54,8 +60,7 @@ public class QueueReceiver implements MessageListener {
 				logger.info("**********receive message excelId : "+excelId + " === step : " + step + "== reqPath : "+ model.getReqPath());
 				ExecutorService executor = Executors.newFixedThreadPool(1);
 				
-				Runnable worker = new WorkerThread2(step, mongodbServiceImpl,excelId, handleExcelService, cellService, 
-						pasteService ,sheetService,model);
+				Runnable worker = new WorkerThread2(step,excelId,model, mcellService, mexcelService);
 				executor.execute(worker);
 				executor.shutdown();
 			} catch (JMSException e) {

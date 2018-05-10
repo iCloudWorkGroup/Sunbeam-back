@@ -1,0 +1,112 @@
+package com.acmr.excel.dao.impl;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.stereotype.Repository;
+
+import com.acmr.excel.dao.MRowColDao;
+import com.acmr.excel.dao.base.BaseDao;
+import com.acmr.excel.model.position.RowCol;
+import com.acmr.excel.model.position.RowColList;
+
+@Repository("mrowColDao")
+public class MRowColDaoImpl  implements MRowColDao{
+	
+	@Resource
+	private MongoTemplate mongoTemplate;
+
+	@Override
+	public void getRowList(List<RowCol> sortRcList, String excelId) {
+		
+		RowColList rowColList = mongoTemplate.findOne(new Query(Criteria.where("_id").is("rList")), RowColList.class, excelId);
+		//long ceb2 = System.currentTimeMillis();
+		//System.out.println("获得rcList的时间为:" + (ceb2-ceb1));
+		List<RowCol> rcList = rowColList.getRcList();//得到行列表
+		Map<String,RowCol> map = new HashMap<String,RowCol>();
+		RowCol rowCol = null;
+		
+		for(int i =0;i<rcList.size();i++){
+			RowCol rc = rcList.get(i);
+			if("".equals(rc.getPreAlias())||(null==rc.getPreAlias())){
+				rowCol=rc;
+				continue;
+			}
+			map.put(rc.getPreAlias(), rc);
+		}
+		
+		//重新整理行，将行安装展示先后顺序重新排列
+		sortRcList.add(rowCol);
+		boolean flag = true;
+		while(flag){
+			rowCol = map.get(rowCol.getAlias());
+			sortRcList.add(rowCol);
+			if(sortRcList.size()==rcList.size()){//跳出循环
+				break;
+			}
+			 
+		}
+		
+		for(int i=0;i < sortRcList.size();i++) {
+			sortRcList.get(i).setTop(getTop(sortRcList, i));
+			
+		}
+		
+	}
+
+	@Override
+	public void getColList(List<RowCol> sortClList, String excelId) {
+		
+		RowColList colList = mongoTemplate.findOne(new Query(Criteria.where("_id").is("cList")), RowColList.class, excelId);
+		List<RowCol> cList = colList.getRcList();
+		Map<String,RowCol> map = new HashMap<String,RowCol>();
+		RowCol rowCol = null;
+		
+		for(int i =0;i<cList.size();i++){
+			RowCol cl = cList.get(i);
+			
+			if("".equals(cl.getPreAlias())||(null==cl.getPreAlias())){
+				rowCol=cl;
+				continue;
+			}
+			map.put(cl.getPreAlias(), cl);
+		}
+		
+		//重新整理行，将行安装展示先后顺序重新排列
+		sortClList.add(rowCol);
+		boolean flag = true;
+		while(flag){
+			rowCol = map.get(rowCol.getAlias());
+			sortClList.add(rowCol);
+			if(sortClList.size()==cList.size()){//跳出循环
+				break;
+			}
+			 
+		}
+		
+		for(int i=0;i < sortClList.size();i++) {
+			
+			sortClList.get(i).setTop(getTop(sortClList, i));
+		}
+		
+	}
+	
+	
+	private int getTop(List<RowCol> rowColList, int i) {
+		if (i == 0) {
+			return 0;
+		}
+		RowCol rowCol = rowColList.get(i - 1);
+		int tempHeight = rowCol.getLength();
+
+		return rowCol.getTop() + tempHeight + 1;
+	}
+
+}

@@ -346,13 +346,8 @@ public class HandleExcelService {
 	 * @param excelBook
 	 */
 	public void data(Cell cell,int step,MongodbServiceImpl mongodbServiceImpl,String excelId) {
-//		Integer version = versionHistory.getVersion().get(step-1);
-//		if(version == null){
-//			version = 0;
-//			
-//		}
-//		version += 1;
-//		versionHistory.getVersion().put(step, version);
+
+		
 		int rowIndex = cell.getCoordinate().getStartRow();
 		int colIndex = cell.getCoordinate().getStartCol();
 		Map<String,Object> rowMap = new HashMap<String, Object>();
@@ -374,7 +369,7 @@ public class HandleExcelService {
 		String content = cell.getContent();
 		try {
 			content = java.net.URLDecoder.decode(content, "utf-8");
-			excelCell.setType(CELLTYPE.STRING);
+			//excelCell.setType(CELLTYPE.STRING);
 			excelCell.setText(content);
 			excelCell.setValue(content);
 			CellFormateUtil.autoRecognise(content, excelCell);
@@ -388,20 +383,6 @@ public class HandleExcelService {
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
-		
-//		History history = new History();
-//		history.setOperatorType(OperatorConstant.textData);
-//		ChangeArea changeArea = new ChangeArea();
-//		changeArea.setColIndex(colIndex);
-//		changeArea.setRowIndex(rowIndex);
-//		if (excelCell == null) {
-//			changeArea.setOriginalValue(excelCell);
-//			excelCell = new ExcelCell();
-//			excelCell.getCellstyle().setBgcolor(new ExcelColor(255, 255, 255));
-//			cellList.set(colIndex, excelCell);
-//		}else{
-//			changeArea.setOriginalValue(excelCell.clone());
-//		}
 		
 	}
 	/**
