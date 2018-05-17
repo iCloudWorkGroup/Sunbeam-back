@@ -6,16 +6,16 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import com.acmr.excel.dao.MRowColDao;
-import com.acmr.excel.dao.base.BaseDao;
 import com.acmr.excel.model.position.RowCol;
 import com.acmr.excel.model.position.RowColList;
+import com.mongodb.BasicDBObject;
 
 @Repository("mrowColDao")
 public class MRowColDaoImpl  implements MRowColDao{
@@ -107,6 +107,38 @@ public class MRowColDaoImpl  implements MRowColDao{
 		int tempHeight = rowCol.getLength();
 
 		return rowCol.getTop() + tempHeight + 1;
+	}
+
+	@Override
+	public void updateRowCol(String excelId,String id,String alias,String preAlias) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("_id").is(id).and("rcList.alias").is(alias));
+		Update update = new Update();
+		update.set("rcList.$.preAlias", preAlias);
+		mongoTemplate.updateFirst(query, update, excelId);
+		
+	}
+
+	@Override
+	public void insertRowCol(String excelId, RowCol rowCol, String id) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("_id").is(id));
+		Update update = new Update();
+		update.addToSet("rcList",rowCol);
+		mongoTemplate.upsert(query, update, excelId);
+		
+		
+	}
+
+	@Override
+	public void delRowCol(String excelId, String alias, String id) {
+		Query query = Query.query(Criteria.where("_id").is(id));
+		BasicDBObject s = new BasicDBObject();
+		s.put("alias",alias);
+		Update update = new Update();
+		update.pull("rcList", s);
+	    mongoTemplate.updateFirst(query, update, excelId);
+		
 	}
 
 }

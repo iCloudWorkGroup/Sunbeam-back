@@ -20,6 +20,29 @@ public interface MRowColDao {
 	 * @param excelId
 	 */
 	void getColList(List<RowCol> sortClList,String excelId);
+	
+	/**
+	 * 根据条件修改行或列前一个行或列的别名
+	 * @param excelId  表ID
+	 * @param id     RowColList ID rList或cList
+	 * @param alias   行或者列别名
+	 * @param preAlias   前面一行或者列别名
+	 */
+	void updateRowCol(String excelId, String id,String alias,String preAlias);
+	
+	/**
+	 * 根据条件更新一条行或类记录
+	 * @param excelId  数据集ID
+	 * @param rowCol   行列对象
+	 * @param id       行或列集合ID
+	 */
+	void insertRowCol(String excelId,RowCol rowCol,String id);
 
-
+	/**
+	 * 根据条件删除一条行或类记录
+	 * @param excelId  数据集ID
+	 * @param alias   别名
+	 * @param id       行或列集合ID
+	 */
+    void delRowCol(String excelId,String alias,String id);
 }

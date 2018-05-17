@@ -19,7 +19,9 @@ import org.springframework.stereotype.Service;
 import com.acmr.excel.service.CellService;
 import com.acmr.excel.service.HandleExcelService;
 import com.acmr.excel.service.MCellService;
+import com.acmr.excel.service.MColService;
 import com.acmr.excel.service.MExcelService;
+import com.acmr.excel.service.MRowService;
 import com.acmr.excel.service.PasteService;
 import com.acmr.excel.service.SheetService;
 import com.acmr.excel.service.impl.MongodbServiceImpl;
@@ -48,6 +50,10 @@ public class QueueReceiver implements MessageListener {
 	private MExcelService mexcelService;
 	@Resource
 	private MCellService mcellService;
+	@Resource
+	private MRowService mrowService;
+	@Resource
+	private MColService mcolService;
 
 	@Override
 	public synchronized void onMessage(Message message) {
@@ -60,7 +66,7 @@ public class QueueReceiver implements MessageListener {
 				logger.info("**********receive message excelId : "+excelId + " === step : " + step + "== reqPath : "+ model.getReqPath());
 				ExecutorService executor = Executors.newFixedThreadPool(1);
 				
-				Runnable worker = new WorkerThread2(step,excelId,model, mcellService, mexcelService);
+				Runnable worker = new WorkerThread2(step,excelId,model, mcellService, mexcelService,mrowService,mcolService);
 				executor.execute(worker);
 				executor.shutdown();
 			} catch (JMSException e) {

@@ -24,6 +24,11 @@ public class BaseDao {
 		return true;
 	}
 	
+	public boolean upsert(String excelId, Object object) {
+		mongoTemplate.insert(object, excelId);
+		return true;
+	}
+	
 	public int getStep(String id) {
 		DBObject dbObject = new BasicDBObject();
 		dbObject.put("_id", id);

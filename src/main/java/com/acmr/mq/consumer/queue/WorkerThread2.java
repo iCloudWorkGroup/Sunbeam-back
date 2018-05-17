@@ -5,10 +5,14 @@ import org.apache.log4j.Logger;
 
 import com.acmr.excel.model.Cell;
 import com.acmr.excel.model.OperatorConstant;
+import com.acmr.excel.model.complete.rows.ColOperate;
+import com.acmr.excel.model.complete.rows.RowOperate;
 import com.acmr.excel.service.CellService;
 import com.acmr.excel.service.HandleExcelService;
 import com.acmr.excel.service.MCellService;
+import com.acmr.excel.service.MColService;
 import com.acmr.excel.service.MExcelService;
+import com.acmr.excel.service.MRowService;
 import com.acmr.excel.service.PasteService;
 import com.acmr.excel.service.SheetService;
 import com.acmr.excel.service.impl.MongodbServiceImpl;
@@ -30,15 +34,20 @@ public class WorkerThread2 implements Runnable{
 	
 	private MCellService mcellService;
 	private MExcelService mexcelService;
+	private MRowService mrowService;
+	private MColService mcolService;
 	
     
-	public WorkerThread2(int step,String key,Model model,MCellService mcellService,MExcelService mexcelService){  
+	public WorkerThread2(int step,String key,Model model,MCellService mcellService,MExcelService mexcelService,
+			MRowService mrowService,MColService mcolService){  
 	       
 		this.step=step;
 	    this.key = key;
 	    this.model = model;
 	    this.mcellService = mcellService;
 	    this.mexcelService = mexcelService;
+	    this.mrowService = mrowService;
+	    this.mcolService = mcolService;
 	}
 	
     public WorkerThread2(int step,MongodbServiceImpl mongodbServiceImpl,String key,HandleExcelService handleExcelService,
@@ -163,18 +172,18 @@ public class WorkerThread2 implements Runnable{
 //			cell = (Cell) model.getObject();
 //			handleExcelService.updateCells(CellUpdateType.align_vertical, cell,excelBook,versionHistory,step);
 //			break;
-//		case OperatorConstant.rowsinsert:
-//			RowOperate rowOperate = (RowOperate) model.getObject();
-//			cellService.addRow(excelBook.getSheets().get(0), rowOperate);
-//			break;
+		case OperatorConstant.rowsinsert:
+			RowOperate rowOperate = (RowOperate) model.getObject();
+			mrowService.insertRow(rowOperate, excelId);
+		break;
 //		case OperatorConstant.rowsdelete:
 //			RowOperate rowOperate2 = (RowOperate) model.getObject();
 //			cellService.deleteRow(excelBook.getSheets().get(0), rowOperate2);
 //			break;
-//		case OperatorConstant.colsinsert:
-//			ColOperate colOperate = (ColOperate) model.getObject();
-//			cellService.addCol(excelBook.getSheets().get(0), colOperate);
-//			break;
+		case OperatorConstant.colsinsert:
+			ColOperate colOperate = (ColOperate) model.getObject();
+		//cellService.addCol(excelBook.getSheets().get(0), colOperate);
+			break;
 //		case OperatorConstant.colsdelete:
 //			ColOperate colOperate2 = (ColOperate) model.getObject();
 //			cellService.deleteCol(excelBook.getSheets().get(0), colOperate2);
