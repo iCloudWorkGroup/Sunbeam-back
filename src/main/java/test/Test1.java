@@ -7,8 +7,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
-import com.acmr.excel.model.mongo.MExcelRow;
-import com.acmr.excel.model.position.RowCol;
+import com.acmr.excel.model.RowColCell;
+import com.acmr.excel.model.mongo.MExcel;
 
 public class Test1 {
 
@@ -51,9 +51,22 @@ public class Test1 {
 		update.set("rcList.$.preAlias", "1");
 		mongoTemplate.updateFirst(query, update, "d02b0e50-02f0-4c7e-b2ac-486e6e487e7c");*/
 		
-		mongoTemplate.remove(new Query(Criteria.where("excelRow.code").is("1")), MExcelRow.class, "d02b0e50-02f0-4c7e-b2ac-486e6e487e7c");
-		
-		
+		//mongoTemplate.remove(new Query(Criteria.where("excelRow.code").is("1")), MExcelRow.class, "d02b0e50-02f0-4c7e-b2ac-486e6e487e7c");
+		/*RowColCell cell = new RowColCell();
+		cell.setRow(100);
+		mongoTemplate.save(cell, "9dad6428-2b6d-42dd-9e9a-185fdcfc0e12");
+		mongoTemplate.remove(cell, "9dad6428-2b6d-42dd-9e9a-185fdcfc0e12");
+		*/
+		Query query = new Query();
+		query.addCriteria(Criteria.where("_id").is("6d16ae1b-7191-4c4d-b67b-a49798a22d00"));
+		Update update = new Update();
+		update.set("step", 0);
+		update.set("viewRowAlias", "");
+		update.set("viewColAlias", "");
+		update.set("rowAlias","");
+		update.set("colAlias", "");
+		update.set("freeze", true);
+		mongoTemplate.updateFirst(query, update,MExcel.class, "6d16ae1b-7191-4c4d-b67b-a49798a22d00");
 	}
 
 }

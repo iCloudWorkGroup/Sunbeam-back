@@ -15,8 +15,6 @@ import com.acmr.excel.model.OnlineExcel;
 import com.acmr.excel.model.complete.Border;
 import com.acmr.excel.model.complete.Content;
 import com.acmr.excel.model.complete.CustomProp;
-import com.acmr.excel.model.complete.Format;
-import com.acmr.excel.model.complete.Frozen;
 import com.acmr.excel.model.complete.Glx;
 import com.acmr.excel.model.complete.Gly;
 import com.acmr.excel.model.complete.Occupy;
@@ -37,7 +35,6 @@ import acmr.excel.pojo.ExcelColumn;
 import acmr.excel.pojo.ExcelFont;
 import acmr.excel.pojo.ExcelRow;
 import acmr.excel.pojo.ExcelSheet;
-import acmr.excel.pojo.ExcelSheetFreeze;
 import acmr.excel.pojo.Excelborder;
 
 
@@ -202,140 +199,7 @@ public class ExcelService {
 		return excelDao.getAllExcel();
 	}
 
-	private void bookToOlExcelGlyList(ExcelSheet excelSheet, List<Gly> glyList) {
-		List<ExcelRow> rowList = excelSheet.getRows();
-		for (int i = 0; i < rowList.size(); i++) {
-			ExcelRow excelRow = rowList.get(i);
-			Gly gly = new Gly();
-			gly.setAlias(rowList.get(i).getCode());
-			gly.setHeight(excelRow.getHeight());
-
-			gly.setTop(getRowTop(glyList, i));
-			gly.setSort(i);
-			glyList.add(gly);
-		}
-
-	}
-
-	private void bookToOlExcelGlxList(ExcelSheet excelSheet, List<Glx> glxList) {
-		List<ExcelColumn> colList = excelSheet.getCols();
-		for (int i = 0; i < colList.size(); i++) {
-			ExcelColumn excelColumn = colList.get(i);
-			Glx glx = new Glx();
-			glx.setAlias(excelColumn.getCode());
-			glx.setOriginWidth(excelColumn.getWidth());
-			boolean hidden = excelColumn.isColumnhidden();
-			if(hidden){
-				glx.setHidden(true);
-				glx.setWidth(0);
-			}else{
-				glx.setWidth(excelColumn.getWidth());
-			}
-			
-			glx.setLeft(getColLeft(glxList, i));
-			glx.setSort(i);
-			Map<String, String> colMap = excelColumn.getExps();
-			//Content content = glxList.get(i).getOperProp().getContent();
-			OperProp operProp = glx.getProps();
-			Content content = operProp.getContent();
-			String alignCol = colMap.get("align_vertical");
-			content.setAlignCol(alignCol);
-			String alignRow = colMap.get("align_level");
-			content.setAlignRow(alignRow);
-			String bd = colMap.get("font_weight");
-			if (bd != null) {
-				content.setBd(Boolean.valueOf(bd));
-			} else {
-				content.setBd(null);
-			}
-			String color = colMap.get("font_color");
-			content.setColor(color);
-			content.setFamily(colMap.get("font_family"));
-			String italic = colMap.get("font_italic");
-			if (italic != null) {
-				content.setItalic(Boolean.valueOf(italic));
-			} else {
-				content.setItalic(null);
-			}
-			content.setSize(colMap.get("font_size"));
-			content.setRgbColor(null);
-			content.setTexts(null);
-			content.setAlignLine(null);
-//			CustomProp customProp = glxList.get(i).getOperProp()
-//					.getCustomProp();
-			CustomProp customProp = operProp.getCustomProp();
-			Format formate = operProp.getFormate();
-			customProp.setBackground(colMap.get("fill_bgcolor"));
-			formate.setType(colMap.get("format")); 
-			formate.setCurrencySign(colMap.get("currency"));
-			formate.setDateFormat(colMap.get("dateFormat"));
-			customProp.setIsValid(null);
-			String decimalPoint = colMap.get("decimalPoint");
-			if (decimalPoint != null) {
-				formate.setDecimal(Integer.valueOf(decimalPoint));
-			} else {
-				formate.setDecimal(null);
-			}
-			String thousandPoint = colMap.get("thousandPoint");
-			if (thousandPoint != null) {
-				formate.setThousands(Boolean.valueOf(thousandPoint));
-			} else {
-				formate.setThousands(null);
-			}
-
-			customProp.setComment(colMap.get("comment"));
-			//Border border = glxList.get(i).getOperProp().getBorder();
-			Border border = operProp.getBorder();
-			String bottom = colMap.get("bottom");
-			String top = colMap.get("top");
-			String left = colMap.get("left");
-			String right = colMap.get("right");
-			String all = colMap.get("all");
-			String outer = colMap.get("outer");
-			String none = colMap.get("none");
-			if (bottom != null) {
-				border.setBottom(Boolean.valueOf(bottom));
-			} else {
-				border.setBottom(null);
-			}
-			if (top != null) {
-				border.setTop(Boolean.valueOf(top));
-			} else {
-				border.setTop(null);
-			}
-			if (left != null) {
-				border.setLeft(Boolean.valueOf(left));
-			} else {
-				border.setLeft(null);
-			}
-			if (right != null) {
-				border.setRight(Boolean.valueOf(right));
-			} else {
-				border.setRight(null);
-			}
-			if (all != null) {
-				border.setAll(Boolean.valueOf(all));
-			} else {
-				border.setAll(null);
-			}
-			if (outer != null) {
-				border.setOuter(Boolean.valueOf(outer));
-			} else {
-				border.setOuter(null);
-			}
-			if (none != null) {
-				border.setNone(Boolean.valueOf(none));
-			} else {
-				border.setNone(null);
-			}
-			
-			operProp.setContent(content);
-			operProp.setBorder(border);
-			operProp.setContent(content);
-			glx.setProps(operProp);
-			glxList.add(glx);
-		}
-	}
+	
 
 	private int getColLeft(List<Glx> glxList, int i) {
 		if (i == 0) {
@@ -343,7 +207,7 @@ public class ExcelService {
 		}
 		Glx glx = glxList.get(i - 1);
 		int tempWidth = glx.getWidth();
-		if(glx.isHidden()){
+		if(null!=glx.getHidden()&&glx.getHidden()){
 			tempWidth = -1;
 		}
 		return glx.getLeft() + tempWidth + 1;
@@ -358,12 +222,210 @@ public class ExcelService {
 
 		return gly.getTop() + tempHeight + 1;
 	}
+	
 
 	private void bookToOlExcelCellList(int rowBeginIndex, int rowEndIndex,
 			List<ExcelRow> rowList, List<Gly> glyList, List<Glx> glxList,
 			ExcelSheet excelSheet, List<OneCell> newCellList) {
 		getCellList(rowBeginIndex, rowEndIndex, rowList, glyList, glxList, excelSheet, newCellList);
 	}
+	
+	private void bookToOlExcelGlyList(ExcelSheet excelSheet, List<Gly> glyList) {
+		List<ExcelRow> rowList = excelSheet.getRows();
+		for (int i = 0; i < rowList.size(); i++) {
+			ExcelRow excelRow = rowList.get(i);
+			Gly gly = new Gly();
+			gly.setAlias(rowList.get(i).getCode());
+			gly.setHeight(excelRow.getHeight());
+            gly.setHidden(excelRow.isRowhidden());
+			gly.setTop(getRowTop(glyList, i));
+			gly.setSort(i);
+			glyList.add(gly);
+		}
+
+	}
+
+	private void bookToOlExcelGlxList(ExcelSheet excelSheet, List<Glx> glxList) {
+		List<ExcelColumn> colList = excelSheet.getCols();
+		for (int i = 0; i < colList.size(); i++) {
+			ExcelColumn excelColumn = colList.get(i);
+			ExcelCellStyle style = excelColumn.getCellstyle();
+			ExcelFont font = style.getFont();
+			
+			Glx glx = new Glx();
+			glx.setAlias(excelColumn.getCode());
+			
+			boolean hidden = excelColumn.isColumnhidden();
+			if(hidden){
+				glx.setHidden(true);
+				glx.setWidth(0);
+			}else{
+				glx.setWidth(excelColumn.getWidth());
+				glx.setHidden(false);
+			}
+			
+			glx.setLeft(getColLeft(glxList, i));
+			glx.setSort(i);
+			
+			OperProp operProp = glx.getProps();
+			
+			Content content = operProp.getContent();
+			switch (style.getAlign()) {
+			case 0:
+				content.setAlignRow(null);
+				break;
+			case 1:
+				content.setAlignRow("center");
+				break;
+			case 2:
+				content.setAlignRow("right");
+				break;
+
+			default:
+				
+				break;
+			}
+			switch (style.getValign()) {
+			case 1:
+				content.setAlignCol(null);
+				break;
+			case 2:
+				content.setAlignCol("middle");
+				break;
+			case 3:
+				content.setAlignCol("bottom");
+				break;
+
+			default:
+				
+				break;
+			}
+			
+			if (700 == font.getBoldweight()) {
+				content.setBold(true);
+			} else {
+				content.setBold(null);
+			}
+			if(null==font.getColor()){
+				content.setColor(null);
+			}else{
+				content.setColor(CellFormateUtil.getBackground(font.getColor()));
+			}
+			
+			switch (font.getFontname()) {
+			case "微软雅黑":
+				content.setFamily("microsoft Yahei");
+				break;
+			case "宋体":
+				content.setFamily(null);
+				break;
+			case "SimSun":
+				content.setFamily(null);
+				break;
+			case "黑体":
+				content.setFamily("SimHei");
+				break;
+			case "楷体":
+				content.setFamily("KaiTi");
+				break;
+			default:
+				content.setFamily(font.getFontname());
+				break;
+			}
+			content.setDisplayTexts(null);
+			if(font.isItalic()){
+				content.setItalic(true);
+			}else{
+				content.setItalic(null);
+			}
+			if(font.getSize()==200){
+				content.setSize(null);
+			}else{
+				content.setSize(font.getSize() / 20 + "");
+			}
+			content.setTexts(null);
+			if(0==(int)font.getUnderline()){
+				content.setUnderline(null);
+			}else{
+				content.setUnderline((int)font.getUnderline());
+			}
+			if(style.isWraptext()){
+				content.setWordWrap(style.isWraptext());
+			}else{
+				content.setWordWrap(null);
+			}
+			content.setType(null);
+			content.setExpress(null);
+			if(null==style.getFgcolor()){
+				content.setBackground(null);
+			}else{
+				content.setBackground(CellFormateUtil.getBackground(style.getFgcolor()));
+			}
+			if(style.isLocked()){
+				content.setLocked(null);
+			}else{
+				content.setLocked(style.isLocked());
+				
+			}
+			
+
+			CustomProp customProp = operProp.getCustomProp();
+			customProp.setComment(null);
+			
+			Border border = operProp.getBorder();
+			Excelborder excelTopborder = style.getTopborder();
+			if(excelTopborder != null){
+				short topBorder = excelTopborder.getSort();
+				if (topBorder == 2) {
+					border.setTop(2);
+				}else if(topBorder == 1){
+					border.setTop(1);
+				}else{
+					border.setTop(null);
+				}
+			}
+			Excelborder excelBottomborder  = style.getBottomborder();
+			if(excelBottomborder != null){
+				short bottomBorder = excelBottomborder.getSort();
+				if (bottomBorder == 2) {
+					border.setBottom(2);
+				}else if(bottomBorder == 1){
+					border.setBottom(1);
+				}else{
+					border.setBottom(null);
+				}
+			}
+			Excelborder excelLeftborder = style.getLeftborder();
+			if(excelLeftborder != null){
+				short leftBorder = excelLeftborder.getSort();
+				if (leftBorder == 2) {
+					border.setLeft(2);
+				}else if(leftBorder == 1){
+					border.setLeft(1);
+				}else{
+					border.setLeft(null);
+				}
+			}
+			Excelborder excelRightborder = style.getRightborder();
+			if(excelRightborder != null){
+				short rightBorder = excelRightborder.getSort();
+				if (rightBorder == 2) {
+					border.setRight(2);
+				}else if(rightBorder == 1){
+					border.setRight(1);
+				}else{
+					border.setRight(null);
+				}
+			}
+			
+			operProp.setContent(content);
+			operProp.setCustomProp(customProp);
+			operProp.setBorder(border);
+			glx.setProps(operProp);
+			glxList.add(glx);
+		}
+	}
+	
 	private void bookToOlExcelCellList2(List<ExcelRow> rowList, List<Gly> glyList, List<Glx> glxList,ExcelSheet excelSheet, List<OneCell> newCellList
 			,int rowBeginIndex,int colBeginIndex) {
 		for (int i = 0; i < rowList.size(); i++) {
@@ -377,104 +439,165 @@ public class ExcelService {
 					ExcelCell excelCell = cellList.get(j);
 					if (excelCell != null) {
 						OneCell cell = new OneCell();
-						String highLight = excelCell.getExps().get(Constant.HIGHLIGHT);
-						if ("true".equals(highLight)) {
-							cell.setHighlight(true);
-						} else {
-							cell.setHighlight(false);
-						}
+					
 						setCellProperty(excelCell, cell, i, j, glyList,glxList, excelSheet);
 
 						newCellList.add(cell);
 					}
 				}
-				Map<String, String> colMap = excelRow.getExps();
-				Content content = glyList.get(i).getProps().getContent();
-				String alignCol = colMap.get("align_vertical");
-				content.setAlignCol(alignCol);
-				String alignRow = colMap.get("align_level");
-				content.setAlignRow(alignRow);
-				String bd = colMap.get("font_weight");
-				if (bd != null) {
-					content.setBd(Boolean.valueOf(bd));
-				}else{
-					content.setBd(null);
+				ExcelCellStyle style = excelRow.getCellstyle();
+				ExcelFont   font = style.getFont();
+				OperProp   prop = glyList.get(i).getProps();
+				
+				Content content = prop.getContent();
+				
+				switch (style.getAlign()) {
+				case 0:
+					content.setAlignRow(null);
+					break;
+				case 1:
+					content.setAlignRow("center");
+					break;
+				case 2:
+					content.setAlignRow("right");
+					break;
+
+				default:
+					
+					break;
 				}
-				String color = colMap.get("font_color");
-				content.setColor(color);
-				content.setFamily(colMap.get("font_family"));
-				String italic = colMap.get("font_italic");
-				if (italic != null) {
-					content.setItalic(Boolean.valueOf(italic));
-				} else {
-					content.setItalic(null);
-				}
-				content.setSize(colMap.get("font_size"));
-				content.setRgbColor(null);
-				content.setTexts(null);
-				CustomProp customProp = glyList.get(i).getProps().getCustomProp();
-				Format format = glyList.get(i).getProps().getFormate();
-				customProp.setBackground(colMap.get("fill_bgcolor"));
-				format.setType(colMap.get("format"));
-				format.setCurrencySign(colMap.get("currency"));
-				format.setDateFormat(colMap.get("dateFormat"));
-				String decimalPoint = colMap.get("decimalPoint");
-				if (decimalPoint != null) {
-					format.setDecimal(Integer.valueOf(decimalPoint));
-				} else {
-					format.setDecimal(null);
-				}
-				String thousandPoint = colMap.get("thousandPoint");
-				if (thousandPoint != null) {
-					format.setThousands(Boolean.valueOf(thousandPoint));
-				} else {
-					format.setThousands(null);
+				switch (style.getValign()) {
+				case 1:
+					content.setAlignCol(null);
+					break;
+				case 2:
+					content.setAlignCol("middle");
+					break;
+				case 3:
+					content.setAlignCol("bottom");
+					break;
+
+				default:
+					
+					break;
 				}
 				
-				customProp.setComment(colMap.get("comment"));
-				Border border = glyList.get(i).getProps().getBorder();
-				String bottom = colMap.get("bottom");
-				String top = colMap.get("top");
-				String left = colMap.get("left");
-				String right = colMap.get("right");
-				String all = colMap.get("all");
-				String outer = colMap.get("outer");
-				String none = colMap.get("none");
-				if(bottom != null){
-					border.setBottom(Boolean.valueOf(bottom));
-				}else{
-					border.setBottom(null);
+				if (700 == font.getBoldweight()) {
+					content.setBold(true);
+				} else {
+					content.setBold(null);
 				}
-				if(top != null){
-					border.setTop(Boolean.valueOf(top));
+				if(null==font.getColor()){
+					content.setColor(null);
 				}else{
-					border.setTop(null);
+					content.setColor(CellFormateUtil.getBackground(font.getColor()));
 				}
-				if(left != null){
-					border.setLeft(Boolean.valueOf(left));
+				switch (font.getFontname()) {
+				case "微软雅黑":
+					content.setFamily("microsoft Yahei");
+					break;
+				case "宋体":
+					content.setFamily(null);
+					break;
+				case "SimSun":
+					content.setFamily(null);
+					break;
+				case "黑体":
+					content.setFamily("SimHei");
+					break;
+				case "楷体":
+					content.setFamily("KaiTi");
+					break;
+				default:
+					content.setFamily(font.getFontname());
+					break;
+				}
+				content.setDisplayTexts(null);
+				if(font.isItalic()){
+					content.setItalic(true);
 				}else{
-					border.setLeft(null);
+					content.setItalic(null);
 				}
-				if(right != null){
-					border.setRight(Boolean.valueOf(right));
+				if(font.getSize()==220){
+					content.setSize(null);
 				}else{
-					border.setRight(null);
+					content.setSize(font.getSize() / 20 + "");
 				}
-				if(all != null){
-					border.setAll(Boolean.valueOf(all));
+				content.setTexts(null);
+				if(0==(int)font.getUnderline()){
+					content.setUnderline(null);
 				}else{
-					border.setAll(null);
+					content.setUnderline((int)font.getUnderline());
 				}
-				if(outer != null){
-					border.setOuter(Boolean.valueOf(outer));
+				if(style.isWraptext()){
+					content.setWordWrap(style.isWraptext());
 				}else{
-					border.setOuter(null);
+					content.setWordWrap(null);
 				}
-				if(none != null){
-					border.setNone(Boolean.valueOf(none));
+				content.setType(null);
+				content.setExpress(null);
+				if(null==style.getFgcolor()){
+					content.setBackground(null);
 				}else{
-					border.setNone(null);
+					content.setBackground(CellFormateUtil.getBackground(style.getFgcolor()));
 				}
+				if(style.isLocked()){
+					content.setLocked(null);
+				}else{
+					
+					content.setLocked(style.isLocked());
+				}
+				
+
+				CustomProp customProp = prop.getCustomProp();
+				customProp.setComment(null);
+				
+				Border border = prop.getBorder();
+				Excelborder excelTopborder = style.getTopborder();
+				if(excelTopborder != null){
+					short topBorder = excelTopborder.getSort();
+					if (topBorder == 2) {
+						border.setTop(2);
+					}else if(topBorder == 1){
+						border.setTop(1);
+					}else{
+						border.setTop(null);
+					}
+				}
+				Excelborder excelBottomborder  = style.getBottomborder();
+				if(excelBottomborder != null){
+					short bottomBorder = excelBottomborder.getSort();
+					if (bottomBorder == 2) {
+						border.setBottom(2);
+					}else if(bottomBorder == 1){
+						border.setBottom(1);
+					}else{
+						border.setBottom(null);
+					}
+				}
+				Excelborder excelLeftborder = style.getLeftborder();
+				if(excelLeftborder != null){
+					short leftBorder = excelLeftborder.getSort();
+					if (leftBorder == 2) {
+						border.setLeft(2);
+					}else if(leftBorder == 1){
+						border.setLeft(1);
+					}else{
+						border.setLeft(null);
+					}
+				}
+				Excelborder excelRightborder = style.getRightborder();
+				if(excelRightborder != null){
+					short rightBorder = excelRightborder.getSort();
+					if (rightBorder == 2) {
+						border.setRight(2);
+					}else if(rightBorder == 1){
+						border.setRight(1);
+					}else{
+						border.setRight(null);
+					}
+				}
+					
 			}
 		}
 	}
@@ -501,12 +624,12 @@ public class ExcelService {
 					ExcelCell excelCell = cellList.get(j);
 					if (excelCell != null) {
 						OneCell cell = new OneCell();
-						String highLight = excelCell.getExps().get(Constant.HIGHLIGHT);
+					/*	String highLight = excelCell.getExps().get(Constant.HIGHLIGHT);
 						if ("true".equals(highLight)) {
 							cell.setHighlight(true);
 						} else {
 							cell.setHighlight(false);
-						}
+						}*/
 						setCellProperty(excelCell, cell, i, j, glyList,glxList, excelSheet);
 						if (excelSheet.getCols().get(j).isColumnhidden() || excelSheet.getRows().get(i).isRowhidden()) {
 							int colspan = excelCell.getColspan();
@@ -522,103 +645,167 @@ public class ExcelService {
 										flag = false;
 									}
 								}
-								if (flag) {
-									cell.setHidden(true);
-								}
-							}else{
-								cell.setHidden(true);
+								
 							}
 						}
 						newCellList.add(cell);
 					}
 				}
-				Map<String, String> colMap = excelRow.getExps();
-				Content content = glyList.get(i).getProps().getContent();
-				String alignCol = colMap.get("align_vertical");
-				content.setAlignCol(alignCol);
-				String alignRow = colMap.get("align_level");
-				content.setAlignRow(alignRow);
-				String bd = colMap.get("font_weight");
-				if (bd != null) {
-					content.setBd(Boolean.valueOf(bd));
-				}else{
-					content.setBd(null);
+				
+				ExcelCellStyle style = excelRow.getCellstyle();
+				ExcelFont   font = style.getFont();
+				OperProp   prop = glyList.get(i).getProps();
+				
+				Content content = prop.getContent();
+				
+				switch (style.getAlign()) {
+				case 0:
+					content.setAlignRow(null);
+					break;
+				case 1:
+					content.setAlignRow("center");
+					break;
+				case 2:
+					content.setAlignRow("right");
+					break;
+
+				default:
+					
+					break;
 				}
-				String color = colMap.get("font_color");
-				content.setColor(color);
-				content.setFamily(colMap.get("font_family"));
-				String italic = colMap.get("font_italic");
-				if (italic != null) {
-					content.setItalic(Boolean.valueOf(italic));
-				} else {
-					content.setItalic(null);
-				}
-				content.setSize(colMap.get("font_size"));
-				content.setRgbColor(null);
-				content.setTexts(null);
-				CustomProp customProp = glyList.get(i).getProps().getCustomProp();
-				Format format = glyList.get(i).getProps().getFormate();
-				customProp.setBackground(colMap.get("fill_bgcolor"));
-				format.setType(colMap.get("format"));
-				format.setCurrencySign(colMap.get("currency"));
-				format.setDateFormat(colMap.get("dateFormat"));
-				String decimalPoint = colMap.get("decimalPoint");
-				if (decimalPoint != null) {
-					format.setDecimal(Integer.valueOf(decimalPoint));
-				} else {
-					format.setDecimal(null);
-				}
-				String thousandPoint = colMap.get("thousandPoint");
-				if (thousandPoint != null) {
-					format.setThousands(Boolean.valueOf(thousandPoint));
-				} else {
-					format.setThousands(null);
+				switch (style.getValign()) {
+				case 1:
+					content.setAlignCol(null);
+					break;
+				case 2:
+					content.setAlignCol("middle");
+					break;
+				case 3:
+					content.setAlignCol("bottom");
+					break;
+
+				default:
+					
+					break;
 				}
 				
-				customProp.setComment(colMap.get("comment"));
-				Border border = glyList.get(i).getProps().getBorder();
-				String bottom = colMap.get("bottom");
-				String top = colMap.get("top");
-				String left = colMap.get("left");
-				String right = colMap.get("right");
-				String all = colMap.get("all");
-				String outer = colMap.get("outer");
-				String none = colMap.get("none");
-				if(bottom != null){
-					border.setBottom(Boolean.valueOf(bottom));
-				}else{
-					border.setBottom(null);
+				if (700 == font.getBoldweight()) {
+					content.setBold(true);
+				} else {
+					content.setBold(null);
 				}
-				if(top != null){
-					border.setTop(Boolean.valueOf(top));
+				if(null==font.getColor()){
+					content.setColor(null);
 				}else{
-					border.setTop(null);
+					content.setColor(CellFormateUtil.getBackground(font.getColor()));
 				}
-				if(left != null){
-					border.setLeft(Boolean.valueOf(left));
+				
+				switch (font.getFontname()) {
+				case "微软雅黑":
+					content.setFamily("microsoft Yahei");
+					break;
+				case "宋体":
+					content.setFamily(null);
+					break;
+				case "SimSun":
+					content.setFamily(null);
+					break;
+				case "黑体":
+					content.setFamily("SimHei");
+					break;
+				case "楷体":
+					content.setFamily("KaiTi");
+					break;
+				default:
+					content.setFamily(font.getFontname());
+					break;
+				}
+				content.setDisplayTexts(null);
+				if(font.isItalic()){
+					content.setItalic(true);
 				}else{
-					border.setLeft(null);
+					content.setItalic(null);
 				}
-				if(right != null){
-					border.setRight(Boolean.valueOf(right));
+				if(font.getSize()==220){
+					content.setSize(null);
 				}else{
-					border.setRight(null);
+					content.setSize(font.getSize() / 20 + "");
 				}
-				if(all != null){
-					border.setAll(Boolean.valueOf(all));
+				content.setTexts(null);
+				if(0==(int)font.getUnderline()){
+					content.setUnderline(null);
 				}else{
-					border.setAll(null);
+					content.setUnderline((int)font.getUnderline());
 				}
-				if(outer != null){
-					border.setOuter(Boolean.valueOf(outer));
+				if(style.isWraptext()){
+					content.setWordWrap(style.isWraptext());
 				}else{
-					border.setOuter(null);
+					content.setWordWrap(null);
 				}
-				if(none != null){
-					border.setNone(Boolean.valueOf(none));
+				content.setType(null);
+				content.setExpress(null);
+				if(null==style.getFgcolor()){
+					content.setBackground(null);
 				}else{
-					border.setNone(null);
+					content.setBackground(CellFormateUtil.getBackground(style.getFgcolor()));
 				}
+				if(style.isLocked()){
+					content.setLocked(null);
+				}else{
+					
+					content.setLocked(style.isLocked());
+				}
+				
+
+				CustomProp customProp = prop.getCustomProp();
+				customProp.setComment(null);
+				
+				Border border = prop.getBorder();
+				Excelborder excelTopborder = style.getTopborder();
+				if(excelTopborder != null){
+					short topBorder = excelTopborder.getSort();
+					if (topBorder == 2) {
+						border.setTop(2);
+					}else if(topBorder == 1){
+						border.setTop(1);
+					}else{
+						border.setTop(null);
+					}
+				}
+				Excelborder excelBottomborder  = style.getBottomborder();
+				if(excelBottomborder != null){
+					short bottomBorder = excelBottomborder.getSort();
+					if (bottomBorder == 2) {
+						border.setBottom(2);
+					}else if(bottomBorder == 1){
+						border.setBottom(1);
+					}else{
+						border.setBottom(null);
+					}
+				}
+				Excelborder excelLeftborder = style.getLeftborder();
+				if(excelLeftborder != null){
+					short leftBorder = excelLeftborder.getSort();
+					if (leftBorder == 2) {
+						border.setLeft(2);
+					}else if(leftBorder == 1){
+						border.setLeft(1);
+					}else{
+						border.setLeft(null);
+					}
+				}
+				Excelborder excelRightborder = style.getRightborder();
+				if(excelRightborder != null){
+					short rightBorder = excelRightborder.getSort();
+					if (rightBorder == 2) {
+						border.setRight(2);
+					}else if(rightBorder == 1){
+						border.setRight(1);
+					}else{
+						border.setRight(null);
+					}
+				}
+					
 			}
 		}
 	}
@@ -642,80 +829,105 @@ public class ExcelService {
 		Excelborder excelTopborder = excelCellStyle.getTopborder();
 		if(excelTopborder != null){
 			short topBorder = excelTopborder.getSort();
-			if (topBorder > 0) {
-				border.setTop(true);
+			if (topBorder == 2) {
+				border.setTop(2);
+			}else if(topBorder == 1){
+				border.setTop(1);
+			}else{
+				border.setTop(null);
 			}
 		}
 		Excelborder excelBottomborder  = excelCellStyle.getBottomborder();
 		if(excelBottomborder != null){
 			short bottomBorder = excelBottomborder.getSort();
-			if (bottomBorder >0) {
-				border.setBottom(true);
+			if (bottomBorder == 2) {
+				border.setBottom(2);
+			}else if(bottomBorder == 1){
+				border.setBottom(1);
+			}else{
+				border.setBottom(null);
 			}
 		}
 		Excelborder excelLeftborder = excelCellStyle.getLeftborder();
 		if(excelLeftborder != null){
 			short leftBorder = excelLeftborder.getSort();
-			if (leftBorder > 0) {
-				border.setLeft(true);
+			if (leftBorder == 2) {
+				border.setLeft(2);
+			}else if(leftBorder == 1){
+				border.setLeft(1);
+			}else{
+				border.setLeft(null);
 			}
 		}
 		Excelborder excelRightborder = excelCellStyle.getRightborder();
 		if(excelRightborder != null){
 			short rightBorder = excelRightborder.getSort();
-			if (rightBorder > 0) {
-				border.setRight(true);
+			if (rightBorder == 2) {
+				border.setRight(2);
+			}else if(rightBorder == 1){
+				border.setRight(1);
+			}else{
+				border.setRight(null);
 			}
 		}
-		cell.setWordWrap(excelCellStyle.isWraptext());
+		
 		Content content = cell.getContent();
 		switch (excelCellStyle.getAlign()) {
-		case 1:
+		case 0:
 			content.setAlignRow("left");
 			break;
-		case 2:
+		case 1:
 			content.setAlignRow("center");
 			break;
-		case 3:
+		case 2:
 			content.setAlignRow("right");
 			break;
 
 		default:
-			//content.setAlignRow("left");
+			
 			break;
 		}
 		switch (excelCellStyle.getValign()) {
-		case 0:
+		case 1:
 			content.setAlignCol("top");
 			break;
-		case 1:
+		case 2:
 			content.setAlignCol("middle");
 			break;
-		case 2:
+		case 3:
 			content.setAlignCol("bottom");
 			break;
 
 		default:
-			content.setAlignCol("middle");
+			
 			break;
 		}
 		ExcelFont excelFont = excelCellStyle.getFont();
-		content.setFamily(excelFont.getFontname());
+		switch (excelFont.getFontname()) {
+		case "微软雅黑":
+			content.setFamily("microsoft Yahei");
+			break;
+		case "宋体":
+			content.setFamily("SimSun");
+			break;
+		case "黑体":
+			content.setFamily("SimHei");
+			break;
+		case "楷体":
+			content.setFamily("KaiTi");
+			break;
+		default:
+			content.setFamily(excelFont.getFontname());
+			break;
+		}
 		if (700 == excelFont.getBoldweight()) {
-			content.setBd(true);
+			content.setBold(true);
 		} else {
-			content.setBd(false);
+			content.setBold(false);
 		}
 		content.setItalic(excelFont.isItalic());
 		content.setSize(excelFont.getSize() / 20 + "");
 		content.setTexts(excelCell.getText());
-		
-		CustomProp customProp = cell.getCustomProp();
-		Format formate = cell.getFormat();
-
-		CellFormateUtil.setShowText(excelCell, content,formate);
-
-		customProp.setComment(excelCell.getMemo());
 		
 		ExcelColor fontColor = excelFont.getColor();
 		if (fontColor != null) {
@@ -724,11 +936,30 @@ public class ExcelService {
 			
 		}
 		
-		ExcelColor fgColor = excelCellStyle.getFgcolor();
-		if (fgColor != null) {
-			int[] rgb = fgColor.getRGBInt();
-			customProp.setBackground(ExcelUtil.getRGB(rgb));
+		CellFormateUtil.setShowText(excelCell, content);
+		content.setUnderline((int)excelFont.getUnderline());
+		content.setWordWrap(excelCellStyle.isWraptext());
+		content.setType(excelCell.getText());
+		content.setExpress(null);
+		ExcelColor color = excelCellStyle.getFgcolor();
+		if (color != null) {
+			int[] rgb = color.getRGBInt();
+			content.setBackground(ExcelUtil.getRGB(rgb));
+		}else{
+			content.setBackground(null);
 		}
+		
+		content.setLocked(excelCellStyle.isLocked());
+		
+		CustomProp customProp = cell.getCustomProp();
+		customProp.setComment(excelCell.getMemo());
+		String highLight = excelCell.getExps().get(Constant.HIGHLIGHT);
+		if ("true".equals(highLight)) {
+			customProp.setHighlight(true);
+		} else {
+			customProp.setHighlight(false);
+		}
+	
 		Occupy occupy = cell.getOccupy();
 		int rowspan = excelCell.getRowspan();
 		int colspan = excelCell.getColspan();
@@ -752,6 +983,7 @@ public class ExcelService {
 		
 	
 	}
+	
 	
 	
 	/**
@@ -811,10 +1043,7 @@ public class ExcelService {
 		bookToOlExcelCellList(rowBeginIndex, rowEndIndex,rowList, glyList,glxList, excelSheet, newCellList);
 		spreadSheet.setGridLineRow(glyList.subList(rowBeginIndex, rowEndIndex + 1));
 		
-		spreadSheet.setViewRowAlias("1");
-		spreadSheet.setViewColAlias("1");
-		
-		ExcelSheetFreeze excelfrozen = excelSheet.getFreeze();
+		/*ExcelSheetFreeze excelfrozen = excelSheet.getFreeze();
 		if (excelfrozen != null) {
 			Frozen frozen = spreadSheet.getFrozen();
 			int rf = excelfrozen.getRow();
@@ -830,7 +1059,7 @@ public class ExcelService {
 				frozen.setCol(cf);
 			}
 
-		}
+		}*/
 		return spreadSheet;
 	}
 

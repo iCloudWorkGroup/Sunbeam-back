@@ -11,9 +11,9 @@ public class Glx implements Serializable {
 	private String alias;
 	private int left;
 	private int width;
-	private int originWidth;
+	private Boolean hidden;
 	private int sort;
-	private boolean hidden;
+	
 	private OperProp props = new OperProp();
 
     
@@ -41,14 +41,6 @@ public class Glx implements Serializable {
 		this.props = props;
 	}
 
-	public int getOriginWidth() {
-		return originWidth;
-	}
-
-	public void setOriginWidth(int originWidth) {
-		this.originWidth = originWidth;
-	}
-
 	public int getLeft() {
 		return left;
 	}
@@ -65,12 +57,11 @@ public class Glx implements Serializable {
 		this.width = width;
 	}
 
-
-	public boolean isHidden() {
+	public Boolean getHidden() {
 		return hidden;
 	}
 
-	public void setHidden(boolean hidden) {
+	public void setHidden(Boolean hidden) {
 		this.hidden = hidden;
 	}
 

@@ -44,6 +44,7 @@ import acmr.excel.pojo.ExcelCell;
 import acmr.excel.pojo.ExcelColumn;
 import acmr.excel.pojo.ExcelRow;
 import acmr.excel.pojo.ExcelSheet;
+import acmr.excel.pojo.ExcelSheetFreeze;
 
 @Service
 public class MongodbServiceImpl {
@@ -104,12 +105,15 @@ public class MongodbServiceImpl {
 		
 	}
 	
+	public MExcel getMExcel(String excelId){
+	     MExcel mExcel = mongoTemplate.findOne(new Query(Criteria.where("_id").is(excelId)), MExcel.class, excelId);//查找sheet属性
+	     return mExcel;
+	}
+	
 	public ExcelSheet getSheetBySort(int rowBeginSort, int rowEndSort,int colBegin,int colEnd ,String excelId,List<RowCol> sortRclist,List<RowCol> sortClList) {
-		MExcel mExcel = mongoTemplate.findOne(new Query(Criteria.where("_id").is(excelId)), MExcel.class, excelId);//查找sheet属性
+		
 		ExcelSheet excelSheet = new ExcelSheet();
-		excelSheet.setMaxcol(mExcel.getMaxcol());
-		excelSheet.setMaxrow(mExcel.getMaxrow());
-		excelSheet.setName(mExcel.getSheetName());
+	
 		List<String> rList = new ArrayList<String>();
 		List<String> cList = new ArrayList<String>();
 		for(int i = rowBeginSort;i<rowEndSort+1;i++){
@@ -313,6 +317,16 @@ public class MongodbServiceImpl {
 		mExcel.setMaxrow(excelSheet.getMaxrow());
 		mExcel.setMaxcol(excelSheet.getMaxcol());
 		mExcel.setSheetName(excelSheet.getName());
+		ExcelSheetFreeze freeze = excelSheet.getFreeze();
+		if(null != freeze){
+		mExcel.setFreeze(freeze.isFreeze());
+		mExcel.setViewRowAlias(Integer.toString(freeze.getFirstrow()+1-freeze.getRow()));
+		mExcel.setViewColAlias(Integer.toString(freeze.getFirstcol()+1-freeze.getCol()));
+		mExcel.setRowAlias(Integer.toString(freeze.getFirstrow()+1));
+		mExcel.setColAlias(Integer.toString(freeze.getFirstcol()+1));
+		}else{
+			mExcel.setFreeze(false);
+		}
 		set(excelId, mExcel);//存上传文件的最大行和最大列
 		List<ExcelColumn> cols = excelSheet.getCols();//得到所有的列
 		List<MExcelColumn> tempCols = new ArrayList<MExcelColumn>();

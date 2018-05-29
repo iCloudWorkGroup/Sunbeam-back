@@ -45,4 +45,6 @@ public interface MRowColDao {
 	 * @param id       行或列集合ID
 	 */
     void delRowCol(String excelId,String alias,String id);
+    
+    void updateRowColLength(String excelId,String id,String alias,Integer length);
 }

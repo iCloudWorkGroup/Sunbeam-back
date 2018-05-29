@@ -6,7 +6,10 @@ public class Frozen implements Serializable {
 	private int oprCol;
 	private int oprRow;
 	private int viewRow;
-	private int viewCol;
+	private int viewCol;//用于接收前台的传参
+	
+	private Integer row;
+	private Integer col;
 
 	
 	public int getOprCol() {
@@ -40,5 +43,22 @@ public class Frozen implements Serializable {
 	public void setViewCol(int viewCol) {
 		this.viewCol = viewCol;
 	}
+
+	public Integer getRow() {
+		return row;
+	}
+
+	public void setRow(Integer row) {
+		this.row = row;
+	}
+
+	public Integer getCol() {
+		return col;
+	}
+
+	public void setCol(Integer col) {
+		this.col = col;
+	}
+
 
 }

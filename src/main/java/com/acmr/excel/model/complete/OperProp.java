@@ -4,18 +4,9 @@ import java.io.Serializable;
 
 
 public class OperProp implements Serializable {
-	private Content content = new Content();
 	private Border border = new Border();
+	private Content content = new Content();
 	private CustomProp customProp = new CustomProp();
-	private Format formate = new Format();
-
-	public Format getFormate() {
-		return formate;
-	}
-
-	public void setFormate(Format formate) {
-		this.formate = formate;
-	}
 
 	public Content getContent() {
 		return content;

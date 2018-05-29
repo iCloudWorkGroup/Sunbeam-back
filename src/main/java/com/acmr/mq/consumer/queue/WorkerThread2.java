@@ -1,10 +1,15 @@
 package com.acmr.mq.consumer.queue;
 
 
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 
 import com.acmr.excel.model.Cell;
+import com.acmr.excel.model.ColWidth;
+import com.acmr.excel.model.Frozen;
 import com.acmr.excel.model.OperatorConstant;
+import com.acmr.excel.model.RowHeight;
 import com.acmr.excel.model.complete.rows.ColOperate;
 import com.acmr.excel.model.complete.rows.RowOperate;
 import com.acmr.excel.service.CellService;
@@ -13,6 +18,7 @@ import com.acmr.excel.service.MCellService;
 import com.acmr.excel.service.MColService;
 import com.acmr.excel.service.MExcelService;
 import com.acmr.excel.service.MRowService;
+import com.acmr.excel.service.MSheetService;
 import com.acmr.excel.service.PasteService;
 import com.acmr.excel.service.SheetService;
 import com.acmr.excel.service.impl.MongodbServiceImpl;
@@ -36,10 +42,11 @@ public class WorkerThread2 implements Runnable{
 	private MExcelService mexcelService;
 	private MRowService mrowService;
 	private MColService mcolService;
+	private MSheetService msheetService;
 	
     
 	public WorkerThread2(int step,String key,Model model,MCellService mcellService,MExcelService mexcelService,
-			MRowService mrowService,MColService mcolService){  
+			MRowService mrowService,MColService mcolService,MSheetService msheetservice){  
 	       
 		this.step=step;
 	    this.key = key;
@@ -48,6 +55,7 @@ public class WorkerThread2 implements Runnable{
 	    this.mexcelService = mexcelService;
 	    this.mrowService = mrowService;
 	    this.mcolService = mcolService;
+	    this.msheetService = msheetservice;
 	}
 	
     public WorkerThread2(int step,MongodbServiceImpl mongodbServiceImpl,String key,HandleExcelService handleExcelService,
@@ -174,20 +182,20 @@ public class WorkerThread2 implements Runnable{
 //			break;
 		case OperatorConstant.rowsinsert:
 			RowOperate rowOperate = (RowOperate) model.getObject();
-			mrowService.insertRow(rowOperate, excelId);
-		break;
-//		case OperatorConstant.rowsdelete:
-//			RowOperate rowOperate2 = (RowOperate) model.getObject();
-//			cellService.deleteRow(excelBook.getSheets().get(0), rowOperate2);
-//			break;
+			mrowService.insertRow(rowOperate, excelId,step);
+			break;
+		case OperatorConstant.rowsdelete:
+			RowOperate rowOperate2 = (RowOperate) model.getObject();
+			mrowService.delRow(rowOperate2,excelId,step);
+			break;
 		case OperatorConstant.colsinsert:
 			ColOperate colOperate = (ColOperate) model.getObject();
-		//cellService.addCol(excelBook.getSheets().get(0), colOperate);
+		    mcolService.insertCol(colOperate, excelId,step);
 			break;
-//		case OperatorConstant.colsdelete:
-//			ColOperate colOperate2 = (ColOperate) model.getObject();
-//			cellService.deleteCol(excelBook.getSheets().get(0), colOperate2);
-//			break;
+		case OperatorConstant.colsdelete:
+			ColOperate colOperate2 = (ColOperate) model.getObject();
+			mcolService.delCol(colOperate2,excelId,step);
+			break;
 //		case OperatorConstant.paste:
 //			Paste paste = (Paste) model.getObject();
 //			pasteService.data(paste, excelBook,versionHistory,step);
@@ -203,40 +211,37 @@ public class WorkerThread2 implements Runnable{
 //			pasteService.cut(copy2, excelBook,versionHistory,step);
 //			storeService.set(excelId+"_history",versionHistory);
 //			break;
-//		case OperatorConstant.frozen:
-//			Frozen frozen = (Frozen) model.getObject();
-//			sheetService.frozen(excelBook.getSheets().get(0), frozen);
-//			break;
-//		case OperatorConstant.unFrozen:
-//			excelBook.getSheets().get(0).setFreeze(null);
-//			Map<String, String> map = excelBook.getSheets().get(0).getExps();
-//			map.remove("fr");
-//			map.remove("fc");
-//			break;
-//		case OperatorConstant.colswidth:
-//			ColWidth colWidth = (ColWidth) model.getObject();
-//			cellService.controlColWidth(excelBook.getSheets().get(0), colWidth);
-//			break;
-//		case OperatorConstant.colshide:
-//			ColOperate colHide = (ColOperate) model.getObject();
-//			cellService.colHide(excelBook.getSheets().get(0), colHide);
-//			break;	
-//		case OperatorConstant.rowshide:
-//			RowOperate rowHide = (RowOperate) model.getObject();
-//			cellService.rowHide(excelBook.getSheets().get(0), rowHide);
-//			break;	
-//		case OperatorConstant.colhideCancel:
-//			ColOperate colhideCancel = (ColOperate) model.getObject();
-//			sheetService.cancelColHide(excelBook.getSheets().get(0), colhideCancel);
-//			break;	
-//		case OperatorConstant.rowhideCancel:
-//			RowOperate rowhideCancel = (RowOperate) model.getObject();
-//			sheetService.cancelRowHide(excelBook.getSheets().get(0), rowhideCancel);
-//			break;	
-//		case OperatorConstant.rowsheight:
-//			RowHeight rowHeight = (RowHeight) model.getObject();
-//			cellService.controlRowHeight(excelBook.getSheets().get(0), rowHeight);
-//			break;
+		case OperatorConstant.frozen:
+			Frozen frozen = (Frozen) model.getObject();
+			msheetService.frozen(frozen, excelId, step);
+			break;
+		case OperatorConstant.unFrozen:
+			msheetService.unFrozen(excelId, step);
+			break;
+		case OperatorConstant.colswidth:
+			ColWidth colWidth = (ColWidth) model.getObject();
+			mcolService.updateColWidth(colWidth, excelId, step);
+			break;
+		case OperatorConstant.colshide:
+			ColOperate colHide = (ColOperate) model.getObject();
+			mcolService.hideCol(colHide, excelId,step);
+			break;	
+		case OperatorConstant.rowshide:
+			RowOperate rowHide = (RowOperate) model.getObject();
+			mrowService.hideRow(rowHide, excelId,step);
+			break;	
+		case OperatorConstant.colhideCancel:
+			ColOperate colhideCancel = (ColOperate) model.getObject();
+			mcolService.showCol(colhideCancel, excelId,step);
+			break;	
+		case OperatorConstant.rowhideCancel:
+			RowOperate rowhideCancel = (RowOperate) model.getObject();
+			mrowService.showRow(rowhideCancel, excelId,step);
+			break;	
+		case OperatorConstant.rowsheight:
+			RowHeight rowHeight = (RowHeight) model.getObject();
+			mrowService.updateRowHeight(rowHeight, excelId, step);
+			break;
 //		case OperatorConstant.addRowLine:
 //			RowLine rowLine = (RowLine) model.getObject();
 //			int rowNum = rowLine.getNum();

@@ -1,5 +1,6 @@
 package com.acmr.excel.service;
 
+import com.acmr.excel.model.RowHeight;
 import com.acmr.excel.model.complete.rows.RowOperate;
 
 public interface MRowService {
@@ -7,8 +8,40 @@ public interface MRowService {
   /**
    * 插入一行	
    * @param rowOperate
+   * @param excelId
+   * @param step 步骤
    */
-  void insertRow(RowOperate rowOperate,String excelId);
+  void insertRow(RowOperate rowOperate,String excelId,Integer step);
   
-  void delRow(RowOperate rowOperate,String excelId);
+  /**
+   * 删除一行
+   * @param rowOperate
+   * @param excelId
+   * @param step 步骤
+   */
+  void delRow(RowOperate rowOperate,String excelId,Integer step);
+  
+  /**
+   * 隐藏行
+   * @param rowOperate
+   * @param excelId
+   * @param step 步骤
+   */
+  void hideRow(RowOperate rowOperate,String excelId,Integer step);
+  
+  /**
+   * 取消隐藏
+   * @param rowOperate
+   * @param excelId
+   * @param step 步骤
+   */
+  void showRow(RowOperate rowOperate,String excelId,Integer step);
+  
+  /**
+   * 更新行长度
+   * @param rowHeight
+   * @param excelId
+   * @param step
+   */
+  void updateRowHeight(RowHeight rowHeight,String excelId,Integer step);
 }

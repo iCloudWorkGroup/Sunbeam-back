@@ -20,8 +20,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
-
 import org.apache.log4j.Logger;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
@@ -32,6 +30,27 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.acmr.excel.controller.excelbase.BaseController;
+import com.acmr.excel.dao.MExcelDao;
+import com.acmr.excel.dao.base.BaseDao;
+import com.acmr.excel.model.Constant;
+import com.acmr.excel.model.complete.CompleteExcel;
+import com.acmr.excel.model.complete.Frozen;
+import com.acmr.excel.model.complete.SheetElement;
+import com.acmr.excel.model.history.VersionHistory;
+import com.acmr.excel.model.mongo.MExcel;
+import com.acmr.excel.model.position.Position;
+import com.acmr.excel.model.position.RowCol;
+import com.acmr.excel.service.ExcelService;
+import com.acmr.excel.service.HandleExcelService;
+import com.acmr.excel.service.impl.MongodbServiceImpl;
+import com.acmr.excel.util.ExcelUtil;
+import com.acmr.excel.util.FileUtil;
+import com.acmr.excel.util.JsonReturn;
+import com.acmr.excel.util.StringUtil;
+import com.acmr.excel.util.UUIDUtil;
+import com.acmr.excel.util.UploadThread;
+
 import acmr.excel.ExcelException;
 import acmr.excel.pojo.Constants.XLSTYPE;
 import acmr.excel.pojo.ExcelBook;
@@ -39,33 +58,6 @@ import acmr.excel.pojo.ExcelCell;
 import acmr.excel.pojo.ExcelColumn;
 import acmr.excel.pojo.ExcelRow;
 import acmr.excel.pojo.ExcelSheet;
-
-import com.acmr.cache.MemoryUtil;
-import com.acmr.excel.controller.excelbase.BaseController;
-import com.acmr.excel.dao.base.BaseDao;
-import com.acmr.excel.model.Constant;
-import com.acmr.excel.model.OnlineExcel;
-import com.acmr.excel.model.complete.CompleteExcel;
-import com.acmr.excel.model.complete.ReturnParam;
-import com.acmr.excel.model.complete.SheetElement;
-import com.acmr.excel.model.complete.SpreadSheet;
-import com.acmr.excel.model.history.VersionHistory;
-import com.acmr.excel.model.mongo.MExcel;
-import com.acmr.excel.model.position.OpenExcel;
-import com.acmr.excel.model.position.Position;
-import com.acmr.excel.model.position.RowCol;
-import com.acmr.excel.service.ExcelService;
-import com.acmr.excel.service.HandleExcelService;
-import com.acmr.excel.service.StoreService;
-import com.acmr.excel.service.impl.MongodbServiceImpl;
-import com.acmr.excel.util.ExcelConst;
-import com.acmr.excel.util.ExcelUtil;
-import com.acmr.excel.util.FileUtil;
-import com.acmr.excel.util.JsonReturn;
-import com.acmr.excel.util.StringUtil;
-import com.acmr.excel.util.UUIDUtil;
-import com.acmr.excel.util.UploadThread;
-import com.alibaba.fastjson.JSON;
 
 /**
  * excel操作
@@ -85,6 +77,8 @@ public class ExcelController extends BaseController {
 	private MongodbServiceImpl mongodbServiceImpl;
 	@Resource
 	private BaseDao baseDao;
+	@Resource
+	private MExcelDao mexcelDao;
 
 	/**
 	 * excel下载
@@ -403,36 +397,46 @@ public class ExcelController extends BaseController {
 	 */
 	@RequestMapping(value="/reload")
 	public void position(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-		
 		String excelId = req.getHeader("X-Book-Id");
 		Position position = getJsonDataParameter(req, Position.class);
 		int height = position.getBottom();
 		int right = position.getRight();
 		
-		MExcel me = new MExcel();
-		me.setId(excelId);
-		me.setStep(0);
-		baseDao.update(excelId, me);
+		mexcelDao.updateStep(excelId, 0);
 		
 		List<RowCol> sortRcList = new ArrayList<RowCol>();//存贮整理顺序后的行
 		List<RowCol> sortClList = new ArrayList<RowCol>();//存储整理顺序后的列
 		int rowEnd = mongodbServiceImpl.getRowEndIndex(excelId,height,sortRcList);
 		int colEnd = mongodbServiceImpl.getColEndIndex(excelId,right,sortClList);
 		
+
 		ExcelSheet excelSheet = mongodbServiceImpl.getSheetBySort(0,rowEnd,0,colEnd, excelId,sortRcList,sortClList);
 		
 		
 		CompleteExcel excel = new CompleteExcel();
 		SheetElement sheet = new SheetElement();
+		MExcel mExcel = mongodbServiceImpl.getMExcel(excelId);
+		sheet.setName(mExcel.getSheetName());
+		excelSheet.setMaxrow(mExcel.getMaxrow());
+		excelSheet.setMaxcol(mExcel.getMaxcol());
+		Frozen frozen = new Frozen();
+		if(mExcel.isFreeze()){
+		 
+		  frozen.setRowAlias(mExcel.getRowAlias());
+		  frozen.setColAlias(mExcel.getColAlias());
+		  sheet.setViewColAlias(mExcel.getViewColAlias());
+		  sheet.setViewRowAlias(mExcel.getViewRowAlias());
+		  sheet.setFrozen(frozen);
+		}else{
+		  sheet.setViewColAlias("1");
+		  sheet.setViewRowAlias("1");
+		}
+		
 		if (excelSheet != null) {
 			sheet = excelService.positionExcel(excelSheet, sheet,height, rowEnd);
-			
-			
 		}
 		excel.getSheets().add(sheet);
 		
-		
-		mongodbServiceImpl.update(excelId, 0, "step");
 	
 		this.sendJson(resp, excel);
 		

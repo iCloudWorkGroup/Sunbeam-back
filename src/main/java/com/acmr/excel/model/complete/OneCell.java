@@ -2,26 +2,35 @@ package com.acmr.excel.model.complete;
 
 import java.io.Serializable;
 
-public class OneCell extends BaseCell implements Serializable {
+public class OneCell  implements Serializable {
+	private Border border = new Border();
+	private Content content = new Content();
+	private CustomProp customProp = new CustomProp();
 	private Occupy occupy = new Occupy();
-	private boolean wordWrap;
-	private boolean highlight;
-	private boolean hidden;
+	
 
-	public boolean isHidden() {
-		return hidden;
+	public Border getBorder() {
+		return border;
 	}
 
-	public void setHidden(boolean hidden) {
-		this.hidden = hidden;
+	public void setBorder(Border border) {
+		this.border = border;
 	}
 
-	public boolean isHighlight() {
-		return highlight;
+	public Content getContent() {
+		return content;
 	}
 
-	public void setHighlight(boolean highlight) {
-		this.highlight = highlight;
+	public void setContent(Content content) {
+		this.content = content;
+	}
+
+	public CustomProp getCustomProp() {
+		return customProp;
+	}
+
+	public void setCustomProp(CustomProp customProp) {
+		this.customProp = customProp;
 	}
 
 	public Occupy getOccupy() {
@@ -32,11 +41,5 @@ public class OneCell extends BaseCell implements Serializable {
 		this.occupy = occupy;
 	}
 
-	public boolean isWordWrap() {
-		return wordWrap;
-	}
-
-	public void setWordWrap(boolean wordWrap) {
-		this.wordWrap = wordWrap;
-	}
+	
 }

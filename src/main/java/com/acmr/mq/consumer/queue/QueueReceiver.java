@@ -22,6 +22,7 @@ import com.acmr.excel.service.MCellService;
 import com.acmr.excel.service.MColService;
 import com.acmr.excel.service.MExcelService;
 import com.acmr.excel.service.MRowService;
+import com.acmr.excel.service.MSheetService;
 import com.acmr.excel.service.PasteService;
 import com.acmr.excel.service.SheetService;
 import com.acmr.excel.service.impl.MongodbServiceImpl;
@@ -54,6 +55,8 @@ public class QueueReceiver implements MessageListener {
 	private MRowService mrowService;
 	@Resource
 	private MColService mcolService;
+	@Resource
+	private MSheetService msheetService;
 
 	@Override
 	public synchronized void onMessage(Message message) {
@@ -66,7 +69,7 @@ public class QueueReceiver implements MessageListener {
 				logger.info("**********receive message excelId : "+excelId + " === step : " + step + "== reqPath : "+ model.getReqPath());
 				ExecutorService executor = Executors.newFixedThreadPool(1);
 				
-				Runnable worker = new WorkerThread2(step,excelId,model, mcellService, mexcelService,mrowService,mcolService);
+				Runnable worker = new WorkerThread2(step,excelId,model, mcellService, mexcelService,mrowService,mcolService,msheetService);
 				executor.execute(worker);
 				executor.shutdown();
 			} catch (JMSException e) {

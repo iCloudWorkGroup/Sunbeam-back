@@ -9,14 +9,12 @@ import java.io.Serializable;
  */
 public class Gly implements Serializable {
 	private String alias;
+	private Boolean hidden;
+	private int sort;
 	private int top;
 	private int height;
-	private int originHeight;
-	private int sort;
-	private boolean hidden;
+	
 	private OperProp props = new OperProp();
-
-
 
 	public int getTop() {
 		return top;
@@ -59,20 +57,12 @@ public class Gly implements Serializable {
 		this.props = props;
 	}
 
-	public boolean isHidden() {
+	public Boolean getHidden() {
 		return hidden;
 	}
 
-	public void setHidden(boolean hidden) {
+	public void setHidden(Boolean hidden) {
 		this.hidden = hidden;
-	}
-
-	public int getOriginHeight() {
-		return originHeight;
-	}
-
-	public void setOriginHeight(int originHeight) {
-		this.originHeight = originHeight;
 	}
 
 }

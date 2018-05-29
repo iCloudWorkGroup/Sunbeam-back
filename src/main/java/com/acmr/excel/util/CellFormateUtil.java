@@ -9,14 +9,13 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.acmr.excel.model.complete.Content;
+import com.acmr.excel.model.complete.Format;
+
 import acmr.excel.pojo.Constants.CELLTYPE;
 import acmr.excel.pojo.ExcelCell;
 import acmr.excel.pojo.ExcelColor;
 import acmr.excel.pojo.ExcelFormat;
-
-import com.acmr.excel.model.complete.Content;
-import com.acmr.excel.model.complete.CustomProp;
-import com.acmr.excel.model.complete.Format;
 
 public class CellFormateUtil {
 	/**
@@ -421,7 +420,7 @@ public class CellFormateUtil {
 		}
 	}
 	
-	public static void setShowText(ExcelCell excelCell,Content content,Format formate){
+	public static void setShowText(ExcelCell excelCell,Content content){
 		if(CELLTYPE.BLANK == excelCell.getType()){
 			content.setDisplayTexts("");
 			return;
@@ -443,42 +442,33 @@ public class CellFormateUtil {
 					text = value;
 				}
 			}
-			formate.setType("normal");
+			
 			content.setDisplayTexts(text);
 			break;
 		case "@":
-			formate.setType("text");
+			
 			content.setDisplayTexts(text);
 			break;
 		case "[$-F800]dddd\\,\\ mmmm\\ dd\\,\\ yyyy":
 			sdf = new SimpleDateFormat("yyyy年MM月dd日");
 			content.setDisplayTexts(sdf.format(excelCell.getValue()));
 			content.setTexts(content.getDisplayTexts());
-			formate.setType("date");
-			formate.setDateFormat("yyyy年MM月dd日");
-			if(CELLTYPE.STRING == excelCell.getType()){
-				formate.setIsValid(false);
-			}
+			
+			
 			break;
 		case "yyyy\"年\"m\"月\";@":
 			sdf = new SimpleDateFormat("yyyy年MM月");
 			content.setDisplayTexts(sdf.format(excelCell.getValue()));
-			formate.setType("date");
-			formate.setDateFormat("yyyy年MM月");
+			
 			content.setTexts(content.getDisplayTexts());
-			if(CELLTYPE.STRING == excelCell.getType()){
-				formate.setIsValid(false);
-			}
+			
 			break;
 		case "m/d/yy":
 			sdf = new SimpleDateFormat("yyyy/MM/dd");
 			content.setDisplayTexts(sdf.format(excelCell.getValue()));
-			formate.setType("date");
-			formate.setDateFormat("yyyy/MM/dd");
+			
 			content.setTexts(content.getDisplayTexts());
-			if(CELLTYPE.STRING == excelCell.getType()){
-				formate.setIsValid(false);
-			}
+			
 			break;
 		case "0_);\\(0\\)":
 		case "0_ ":	
@@ -486,70 +476,43 @@ public class CellFormateUtil {
 		case "0;[Red]0":	
 		case "0_ ;[Red]\\-0\\ ":	
 			//整数
-			formate.setType("number");
+			
 			content.setTexts(excelCell.getValue().toString());
 			String zdisplayText = setNumber(excelCell, 0, false);
 			content.setDisplayTexts(zdisplayText);
-			formate.setDecimal(0);
-			formate.setThousands(false);
-			if(CELLTYPE.STRING == excelCell.getType()){
-				formate.setIsValid(false);
-			}
+			
 			break;	
 		case "#,##0_);\\(#,##0\\)":
 			//整数千分位
 			setNumber(excelCell, 0, true);
 			content.setDisplayTexts(excelCell.getShowText());
-			formate.setType("number");
-			formate.setThousands(true);
-			formate.setDecimal(0);
-			if(CELLTYPE.STRING == excelCell.getType()){
-				formate.setIsValid(false);
-			}
+			
 			break;
 		case "#,##0_);[Red]\\(#,##0\\)":
 			//整数千分位
 			setNumber(excelCell, 0, true);
 			content.setDisplayTexts(excelCell.getShowText());
-			formate.setType("number");
-			formate.setThousands(true);
-			formate.setDecimal(0);
-			if(CELLTYPE.STRING == excelCell.getType()){
-				formate.setIsValid(false);
-			}
+		
 			break;	
 		case "\"¥\"#,##0_);\\(\"¥\"#,##0\\)":
 			//货币
 			setCurrency(excelCell, 0, "¥");
-			formate.setType("currency");
-			formate.setCurrencySign("¥");
-			formate.setDecimal(0);
-			formate.setThousands(true);
+			
 			content.setDisplayTexts(excelCell.getShowText());
-			if(CELLTYPE.STRING == excelCell.getType()){
-				formate.setIsValid(false);
-			}
+			
 			break;
 		case "\"$\"#,##0_);\\(\"¥\"#,##0\\)":
 			//货币
 			setCurrency(excelCell, 0, "$");
-			formate.setType("currency");
-			formate.setDecimal(0);
-			formate.setCurrencySign("$");
-			formate.setThousands(true);
+			
 			content.setDisplayTexts(excelCell.getShowText());
-			if(CELLTYPE.STRING == excelCell.getType()){
-				formate.setIsValid(false);
-			}
+			
 			break;
 		case "0%":
 			setPercent(excelCell, 0);
-			formate.setType("percent");
-			formate.setDecimal(0);
+			
 			content.setDisplayTexts(excelCell.getShowText());
-			if(CELLTYPE.STRING == excelCell.getType()){
-				formate.setIsValid(false);
-			}
+		
 			break;
 		default:
 			if (dataFormate.startsWith("0.0") && dataFormate.endsWith("0\\)") && !dataFormate.contains(";[Red]")) {
@@ -557,24 +520,20 @@ public class CellFormateUtil {
 				int index = dataFormate.indexOf("_");
 				int decimal = index - 2;
 				String d = setNumber(excelCell, index - 2, false);
-				formate.setType("number");
-				formate.setDecimal(decimal);
-				formate.setThousands(false);
+				
 				content.setDisplayTexts(d);
 				if(CELLTYPE.STRING == excelCell.getType()){
-					formate.setIsValid(false);
+					
 					content.setDisplayTexts(excelCell.getText());
 				}
 			}else if (dataFormate.startsWith("0.0")) {
 				// 小数
 				String d = setNumber(excelCell, 1, false);
-				formate.setType("number");
-				formate.setDecimal(1);
-				formate.setThousands(false);
+				
 				content.setDisplayTexts(d);
 				content.setTexts(d);
 				if(CELLTYPE.STRING == excelCell.getType()){
-					formate.setIsValid(false);
+					
 					content.setDisplayTexts(excelCell.getText());
 				}
 			}else if (dataFormate.startsWith("0.0") && dataFormate.endsWith("0\\)") && dataFormate.contains(";[Red]")) {
@@ -582,12 +541,10 @@ public class CellFormateUtil {
 				int index = dataFormate.indexOf("_");
 				int decimal = index - 2;
 				String displayText = setNumber(excelCell, index - 2, false);
-				formate.setType("number");
-				formate.setDecimal(decimal);
-				formate.setThousands(false);
+				
 				content.setDisplayTexts(displayText);
 				if(CELLTYPE.STRING == excelCell.getType()){
-					formate.setIsValid(false);
+					
 					content.setDisplayTexts(excelCell.getText());
 				}
 				content.setDisplayTexts(displayText);
@@ -607,12 +564,10 @@ public class CellFormateUtil {
 				int index = dataFormate.indexOf("_");
 				int decimal = index - 2;
 				String displayText = setNumber(excelCell, index - 2, false);
-				formate.setType("number");
-				formate.setDecimal(decimal);
-				formate.setThousands(false);
+				
 				content.setDisplayTexts(displayText);
 				if(CELLTYPE.STRING == excelCell.getType()){
-					formate.setIsValid(false);
+					
 					content.setDisplayTexts(excelCell.getText());
 				}
 			}else if (dataFormate.startsWith("0.0") && dataFormate.contains(";[Red]")) {
@@ -620,12 +575,10 @@ public class CellFormateUtil {
 				int index = dataFormate.indexOf(";");
 				int decimal = index - 2;
 				String displayText = setNumber(excelCell, index - 2, false);
-				formate.setType("number");
-				formate.setDecimal(decimal);
-				formate.setThousands(false);
+			
 				content.setDisplayTexts(displayText);
 				if(CELLTYPE.STRING == excelCell.getType()){
-					formate.setIsValid(false);
+					
 					content.setDisplayTexts(excelCell.getText());
 				}
 			}else if (dataFormate.startsWith("#,##0.0")) {
@@ -634,11 +587,9 @@ public class CellFormateUtil {
 				int decimal = index - 6;
 				String displayText = setNumber(excelCell, decimal, true);
 				content.setDisplayTexts(displayText);
-				formate.setType("number");
-				formate.setDecimal(decimal);
-				formate.setThousands(true);
+				
 				if(CELLTYPE.STRING == excelCell.getType()){
-					formate.setIsValid(false);
+					
 					content.setDisplayTexts(excelCell.getText());
 				}
 			} else if (dataFormate.startsWith("\"¥\"#,##0.0")) {
@@ -647,40 +598,29 @@ public class CellFormateUtil {
 				int decimal = index - 9;
 				String cu = setCurrency(excelCell, decimal, "¥");
 				content.setDisplayTexts(cu);
-				formate.setType("currency");
-				formate.setCurrencySign("¥");
-				formate.setDecimal(decimal);
-				if(CELLTYPE.STRING == excelCell.getType()){
-					formate.setIsValid(false);
-				}
+				
+			
 			} else if (dataFormate.startsWith("\"$\"#,##0.0")) {
 				//千分位货币
 				int index = dataFormate.indexOf("_");
 				int decimal = index - 9;
 				String cu2 = setCurrency(excelCell, index - 9, "$");
 				content.setDisplayTexts(cu2);
-				formate.setType("currency");
-				formate.setCurrencySign("$");
-				formate.setDecimal(decimal);
-				if(CELLTYPE.STRING == excelCell.getType()){
-					formate.setIsValid(false);
-				}
+				
 			} else if(dataFormate.startsWith("0.0") && dataFormate.endsWith("0%")){
 				//小数百分比
 				int index = dataFormate.indexOf("%");
 				int decimal = index - 2;
 				setPercent(excelCell, index-2);
-				formate.setDecimal(decimal);
+				
 				content.setDisplayTexts(excelCell.getShowText());
-				formate.setType("percent");
-				if(CELLTYPE.STRING == excelCell.getType()){
-					formate.setIsValid(false);
-				}
+				
+				
 			}else{
-				formate.setType("normal");
+				
 				if(CELLTYPE.NUMERIC == excelCell.getType()){
 					int d = ExcelFormat.getDecimalFormatDotcount(excelCell.getCellstyle().getDataformat());
-					formate.setDecimal(d);
+					
 					Object o = excelCell.getValue();
 					if(o != null){
 						text = o.toString();
@@ -696,12 +636,24 @@ public class CellFormateUtil {
 	private static String getPrettyNumber(String number) {  
 	    return BigDecimal.valueOf(Double.parseDouble(number))  
 	            .stripTrailingZeros().toPlainString();  
-	}  
+	}
+	
+	public static String getBackground(ExcelColor color){
+		String s=null;
+		if(null!=color){
+			 s = "rgb("+color.getR()+","+color.getG()+","+color.getB()+")";
+		}else{
+			s = "rgb(0,0,0)";
+		}
+		return s;
+	}
 	  
 	public static void main(String[] args) {  
 		NumberFormat numberFormat = NumberFormat.getNumberInstance();
 		numberFormat.setMinimumFractionDigits(5);
 		String s = "0.46801";
 		System.out.println(numberFormat.format(Double.valueOf(s)));
+		ExcelColor color = new ExcelColor(1,23,4);
+		System.out.println(getBackground(color));
 	} 
 }

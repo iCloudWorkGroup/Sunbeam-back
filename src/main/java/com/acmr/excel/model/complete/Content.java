@@ -5,19 +5,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Content implements Serializable {
-
-	private String size = "11px";
-	private String family = "SimSun";
-	private Boolean bd = false;
-	private Boolean italic = false;
-	private String color = "rgb(0,0,0)";
-	private String rgbColor = "0,0,0";
-	private String alignRow = "";
 	private String alignCol = "";
-	private String alignLine = "bottom";
-	private Integer weight;
-	private String texts = "";
+	private String alignRow = "";
+	private Boolean bold;
+	private String color = "rgb(0,0,0)";
 	private String displayTexts;
+	private String family = "SimSun";
+	private Boolean italic = false;
+	private String size = "11px";
+	private String texts = "";
+	private Integer underline;
+	private Boolean wordWrap;
+	private String type;
+	private String express;
+	private String background;
+	private Boolean locked;
+	
 
 	public String getSize() {
 		return size;
@@ -33,14 +36,6 @@ public class Content implements Serializable {
 
 	public void setFamily(String family) {
 		this.family = family;
-	}
-
-	public Boolean getBd() {
-		return bd;
-	}
-
-	public void setBd(Boolean bd) {
-		this.bd = bd;
 	}
 
 	public Boolean getItalic() {
@@ -59,14 +54,6 @@ public class Content implements Serializable {
 		this.color = color;
 	}
 
-	public String getRgbColor() {
-		return rgbColor;
-	}
-
-	public void setRgbColor(String rgbColor) {
-		this.rgbColor = rgbColor;
-	}
-
 	public String getAlignRow() {
 		return alignRow;
 	}
@@ -81,22 +68,6 @@ public class Content implements Serializable {
 
 	public void setAlignCol(String alignCol) {
 		this.alignCol = alignCol;
-	}
-
-	public String getAlignLine() {
-		return alignLine;
-	}
-
-	public void setAlignLine(String alignLine) {
-		this.alignLine = alignLine;
-	}
-
-	public Integer getWeight() {
-		return weight;
-	}
-
-	public void setWeight(Integer weight) {
-		this.weight = weight;
 	}
 
 	public String getTexts() {
@@ -114,6 +85,66 @@ public class Content implements Serializable {
 	public void setDisplayTexts(String displayTexts) {
 		this.displayTexts = displayTexts;
 	}
+
+	
+
+	public Boolean getBold() {
+		return bold;
+	}
+
+	public void setBold(Boolean bold) {
+		this.bold = bold;
+	}
+
+	public Boolean getWordWrap() {
+		return wordWrap;
+	}
+
+	public void setWordWrap(Boolean wordWrap) {
+		this.wordWrap = wordWrap;
+	}
+
+	public Boolean getLocked() {
+		return locked;
+	}
+
+	public void setLocked(Boolean locked) {
+		this.locked = locked;
+	}
+
+	public Integer getUnderline() {
+		return underline;
+	}
+
+	public void setUnderline(Integer underline) {
+		this.underline = underline;
+	}
+
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getExpress() {
+		return express;
+	}
+
+	public void setExpress(String express) {
+		this.express = express;
+	}
+
+	public String getBackground() {
+		return background;
+	}
+
+	public void setBackground(String background) {
+		this.background = background;
+	}
+
 
 	public static void main(String[] args) {
 		Map<String, String> map = new HashMap<String, String>();
