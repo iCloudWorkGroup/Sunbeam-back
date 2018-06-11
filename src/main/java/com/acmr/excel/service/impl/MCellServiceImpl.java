@@ -57,6 +57,7 @@ public class MCellServiceImpl implements MCellService {
 			mExcelCell.setColId(colAlias);
 			mExcelCell.setId(id);
 			excelCell = new ExcelCell();
+			excelCell.getCellstyle().setAlign((short)2);
 			mExcelCell.setExcelCell(excelCell);
 			
 			RowColCell rowColCell = new RowColCell();

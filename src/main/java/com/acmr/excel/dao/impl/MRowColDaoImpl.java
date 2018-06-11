@@ -47,6 +47,9 @@ public class MRowColDaoImpl  implements MRowColDao{
 		boolean flag = true;
 		while(flag){
 			rowCol = map.get(rowCol.getAlias());
+			if(null == rowCol){
+				break;
+			}
 			sortRcList.add(rowCol);
 			if(sortRcList.size()==rcList.size()){//跳出循环
 				break;
@@ -84,6 +87,9 @@ public class MRowColDaoImpl  implements MRowColDao{
 		boolean flag = true;
 		while(flag){
 			rowCol = map.get(rowCol.getAlias());
+			if(null == rowCol){
+				break;
+			}
 			sortClList.add(rowCol);
 			if(sortClList.size()==cList.size()){//跳出循环
 				break;

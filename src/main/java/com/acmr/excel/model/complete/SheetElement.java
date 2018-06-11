@@ -8,7 +8,7 @@ import java.util.List;
 
 public class SheetElement implements Serializable{
 	
-	private String name = "new sheet";
+	private String name ;
 	private String maxColAlias;
 	private String maxRowAlias;
 	private Integer maxColPixel;

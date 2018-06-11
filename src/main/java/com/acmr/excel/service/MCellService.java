@@ -13,6 +13,12 @@ public interface MCellService {
 	 */
 	void saveContent(Cell cell,int step,String excelId);
 	
+	/**
+	 * 更新字体
+	 * @param cell
+	 * @param step
+	 * @param excelId
+	 */
 	void updateFontFamily(Cell cell,int step,String excelId);
 
 }

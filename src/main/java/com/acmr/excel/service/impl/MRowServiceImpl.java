@@ -17,6 +17,7 @@ import com.acmr.excel.dao.base.BaseDao;
 import com.acmr.excel.model.RowColCell;
 import com.acmr.excel.model.RowHeight;
 import com.acmr.excel.model.complete.rows.RowOperate;
+import com.acmr.excel.model.mongo.MExcel;
 import com.acmr.excel.model.mongo.MExcelCell;
 import com.acmr.excel.model.mongo.MExcelRow;
 import com.acmr.excel.model.position.RowCol;
@@ -45,21 +46,33 @@ public class MRowServiceImpl implements MRowService {
 		List<RowCol> sortClList = new ArrayList<RowCol>();
 		mrowColDao.getColList(sortClList, excelId);
 		mrowColDao.getRowList(sortRcList, excelId);
-		String alias = sortRcList.size()+1+"";
+		if(rowOperate.getRow()>sortRcList.size()-1){
+			return;
+		}
+		
+		MExcel mexcel = mexcelDao.getMExcel(excelId);
+		String alias = mexcel.getMaxrow()+1+"";
 		
 		RowCol rowCol = new RowCol();
 		rowCol.setAlias(alias);
 		rowCol.setLength(19);
-		rowCol.setPreAlias(sortRcList.get(rowOperate.getRow()-1).getAlias());
+		if(rowOperate.getRow() == 0){
+			rowCol.setPreAlias(null);
+		}else{
+			rowCol.setPreAlias(sortRcList.get(rowOperate.getRow()-1).getAlias());
+		}
+		
 		mrowColDao.insertRowCol(excelId, rowCol, "rList");
-		//修改这行后面的前行别名
-		String nextAlias = sortRcList.get(rowOperate.getRow()+1).getAlias();
+		//修改这行的前行别名
+		String nextAlias = sortRcList.get(rowOperate.getRow()).getAlias();
 		mrowColDao.updateRowCol(excelId, "rList", nextAlias, alias);
 		//存一个行样式
 		MExcelRow mer = new MExcelRow();
 		ExcelRow er = new ExcelRow(alias);
 		mer.setExcelRow(er);
 		baseDao.update(excelId, mer);
+		
+		mexcelDao.updateMaxRow(mexcel.getMaxrow()+1, excelId);
 		
 		Integer row  = Integer.parseInt(sortRcList.get(rowOperate.getRow()).getAlias());
 		List<RowColCell> relationList = mcellDao.getRowColCellList(excelId, row);
@@ -85,6 +98,9 @@ public class MRowServiceImpl implements MRowService {
 		List<Object> tempList = new ArrayList<Object>();//存关系表和MExcelCell对象
 		for(int i=0;i<sortClList.size();i++){
 			MExcelCell mec = sortMCellList.get(i);
+			if(null==mec){
+				continue;
+			}
 			RowCol rc = sortClList.get(i);
 			if(mec.getRowspan()==1){
 				//new新增一行的MExcelCell对象
@@ -141,7 +157,10 @@ public class MRowServiceImpl implements MRowService {
 				}
 			}
 		}
-		baseDao.update(excelId, tempList);
+		if(tempList.size()>0){
+			baseDao.update(excelId, tempList);
+		}
+		
 		
 		mexcelDao.updateStep(excelId, step);
 		
@@ -154,13 +173,22 @@ public class MRowServiceImpl implements MRowService {
 		List<RowCol> sortCList = new ArrayList<RowCol>();
 		mrowColDao.getRowList(sortRList, excelId);
 		mrowColDao.getColList(sortCList, excelId);
+		if(rowOperate.getRow()>sortRList.size()-1){
+			return;
+		}
 		//行别名
 		String alias = sortRList.get(rowOperate.getRow()).getAlias();
 		//删除行
 		mrowColDao.delRowCol(excelId, alias, "rList");
 		//修改这行后面一行的前一行别名
 		int index = rowOperate.getRow();
-		String frontAlias = sortRList.get(index-1).getAlias();//前一行别名
+		String frontAlias;
+		if(rowOperate.getRow() == 0){
+			frontAlias = null;//前一行别名
+		}else{
+			frontAlias = sortRList.get(index-1).getAlias();//前一行别名
+		}
+		 
 		String backAlias = sortRList.get(index+1).getAlias();//下一行别名
 		mrowColDao.updateRowCol(excelId, "rList", backAlias, frontAlias);
 		//删除行样式记录
@@ -190,6 +218,9 @@ public class MRowServiceImpl implements MRowService {
 		for(int i=0;i<sortCList.size();i++){
 			String col = sortCList.get(i).getAlias();
 			MExcelCell ec = sortMcellList.get(i);
+			if(null == ec){
+				continue;
+			}
 			if(ec.getRowspan() == 1){
 				cellIdList.add(ec.getId());
 			}else{
@@ -223,8 +254,9 @@ public class MRowServiceImpl implements MRowService {
 		}
 		
 		mcellDao.delCell(excelId, cellIdList);
-		baseDao.update(excelId, cellList);
-		
+		if(cellList.size()>0){
+			baseDao.update(excelId, cellList);
+		}
 		mexcelDao.updateStep(excelId, step);
 		
 	}
@@ -234,8 +266,9 @@ public class MRowServiceImpl implements MRowService {
 		List<RowCol> sortRList = new ArrayList<RowCol>();
 		mrowColDao.getRowList(sortRList, excelId);
 		String alias = sortRList.get(rowOperate.getRow()).getAlias();
-		mexcelRowDao.updateRowHidden(excelId, alias, false);
-		
+		mexcelRowDao.updateRowHidden(excelId, alias, true);
+		mrowColDao.updateRowColLength(excelId, "rList", alias, 0);
+		//mcellDao.updateHidden("rowId", alias, true, excelId);
 		mexcelDao.updateStep(excelId, step);
 		
 	}
@@ -245,8 +278,12 @@ public class MRowServiceImpl implements MRowService {
 		List<RowCol> sortRList = new ArrayList<RowCol>();
 		mrowColDao.getRowList(sortRList, excelId);
 		String alias = sortRList.get(rowOperate.getRow()).getAlias();
-		mexcelRowDao.updateRowHidden(excelId, alias, true);
+		mexcelRowDao.updateRowHidden(excelId, alias, false);
 		
+		MExcelRow mrow = mexcelRowDao.getMExcelRow(excelId, alias);
+		mrowColDao.updateRowColLength(excelId, "rList", alias, mrow.getExcelRow().getHeight());
+		
+		//mcellDao.updateHidden("rowId", alias, false, excelId);
 		mexcelDao.updateStep(excelId, step);
 		
 	}

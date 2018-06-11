@@ -22,4 +22,9 @@ public interface MExcelDao {
    * @param excelId
    */
   void updateUnFrozen(MExcel mexcel,String excelId);
+  
+  void updateMaxRow(Integer alias,String excelId);
+  
+  void updateMaxCol(Integer alias,String excelId);
+  MExcel getMExcel(String excelId);
 }

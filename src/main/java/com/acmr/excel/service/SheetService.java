@@ -64,7 +64,7 @@ public class SheetService {
 	 *            开始点纵坐标
 	 */
 	public void frozen(ExcelSheet excelSheet,Frozen frozen) {
-		ExcelSheetFreeze excelSheetFreeze = excelSheet.getFreeze();
+	/*	ExcelSheetFreeze excelSheetFreeze = excelSheet.getFreeze();
 		if (excelSheetFreeze == null) {
 			excelSheetFreeze = new ExcelSheetFreeze();
 			excelSheet.setFreeze(excelSheetFreeze);
@@ -84,7 +84,7 @@ public class SheetService {
 		excelSheetFreeze.setRow(frozenYIndex);
 		excelSheetFreeze.setCol(frozenXIndex);
 		excelSheetFreeze.setFirstrow(frozenYIndex);
-		excelSheetFreeze.setFirstcol(frozenXIndex);
+		excelSheetFreeze.setFirstcol(frozenXIndex);*/
 	}
 	
 	public void cancelColHide(ExcelSheet excelSheet,ColOperate colOperate) {

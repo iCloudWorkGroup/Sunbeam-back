@@ -63,9 +63,23 @@ public interface MCellDao {
   */
  void delCell(String excelId,List<String> cellIdList);
  
- void updateFontname(String fontName,List<String> idList,String excelId);
+ /**
+  * 更新字体属性
+  * @param name
+  * @param property
+  * @param idList
+  * @param excelId
+  */
+ void updateFont(String name,Object property,List<String> idList,String excelId);
  
- void updateFontSize(short size,List<String> idList,String excelId);
+ /**
+  * 更新隐藏属性
+  * @param type
+  * @param alias
+  * @param state
+  * @param excelId
+  */
+ void updateHidden(String type,String alias,boolean state,String excelId);
  
  
 }

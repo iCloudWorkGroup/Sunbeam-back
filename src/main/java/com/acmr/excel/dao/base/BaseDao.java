@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import com.acmr.excel.model.mongo.MExcel;
 import com.mongodb.BasicDBObject;
@@ -20,11 +21,14 @@ public class BaseDao {
 	private MongoTemplate mongoTemplate;
 	
 	public boolean update(String excelId, Object object) {
-		mongoTemplate.save(object, excelId);
+		if(!object.equals(null)){
+		 mongoTemplate.save(object, excelId);
+		}
 		return true;
 	}
 	
 	public boolean upsert(String excelId, Object object) {
+	
 		mongoTemplate.insert(object, excelId);
 		return true;
 	}

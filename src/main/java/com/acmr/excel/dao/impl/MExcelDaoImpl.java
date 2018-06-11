@@ -54,4 +54,30 @@ public class MExcelDaoImpl implements MExcelDao {
 		
 	}
 
+	@Override
+	public void updateMaxRow(Integer alias, String excelId) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("_id").is(excelId));
+		Update update = new Update();
+		update.set("maxrow", alias);
+		
+		mongoTemplate.updateFirst(query, update,MExcel.class, excelId);
+		
+	}
+
+	@Override
+	public void updateMaxCol(Integer alias, String excelId) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("_id").is(excelId));
+		Update update = new Update();
+		update.set("maxcol", alias);
+		
+		mongoTemplate.updateFirst(query, update,MExcel.class, excelId);
+		
+	}
+
+	public MExcel getMExcel(String excelId){
+	     MExcel mExcel = mongoTemplate.findOne(new Query(Criteria.where("_id").is(excelId)), MExcel.class, excelId);//查找sheet属性
+	     return mExcel;
+	}
 }

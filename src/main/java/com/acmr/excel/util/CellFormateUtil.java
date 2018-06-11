@@ -427,12 +427,13 @@ public class CellFormateUtil {
 		}
 		String dataFormate = excelCell.getCellstyle().getDataformat();
 		String text = excelCell.getText();
+		Object o = excelCell.getValue();
 		SimpleDateFormat sdf = null;
 		switch (dataFormate) {
 		case "General":
 			//NUMERIC
 			if (CELLTYPE.NUMERIC == excelCell.getType()) {
-				Object o = excelCell.getValue();
+				
 				if (o != null) {
 					DecimalFormat df = new DecimalFormat("#.######");
 					String value = df.format(o);
@@ -446,26 +447,40 @@ public class CellFormateUtil {
 			content.setDisplayTexts(text);
 			break;
 		case "@":
-			
+			content.setTexts(text);
 			content.setDisplayTexts(text);
 			break;
 		case "[$-F800]dddd\\,\\ mmmm\\ dd\\,\\ yyyy":
 			sdf = new SimpleDateFormat("yyyy年MM月dd日");
-			content.setDisplayTexts(sdf.format(excelCell.getValue()));
-			content.setTexts(content.getDisplayTexts());
+			try {
+				content.setDisplayTexts(sdf.format(excelCell.getValue()));
+			} catch (Exception e) {
+				content.setDisplayTexts((String)o);
+			}
+			
+			content.setTexts(excelCell.getText());
 			
 			
 			break;
 		case "yyyy\"年\"m\"月\";@":
 			sdf = new SimpleDateFormat("yyyy年MM月");
-			content.setDisplayTexts(sdf.format(excelCell.getValue()));
+			try {
+				content.setDisplayTexts(sdf.format(o));
+			} catch (Exception e) {
+				content.setDisplayTexts((String)o);
+			}
+			
 			
 			content.setTexts(content.getDisplayTexts());
 			
 			break;
 		case "m/d/yy":
 			sdf = new SimpleDateFormat("yyyy/MM/dd");
-			content.setDisplayTexts(sdf.format(excelCell.getValue()));
+			try {
+				content.setDisplayTexts(sdf.format(o));
+			} catch (Exception e) {
+				content.setDisplayTexts((String)o);
+			}
 			
 			content.setTexts(content.getDisplayTexts());
 			
@@ -477,7 +492,7 @@ public class CellFormateUtil {
 		case "0_ ;[Red]\\-0\\ ":	
 			//整数
 			
-			content.setTexts(excelCell.getValue().toString());
+			content.setTexts(o.toString());
 			String zdisplayText = setNumber(excelCell, 0, false);
 			content.setDisplayTexts(zdisplayText);
 			
@@ -621,7 +636,6 @@ public class CellFormateUtil {
 				if(CELLTYPE.NUMERIC == excelCell.getType()){
 					int d = ExcelFormat.getDecimalFormatDotcount(excelCell.getCellstyle().getDataformat());
 					
-					Object o = excelCell.getValue();
 					if(o != null){
 						text = o.toString();
 						content.setTexts(text);

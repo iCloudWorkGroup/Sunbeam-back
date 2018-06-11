@@ -192,7 +192,7 @@ public class CellController extends BaseController {
 	 * 
 	 * @throws IOException
 	 */
-    @RequestMapping("/content")
+    @RequestMapping("/data-set")
 	public void data(HttpServletRequest req, HttpServletResponse resp) throws Exception {
 		Cell cell = getJsonDataParameter(req, Cell.class);
 		this.assembleData(req, resp, cell, OperatorConstant.textData);

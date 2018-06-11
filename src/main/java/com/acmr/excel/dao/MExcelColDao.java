@@ -1,5 +1,7 @@
 package com.acmr.excel.dao;
 
+import com.acmr.excel.model.mongo.MExcelColumn;
+
 public interface MExcelColDao {
 
 /**
@@ -23,4 +25,6 @@ public interface MExcelColDao {
   * @param width
   */
  void updateColWidth(String excelId,String alias,Integer width);
+ 
+ MExcelColumn getMExcelCol(String excelId,String alias);
 }

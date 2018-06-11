@@ -86,18 +86,22 @@ public class MCellDaoImpl implements MCellDao {
 	}
 
 	@Override
-	public void updateFontname(String fontName, List<String> idList,String excelId) {
+	public void updateFont(String name,Object property,List<String> idList,String excelId) {
 		Query query = new Query();
 	    query.addCriteria(Criteria.where("_id").in(idList));
 	    Update update = new Update();
-	    update.set("excelCell.cellstyle.font.fontname", fontName);
-	    mongoTemplate.updateFirst(query, update, MExcelCell.class,excelId);
+	    update.set("excelCell.cellstyle.font."+name, property);
+	    mongoTemplate.updateMulti(query, update, MExcelCell.class,excelId);
 	}
 
 
 	@Override
-	public void updateFontSize(short size, List<String> idList, String excelId) {
-		// TODO Auto-generated method stub
+	public void updateHidden(String type, String alias,boolean state, String excelId) {
+		Query query = new Query();
+	    query.addCriteria(Criteria.where(type).is(alias));
+	    Update update = new Update();
+	    update.set("excelCell.cellstyle.hidden", state);
+	    mongoTemplate.updateFirst(query, update, MExcelCell.class,excelId);
 		
 	}
 

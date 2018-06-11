@@ -67,6 +67,18 @@ public class RowController extends BaseController {
 		RowOperate colOperate = getJsonDataParameter(req, RowOperate.class);
 		this.assembleData(req, resp,colOperate,OperatorConstant.rowshide);
 	}
+    
+    /**
+	 * 行隐藏
+	 * 
+	 * @throws IOException
+	 */
+    @RequestMapping("/show")
+	public void rows_show(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+		RowOperate colOperate = getJsonDataParameter(req, RowOperate.class);
+		this.assembleData(req, resp,colOperate,OperatorConstant.rowhideCancel);
+	}
+    
 	/**
 	 * 高度调整
 	 * 

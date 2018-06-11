@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import com.acmr.excel.dao.MExcelColDao;
+import com.acmr.excel.model.mongo.MExcelCell;
 import com.acmr.excel.model.mongo.MExcelColumn;
 
 @Repository("mexcelColDao")
@@ -41,6 +42,12 @@ public class MExcelColDaoImpl implements MExcelColDao {
 		Update update = new Update();
 		update.set("excelColumn.width", width);
 		mongoTemplate.updateFirst(query, update,MExcelColumn.class, excelId);
+	}
+
+	@Override
+	public MExcelColumn getMExcelCol(String excelId, String alias) {
+		MExcelColumn mexcelCol =  mongoTemplate.findOne(new Query(Criteria.where("excelColumn.code").is(alias)), MExcelColumn.class,excelId);
+		return mexcelCol;
 	}
 
 }

@@ -1,5 +1,7 @@
 package com.acmr.excel.dao.impl;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -10,6 +12,8 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import com.acmr.excel.dao.MExcelRowDao;
+import com.acmr.excel.model.mongo.MExcelCell;
+import com.acmr.excel.model.mongo.MExcelColumn;
 import com.acmr.excel.model.mongo.MExcelRow;
 import com.mongodb.WriteResult;
 
@@ -39,8 +43,24 @@ public class MExcelRowDaoImpl implements MExcelRowDao {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("excelRow.code").is(alias));
 		Update update = new Update();
-		update.set("height", height);
+		update.set("excelRow.height", height);
 		mongoTemplate.updateFirst(query, update,MExcelRow.class, excelId);
+		
+	}
+
+	@Override
+	public MExcelRow getMExcelRow(String excelId, String alias) {
+		MExcelRow mexcelRow =  mongoTemplate.findOne(new Query(Criteria.where("excelRow.code").is(alias)), MExcelRow.class,excelId);
+		return mexcelRow;
+	}
+
+	@Override
+	public void updateFont(String name, Object property, String alias, String excelId) {
+		Query query = new Query();
+	    query.addCriteria(Criteria.where("excelRow.code").in(alias));
+	    Update update = new Update();
+	    update.set("excelRow.cellstyle.font."+name, property);
+	    mongoTemplate.updateMulti(query, update, MExcelCell.class,excelId);
 		
 	}
 

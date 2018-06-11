@@ -58,15 +58,10 @@ public class Test1 {
 		mongoTemplate.remove(cell, "9dad6428-2b6d-42dd-9e9a-185fdcfc0e12");
 		*/
 		Query query = new Query();
-		query.addCriteria(Criteria.where("_id").is("6d16ae1b-7191-4c4d-b67b-a49798a22d00"));
+		query.addCriteria(Criteria.where("_id").is("rList").and("rcList.alias").is("9"));
 		Update update = new Update();
-		update.set("step", 0);
-		update.set("viewRowAlias", "");
-		update.set("viewColAlias", "");
-		update.set("rowAlias","");
-		update.set("colAlias", "");
-		update.set("freeze", true);
-		mongoTemplate.updateFirst(query, update,MExcel.class, "6d16ae1b-7191-4c4d-b67b-a49798a22d00");
+		update.set("rcList.$.preAlias", "8");
+		mongoTemplate.updateFirst(query, update, "0c8d6409-700f-4d18-875a-d948b4c8c07c");
 	}
 
 }

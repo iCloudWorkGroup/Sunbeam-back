@@ -27,6 +27,7 @@ import com.acmr.excel.model.mongo.MExcelSheet;
 import com.acmr.excel.model.position.OpenExcel;
 import com.acmr.excel.model.position.RowCol;
 import com.acmr.excel.service.ExcelService;
+import com.acmr.excel.service.MExcelService;
 import com.acmr.excel.service.PasteService;
 import com.acmr.excel.service.impl.MongodbServiceImpl;
 import com.acmr.excel.util.AnsycDataReturn;
@@ -49,8 +50,11 @@ public class SheetController extends BaseController {
 	private MongodbServiceImpl mongodbServiceImpl;
 	@Resource
 	private PasteService pasteService; 
-	 @Resource
+	@Resource
 	private ExcelService excelService;
+	@Resource
+	private MExcelService mexcelService;
+	
 
 	/**
 	 * 新建sheet
@@ -201,18 +205,32 @@ public class SheetController extends BaseController {
 		long b1 = System.currentTimeMillis();
 		String excelId = req.getHeader("X-Book-Id");
 		String curStep = req.getHeader("X-Step");
+		int memStep = 0 ;
+		int cStep = 0;
+		
+		if(!StringUtil.isEmpty(curStep)){
+			cStep = Integer.valueOf(curStep);
+		}
+		if(cStep>0){
+			memStep = mexcelService.getStep(excelId);
+			if(cStep!=memStep){
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+       
 		
 		if(StringUtil.isEmpty(excelId) || StringUtil.isEmpty(curStep)){
 			resp.setStatus(400);
 			return;
 		}
 		OpenExcel openExcel = getJsonDataParameter(req, OpenExcel.class);
-		int memStep = 0 ;
 		
-		int cStep = 0;
-		if(!StringUtil.isEmpty(curStep)){
-			cStep = Integer.valueOf(curStep);
-		}
+		
 		int rowBegin = openExcel.getTop();
 		int rowEnd = openExcel.getBottom();
 		int colBegin = openExcel.getLeft();
@@ -228,15 +246,14 @@ public class SheetController extends BaseController {
 		int rowEndIndex = mongodbServiceImpl.getIndexByPixel(sortRcList,rowEnd);
 		int colBeginIndex = mongodbServiceImpl.getIndexByPixel(sortClList,colBegin);
 		int colEndIndex = mongodbServiceImpl.getIndexByPixel(sortClList,colEnd);
+		
 		CompleteExcel excel = new CompleteExcel();
 		SheetElement sheet = new SheetElement();
-		if (cStep == memStep) {
+		
 
 			ExcelSheet excelSheet = mongodbServiceImpl.getSheetBySort(rowBeginIndex,rowEndIndex,colBeginIndex,colEndIndex, excelId,sortRcList,sortClList);
 			
 			if (excelSheet != null) {
-				
-				
 				
 				excel.getSheets().add(sheet);
 				sheet = excelService.openExcel(sheet, excelSheet, rowBeginIndex, rowEndIndex, colBeginIndex, colEndIndex,  sortRcList, sortClList);
@@ -244,23 +261,11 @@ public class SheetController extends BaseController {
 			} else {
 				
 			}
-		}
-
 		
 		long b2 = System.currentTimeMillis();
 		System.out.println("openexcel=====================" + (b2 - b1));
 
 		this.sendJson(resp, sheet);
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 }

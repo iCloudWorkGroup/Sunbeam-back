@@ -114,6 +114,7 @@ public class MongodbServiceImpl {
 		
 		ExcelSheet excelSheet = new ExcelSheet();
 	
+		//需要查找的行列
 		List<String> rList = new ArrayList<String>();
 		List<String> cList = new ArrayList<String>();
 		for(int i = rowBeginSort;i<rowEndSort+1;i++){
@@ -125,14 +126,24 @@ public class MongodbServiceImpl {
 	
 		//查找行样式
 		List<MExcelRow> mRowList = mongoTemplate.find(new Query(Criteria.where("excelRow.code").in(rList)), MExcelRow.class, excelId);
+		Map<String, ExcelRow> rowMap = new HashMap<String, ExcelRow>();
+		for(MExcelRow mr:mRowList){
+		  ExcelRow er =	mr.getExcelRow();
+		  rowMap.put(er.getCode(), er);
+		}
         //查找列样式
 		List<MExcelColumn> mColList = mongoTemplate.find(new Query(Criteria.where("excelColumn.code").in(cList)), MExcelColumn.class, excelId);
 		
-		Map<String, MExcelColumn> colMap = new HashMap<String, MExcelColumn>();
+		Map<String, ExcelColumn> colMap = new HashMap<String, ExcelColumn>();
 		for (MExcelColumn mc : mColList) {
 			ExcelColumn col = mc.getExcelColumn();
+			//excelSheet.getCols().add(col);
+			colMap.put(col.getCode(), col);
+		}
+		//将col对象放入excelSheet
+		for(String code:cList){
+			ExcelColumn col = colMap.get(code);
 			excelSheet.getCols().add(col);
-			colMap.put(col.getCode(), mc);
 		}
 		List<Integer> irList = new ArrayList<Integer>();
 		List<Integer> icList = new ArrayList<Integer>();
@@ -159,8 +170,8 @@ public class MongodbServiceImpl {
 		}
 	
 		
-		for (int i = 0; i < mRowList.size(); i++) {
-			ExcelRow row = mRowList.get(i).getExcelRow();
+		for (int i = 0; i < rList.size(); i++) {
+			ExcelRow row = rowMap.get(rList.get(i));
 			excelSheet.getRows().add(row);
 			List<ExcelCell> cells = new ArrayList<>();
 			for (String cl:cList) {
@@ -179,6 +190,9 @@ public class MongodbServiceImpl {
 		RowColList rowColList = mongoTemplate.findOne(new Query(Criteria.where("_id").is("rList")), RowColList.class, excelId);
 		//long ceb2 = System.currentTimeMillis();
 		//System.out.println("获得rcList的时间为:" + (ceb2-ceb1));
+		if(null == rowColList){
+			return 0;
+		}
 		List<RowCol> rcList = rowColList.getRcList();//得到行列表
 		Map<String,RowCol> map = new HashMap<String,RowCol>();
 		RowCol rowCol = null;
@@ -197,6 +211,9 @@ public class MongodbServiceImpl {
 		boolean flag = true;
 		while(flag){
 			rowCol = map.get(rowCol.getAlias());
+			if(null == rowCol){
+				break;
+			}
 			sortRcList.add(rowCol);
 			if(sortRcList.size()==rcList.size()){//跳出循环
 				break;
@@ -270,6 +287,9 @@ public class MongodbServiceImpl {
 		boolean flag = true;
 		while(flag){
 			rowCol = map.get(rowCol.getAlias());
+			if(null == rowCol){
+				break;
+			}
 			sortClList.add(rowCol);
 			if(sortClList.size()==cList.size()){//跳出循环
 				break;
@@ -301,6 +321,9 @@ public class MongodbServiceImpl {
 		}
 		RowCol rowCol = rowColList.get(i - 1);
 		int tempHeight = rowCol.getLength();
+		if(tempHeight == 0){
+			tempHeight = -1;
+		}
 
 		return rowCol.getTop() + tempHeight + 1;
 	}
@@ -363,7 +386,12 @@ public class MongodbServiceImpl {
 			RowCol rc = new RowCol();
 			ExcelRow row = rows.get(i);
 			rc.setAlias(row.getCode());
-			rc.setLength(row.getHeight());
+			if(row.isRowhidden()){
+				rc.setLength(0);
+			}else{
+				rc.setLength(row.getHeight());
+			}
+			
 			if(i>0){
 				
 			 rc.setPreAlias(rows.get(i-1).getCode());//存储它前一个值得别名
@@ -378,7 +406,12 @@ public class MongodbServiceImpl {
 			
 			ExcelColumn col = cols.get(i);
 			rc.setAlias(col.getCode());
-			rc.setLength(col.getWidth());
+			if(col.isColumnhidden()){
+				rc.setLength(0);
+			}else{
+				rc.setLength(col.getWidth());
+			}
+			
 			if(i>0){
 				
 				rc.setPreAlias(cols.get(i-1).getCode());//存贮它前一行的别名

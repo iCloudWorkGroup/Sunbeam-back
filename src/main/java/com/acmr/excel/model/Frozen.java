@@ -3,44 +3,44 @@ package com.acmr.excel.model;
 import java.io.Serializable;
 
 public class Frozen implements Serializable {
-	private int oprCol;
-	private int oprRow;
-	private int viewRow;
-	private int viewCol;//用于接收前台的传参
+	private String oprCol;
+	private String oprRow;
+	private String viewRow;
+	private String viewCol;//用于接收前台的传参
 	
 	private Integer row;
 	private Integer col;
 
-	
-	public int getOprCol() {
+
+	public String getOprCol() {
 		return oprCol;
 	}
 
-	public void setOprCol(int oprCol) {
+	public void setOprCol(String oprCol) {
 		this.oprCol = oprCol;
 	}
 
-	public int getOprRow() {
+	public String getOprRow() {
 		return oprRow;
 	}
 
-	public void setOprRow(int oprRow) {
+	public void setOprRow(String oprRow) {
 		this.oprRow = oprRow;
 	}
 
-	public int getViewRow() {
+	public String getViewRow() {
 		return viewRow;
 	}
 
-	public void setViewRow(int viewRow) {
+	public void setViewRow(String viewRow) {
 		this.viewRow = viewRow;
 	}
 
-	public int getViewCol() {
+	public String getViewCol() {
 		return viewCol;
 	}
 
-	public void setViewCol(int viewCol) {
+	public void setViewCol(String viewCol) {
 		this.viewCol = viewCol;
 	}
 

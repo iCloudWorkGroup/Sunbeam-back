@@ -7,7 +7,7 @@ import java.util.Map;
 public class Content implements Serializable {
 	private String alignCol = "";
 	private String alignRow = "";
-	private Boolean bold;
+	private Boolean weight;
 	private String color = "rgb(0,0,0)";
 	private String displayTexts;
 	private String family = "SimSun";
@@ -86,14 +86,13 @@ public class Content implements Serializable {
 		this.displayTexts = displayTexts;
 	}
 
-	
 
-	public Boolean getBold() {
-		return bold;
+	public Boolean getWeight() {
+		return weight;
 	}
 
-	public void setBold(Boolean bold) {
-		this.bold = bold;
+	public void setWeight(Boolean weight) {
+		this.weight = weight;
 	}
 
 	public Boolean getWordWrap() {

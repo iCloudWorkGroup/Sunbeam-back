@@ -113,7 +113,7 @@ public class ExcelController extends BaseController {
 	@RequestMapping
 	public ModelAndView main(HttpServletRequest req, HttpServletResponse resp) {
 		String excelId = UUIDUtil.getUUID();
-		handleExcelService.createNewExcel(excelId,mongodbServiceImpl);
+		//handleExcelService.createNewExcel(excelId,mongodbServiceImpl);
 		//VersionHistory versionHistory = new VersionHistory();
 		//storeService.set(excelId+"_history", versionHistory);
 		log.info("初始化excel");
@@ -122,6 +122,7 @@ public class ExcelController extends BaseController {
 		return new ModelAndView("/index").addObject("sheetId", "1").addObject("build", true).addObject("excelId", excelId).
 				addObject("frontName",Constant.frontName);
 	}
+	
 	/**
 	 * 测试接口
 	 * 
@@ -237,41 +238,7 @@ public class ExcelController extends BaseController {
 		getscript(null, req, resp);
 
 	}
-	// private void test500LineData(CompleteExcel excel) {
-	// SheetElement sheet = excel.getSpreadSheet().get(0).getSheet();
-	// Map<String, Map<String, Integer>> alaisY =
-	// sheet.getPosi().getStrandY().getAliasY();
-	// for (int i = 0; i < 500; i++) {
-	// for (int j = 0; j < 26; j++) {
-	// Map<String, Integer> x = new HashMap<String, Integer>();
-	// x.put(j + "", j);
-	// alaisY.put(i + "", x);
-	// }
-	// }
-	// for (int i = 0; i < 400; i++) {
-	// Gly gly = new Gly();
-	// gly.setAliasY("X");
-	// gly.setHeight(600);
-	// gly.setTop(300);
-	// sheet.getGlY().add(gly);
-	// }
-	// for (int i = 1; i <= 13000; i++) {
-	// sheet.getCells().add(new OneCell());
-	// }
-	// }
 
-	/**
-	 * 重新打开excel
-	 * 
-	 * @return
-	 */
-//	public ModelAndView reOpen(HttpServletRequest req, HttpServletResponse resp) {
-//		String excelId = req.getParameter("excelId");
-//		//ExcelBook excelBook = (ExcelBook)ExcelBook.JSONParse(excel);
-//		ExcelBook excelBook = (ExcelBook)memcachedClient.get(excelId);
-//		memcachedClient.set(excelId, Constant.MEMCACHED_EXP_TIME, excelBook);
-//		return new ModelAndView("/index").addObject("excelId", excelId).addObject("sheetId", "1").addObject("build", false);
-//	}
 	@RequestMapping(value="/reopen/{excelId}",method=RequestMethod.GET)
 	public ModelAndView reopen(@PathVariable String excelId) {
 		//String excelId = req.getParameter("excelId");
@@ -280,22 +247,6 @@ public class ExcelController extends BaseController {
 		return new ModelAndView("/index").addObject("excelId", excelId).addObject("sheetId", "1")
 				.addObject("build", false).addObject("frontName",Constant.frontName);
 	}
-	// public void getExcelParam(HttpServletRequest req, HttpServletResponse
-	// resp) throws IOException {
-	// String excelId = req.getParameter("excelId");
-	// CompleteExcel excel = (CompleteExcel)
-	// getSession(req).getAttribute(excelId);
-	// if (excel != null) {
-	// SheetElement sheet = excel.getSpreadSheet().get(0).getSheet();
-	// int rowNum = sheet.getGlY().size();
-	// int colNum = sheet.getGlX().size();
-	// JsonReturn data = new JsonReturn("");
-	// data.setRowNum(rowNum);
-	// data.setColNum(colNum);
-	// this.sendJson(resp, data);
-	// }
-	// }
-	
 
 	/**
 	 * 通过别名加载excel
@@ -415,7 +366,16 @@ public class ExcelController extends BaseController {
 		
 		CompleteExcel excel = new CompleteExcel();
 		SheetElement sheet = new SheetElement();
+		
 		MExcel mExcel = mongodbServiceImpl.getMExcel(excelId);
+		
+		RowCol row = sortRcList.get(sortRcList.size()-1);
+		RowCol col = sortClList.get(sortClList.size()-1);
+		sheet.setMaxRowPixel(row.getTop()+row.getLength());
+		sheet.setMaxRowAlias(mExcel.getMaxrow()+"");
+		sheet.setMaxColPixel(col.getTop()+col.getLength());
+		sheet.setMaxColAlias(mExcel.getMaxcol()+"");
+		
 		sheet.setName(mExcel.getSheetName());
 		excelSheet.setMaxrow(mExcel.getMaxrow());
 		excelSheet.setMaxcol(mExcel.getMaxcol());
