@@ -13,8 +13,9 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import com.acmr.excel.dao.MRowColDao;
-import com.acmr.excel.model.position.RowCol;
-import com.acmr.excel.model.position.RowColList;
+import com.acmr.excel.model.RowCol;
+import com.acmr.excel.model.RowColList;
+import com.acmr.excel.model.mongo.MRowColList;
 import com.mongodb.BasicDBObject;
 
 @Repository("mrowColDao")
@@ -24,9 +25,9 @@ public class MRowColDaoImpl  implements MRowColDao{
 	private MongoTemplate mongoTemplate;
 
 	@Override
-	public void getRowList(List<RowCol> sortRcList, String excelId) {
+	public void getRowList(List<RowCol> sortRcList, String excelId,String sheetId) {
 		
-		RowColList rowColList = mongoTemplate.findOne(new Query(Criteria.where("_id").is("rList")), RowColList.class, excelId);
+		MRowColList rowColList = mongoTemplate.findOne(new Query(Criteria.where("_id").is("rList").and("sheetId").is(sheetId)), MRowColList.class, excelId);
 		//long ceb2 = System.currentTimeMillis();
 		//System.out.println("获得rcList的时间为:" + (ceb2-ceb1));
 		List<RowCol> rcList = rowColList.getRcList();//得到行列表
@@ -65,9 +66,9 @@ public class MRowColDaoImpl  implements MRowColDao{
 	}
 
 	@Override
-	public void getColList(List<RowCol> sortClList, String excelId) {
+	public void getColList(List<RowCol> sortClList, String excelId,String sheetId) {
 		
-		RowColList colList = mongoTemplate.findOne(new Query(Criteria.where("_id").is("cList")), RowColList.class, excelId);
+		MRowColList colList = mongoTemplate.findOne(new Query(Criteria.where("_id").is("cList").and("sheetId").is(sheetId)), MRowColList.class, excelId);
 		List<RowCol> cList = colList.getRcList();
 		Map<String,RowCol> map = new HashMap<String,RowCol>();
 		RowCol rowCol = null;
@@ -116,9 +117,9 @@ public class MRowColDaoImpl  implements MRowColDao{
 	}
 
 	@Override
-	public void updateRowCol(String excelId,String id,String alias,String preAlias) {
+	public void updateRowCol(String excelId,String sheetId,String id,String alias,String preAlias) {
 		Query query = new Query();
-		query.addCriteria(Criteria.where("_id").is(id).and("rcList.alias").is(alias));
+		query.addCriteria(Criteria.where("_id").is(id).and("rcList.alias").is(alias).and("sheetId").is(sheetId));
 		Update update = new Update();
 		update.set("rcList.$.preAlias", preAlias);
 		mongoTemplate.updateFirst(query, update, excelId);
@@ -126,9 +127,9 @@ public class MRowColDaoImpl  implements MRowColDao{
 	}
 
 	@Override
-	public void insertRowCol(String excelId, RowCol rowCol, String id) {
+	public void insertRowCol(String excelId,String sheetId, RowCol rowCol, String id) {
 		Query query = new Query();
-		query.addCriteria(Criteria.where("_id").is(id));
+		query.addCriteria(Criteria.where("_id").is(id).and("sheetId").is(sheetId));
 		Update update = new Update();
 		update.addToSet("rcList",rowCol);
 		mongoTemplate.upsert(query, update, excelId);
@@ -137,8 +138,8 @@ public class MRowColDaoImpl  implements MRowColDao{
 	}
 
 	@Override
-	public void delRowCol(String excelId, String alias, String id) {
-		Query query = Query.query(Criteria.where("_id").is(id));
+	public void delRowCol(String excelId,String sheetId, String alias, String id) {
+		Query query = Query.query(Criteria.where("_id").is(id).and("sheetId").is(sheetId));
 		BasicDBObject s = new BasicDBObject();
 		s.put("alias",alias);
 		Update update = new Update();

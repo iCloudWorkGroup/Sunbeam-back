@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>acmr</groupId>
-	<artifactId>sunbeam</artifactId>
+	<groupId>spreadsheet</groupId>
+	<artifactId>spreadsheet</artifactId>
 	<packaging>war</packaging>
 	<version>1.0.0</version>
-	<name>Sunbeam Webapp</name>
+	<name>spreadsheet Webapp</name>
 	<url>http://maven.apache.org</url>
 
 	<!-- Jar版本管理 -->
@@ -20,9 +20,9 @@
 		<repository>
 			<id>nexus-releases</id>
 			<name>Nexus Release Repository</name>
-			<url>http://excel-inc.acmr.com.cn:20064/nexus/content/repositories/releases/</url>
+		<!--<url>http://excel-inc.acmr.com.cn:20064/nexus/content/repositories/releases/</url>-->
 			<!-- 内网地址 -->
-			<!-- <url>http://192.168.1.228:8080/nexus/content/repositories/releases/</url> -->
+			 <url>http://192.168.1.228:8080/nexus/content/repositories/releases/</url> 
 			<releases>
 				<enabled>true</enabled>
 			</releases>
@@ -214,7 +214,7 @@
 		<dependency>
 			<groupId>com.excel</groupId>
 			<artifactId>excelutil</artifactId>
-			<version>7.1</version>
+			<version>7.2</version>
 		</dependency>
 		
 		<dependency>

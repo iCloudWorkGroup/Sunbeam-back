@@ -2,6 +2,8 @@ package com.acmr.excel.model.complete;
 
 import java.io.Serializable;
 
+import com.acmr.excel.model.mongo.MRow;
+
 /***
  * 返回到页面的行属性
  * @author liucb
@@ -63,6 +65,17 @@ public class Gly implements Serializable {
 
 	public void setHidden(Boolean hidden) {
 		this.hidden = hidden;
+	}
+	
+	public Gly(MRow mrow){
+		this.alias = mrow.getAlias();
+		this.height = mrow.getHeight();
+		this.hidden = mrow.getHidden();
+		this.props = mrow.getProps();
+	}
+	
+	public Gly(){
+		
 	}
 
 }

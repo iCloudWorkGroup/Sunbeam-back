@@ -2,6 +2,8 @@ package com.acmr.excel.model.complete;
 
 import java.io.Serializable;
 
+import com.acmr.excel.model.mongo.MCol;
+
 /***
  * 返回到页面的列属性
  * @author liucb
@@ -63,6 +65,17 @@ public class Glx implements Serializable {
 
 	public void setHidden(Boolean hidden) {
 		this.hidden = hidden;
+	}
+	
+	public Glx(MCol mcol){
+		this.alias = mcol.getAlias();
+		this.width = mcol.getWidth();
+		this.hidden = mcol.getHidden();
+		this.props = mcol.getProps();
+	}
+	
+	public Glx(){
+		
 	}
 
 }

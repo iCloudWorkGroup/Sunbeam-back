@@ -5,13 +5,12 @@ package com.acmr.excel.service;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.acmr.excel.dao.ExcelDao;
 import com.acmr.excel.model.Constant;
 import com.acmr.excel.model.OnlineExcel;
+import com.acmr.excel.model.RowCol;
 import com.acmr.excel.model.complete.Border;
 import com.acmr.excel.model.complete.Content;
 import com.acmr.excel.model.complete.CustomProp;
@@ -20,10 +19,7 @@ import com.acmr.excel.model.complete.Gly;
 import com.acmr.excel.model.complete.Occupy;
 import com.acmr.excel.model.complete.OneCell;
 import com.acmr.excel.model.complete.OperProp;
-import com.acmr.excel.model.complete.ReturnParam;
 import com.acmr.excel.model.complete.SheetElement;
-import com.acmr.excel.model.complete.SpreadSheet;
-import com.acmr.excel.model.position.RowCol;
 import com.acmr.excel.util.CellFormateUtil;
 import com.acmr.excel.util.ExcelUtil;
 
@@ -47,12 +43,6 @@ import acmr.excel.pojo.Excelborder;
  */
 @Service
 public class ExcelService {
-	private ExcelDao excelDao;
-
-	public void setExcelDao(ExcelDao excelDao) {
-		this.excelDao = excelDao;
-	}
-
 	
 	private void addRow(List<Gly> glyList, int rowEnd, ExcelSheet excelSheet) {
 		int index = glyList.size() - 1;
@@ -90,69 +80,6 @@ public class ExcelService {
 		
 	}
 
-	/**
-	 * 通过别名加载excel
-	 * 
-	 * @return CompleteExcel对象
-	 */
-
-	public SpreadSheet openExcelByAlais(SpreadSheet spreadSheet,
-			ExcelSheet excelSheet, String rowBeginAlais, String rowEndAlais,
-			ReturnParam returnParam) {
-//		List<Gly> glyList = spreadSheet.getSheet().getGlY();
-//		List<Glx> glxList = spreadSheet.getSheet().getGlX();
-//		bookToOlExcelGlyList(excelSheet, glyList);
-//		bookToOlExcelGlxList(excelSheet, glxList);
-//		ListHashMap<ExcelRow> rowList = (ListHashMap<ExcelRow>) excelSheet
-//				.getRows();
-//		int rowBeginIndex = rowList.getMaps().get(rowBeginAlais);
-//		int rowEndIndex = rowList.getMaps().get(rowEndAlais);
-//		List<OneCell> newCellList = new ArrayList<OneCell>();
-//		spreadSheet.getSheet().setCells(newCellList);
-//		bookToOlExcelCellList(rowBeginIndex, rowEndIndex, rowList, glyList,glxList, excelSheet, newCellList);
-//		spreadSheet.getSheet().setGlY(glyList.subList(rowBeginIndex, rowEndIndex + 1));
-//		returnParam.setDataRowStartIndex(rowBeginIndex);
-		return spreadSheet;
-	}
-
-	/**
-	 * 通过Workbook转换为CompleteExcel
-	 * 
-	 * @param excel
-	 *            CompleteExcel对象
-	 * @return CompleteExcel对象
-	 */
-
-//	public CompleteExcel getExcel(Workbook workbook) {
-//		Convert convert = new OnlineExcelConvert();
-//		return convert.doConvertExcel(workbook);
-//	}
-
-	/**
-	 * 保存excel
-	 * 
-	 * @param excel
-	 *            OnlineExcel对象
-	 */
-
-	public void saveOrUpdateExcel(OnlineExcel excel) throws Exception {
-		String excelId = excel.getExcelId();
-		if(excelDao.getByExcelId(excelId) == 0){
-			excelDao.saveExcel(excel);
-		}
-	}
-
-	/**
-	 * 获得所有的OnlineExcel对象
-	 * 
-	 * @return OnlineExcel对象集合
-	 */
-
-	public List<OnlineExcel> getAllExcel() {
-		return excelDao.getAllExcel();
-	}
-
-	
 
 	private int getColLeft(List<Glx> glxList, int i,Integer left) {
 		if (i == 0) {
@@ -1051,23 +978,6 @@ public class ExcelService {
 		return spreadSheet;
 	}
 
-
-	/**
-	 * 通过id获得OnlineExcel对象
-	 * 
-	 * @param id
-	 * @return OnlineExcel
-	 */
-
-	public String getExcel(String excelId) {
-		try {
-			OnlineExcel oe = excelDao.getJsonObjectByExcelId(excelId);
-			return oe.getExcelObject();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 
 
 	/**

@@ -6,21 +6,18 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.acmr.excel.model.Cell;
+import com.acmr.excel.model.ColOperate;
 import com.acmr.excel.model.ColWidth;
 import com.acmr.excel.model.Frozen;
 import com.acmr.excel.model.OperatorConstant;
 import com.acmr.excel.model.RowHeight;
-import com.acmr.excel.model.complete.rows.ColOperate;
-import com.acmr.excel.model.complete.rows.RowOperate;
-import com.acmr.excel.service.CellService;
-import com.acmr.excel.service.HandleExcelService;
+import com.acmr.excel.model.RowOperate;
 import com.acmr.excel.service.MCellService;
 import com.acmr.excel.service.MColService;
 import com.acmr.excel.service.MExcelService;
 import com.acmr.excel.service.MRowService;
 import com.acmr.excel.service.MSheetService;
-import com.acmr.excel.service.PasteService;
-import com.acmr.excel.service.SheetService;
+
 import com.acmr.excel.service.impl.MongodbServiceImpl;
 import com.acmr.mq.Model;
 
@@ -33,10 +30,6 @@ public class WorkerThread2 implements Runnable{
 	private Model model;
 	
 	private MongodbServiceImpl mongodbServiceImpl;
-	private HandleExcelService handleExcelService;
-	private CellService cellService;
-	private PasteService pasteService;
-	private SheetService sheetService;
 	
 	private MCellService mcellService;
 	private MExcelService mexcelService;
@@ -57,18 +50,6 @@ public class WorkerThread2 implements Runnable{
 	    this.mcolService = mcolService;
 	    this.msheetService = msheetservice;
 	}
-	
-    public WorkerThread2(int step,MongodbServiceImpl mongodbServiceImpl,String key,HandleExcelService handleExcelService,
-    		CellService cellService,PasteService pasteService,SheetService sheetService,Model model){  
-        this.step=step;
-        this.mongodbServiceImpl = mongodbServiceImpl;
-        this.key = key;
-        this.handleExcelService = handleExcelService;
-        this.cellService = cellService;
-        this.pasteService = pasteService;
-        this.sheetService = sheetService;
-        this.model = model;
-    }  
    
     @Override  
     public void run() {  

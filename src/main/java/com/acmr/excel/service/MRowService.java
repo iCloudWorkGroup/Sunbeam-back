@@ -1,7 +1,7 @@
 package com.acmr.excel.service;
 
 import com.acmr.excel.model.RowHeight;
-import com.acmr.excel.model.complete.rows.RowOperate;
+import com.acmr.excel.model.RowOperate;
 
 public interface MRowService {
 	

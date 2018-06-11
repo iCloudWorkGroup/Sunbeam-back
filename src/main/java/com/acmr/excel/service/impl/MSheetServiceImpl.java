@@ -4,11 +4,11 @@ import javax.annotation.Resource;
 
 import org.springframework.stereotype.Service;
 
-import com.acmr.excel.dao.MExcelDao;
 import com.acmr.excel.dao.MRowColDao;
+import com.acmr.excel.dao.MSheetDao;
 import com.acmr.excel.dao.base.BaseDao;
 import com.acmr.excel.model.Frozen;
-import com.acmr.excel.model.mongo.MExcel;
+import com.acmr.excel.model.mongo.MSheet;
 import com.acmr.excel.service.MSheetService;
 @Service("msheetService")
 public class MSheetServiceImpl implements MSheetService {
@@ -17,7 +17,8 @@ public class MSheetServiceImpl implements MSheetService {
 	@Resource
 	private MRowColDao mrowColDao;
 	@Resource
-	private MExcelDao mexcelDao;
+	private MSheetDao msheetDao;
+	
 	
 	@Override
 	public void frozen(Frozen frozen, String excelId, Integer step) {
@@ -29,7 +30,7 @@ public class MSheetServiceImpl implements MSheetService {
 		String oprCol = frozen.getOprCol();
 		String viewRow = frozen.getViewRow();
 		String viewCol = frozen.getViewCol();
-		MExcel mexcel = new MExcel();
+		MSheet mexcel = new MSheet();
 		mexcel.setFreeze(true);
 		mexcel.setRowAlias(oprRow);
 		mexcel.setColAlias(oprCol);
@@ -37,18 +38,26 @@ public class MSheetServiceImpl implements MSheetService {
 		mexcel.setViewColAlias(viewCol);
 		mexcel.setStep(step);
 		
-		mexcelDao.updateFrozen(mexcel, excelId);
+		msheetDao.updateFrozen(mexcel, excelId);
 
 	}
 
 	@Override
 	public void unFrozen(String excelId, Integer step) {
-		MExcel mexcel = new MExcel();
+		MSheet mexcel = new MSheet();
 		mexcel.setFreeze(false);
 		mexcel.setStep(step);
 		mexcel.setId(excelId);
-		mexcelDao.updateUnFrozen(mexcel, excelId);
+		msheetDao.updateUnFrozen(mexcel, excelId);
 		
+	}
+
+	@Override
+	public int getStep(String excelId, String sheetId) {
+		
+		MSheet msheet = msheetDao.getMSheet(excelId, sheetId);
+		
+		return msheet.getStep();
 	}
 
 }

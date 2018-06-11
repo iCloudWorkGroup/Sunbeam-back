@@ -19,8 +19,8 @@ import com.acmr.excel.model.Constant;
 import com.acmr.excel.model.OperatorConstant;
 import com.acmr.excel.model.RowHeight;
 import com.acmr.excel.model.RowLine;
-import com.acmr.excel.model.complete.rows.ColOperate;
-import com.acmr.excel.model.complete.rows.RowOperate;
+import com.acmr.excel.model.RowOperate;
+
 
 /**
  * 单元格操作

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -22,16 +21,15 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import com.acmr.excel.model.RowCol;
 import com.acmr.excel.model.RowColCell;
-import com.acmr.excel.model.complete.ReturnParam;
-import com.acmr.excel.model.mongo.MExcel;
+import com.acmr.excel.model.RowColList;
 import com.acmr.excel.model.mongo.MExcelCell;
 import com.acmr.excel.model.mongo.MExcelColumn;
 import com.acmr.excel.model.mongo.MExcelRow;
 import com.acmr.excel.model.mongo.MExcelRowC;
 import com.acmr.excel.model.mongo.MExcelSheet;
-import com.acmr.excel.model.position.RowCol;
-import com.acmr.excel.model.position.RowColList;
+import com.acmr.excel.model.mongo.MSheet;
 import com.acmr.excel.util.BinarySearch;
 import com.acmr.excel.util.masterworker.Master;
 import com.acmr.excel.util.masterworker.Worker;
@@ -86,27 +84,13 @@ public class MongodbServiceImpl {
 		BasicDBObject fieldsObject = new BasicDBObject();
 		fieldsObject.put("step", true);
 		Query query = new BasicQuery(dbObject, fieldsObject);
-		List<MExcel> result = mongoTemplate.find(query, MExcel.class, id);
+		List<MSheet> result = mongoTemplate.find(query, MSheet.class, id);
 		return result.get(0).getStep();
 	}
 	
 	
-	public void getParam(String excelId) {
-		RowColList rowColList = mongoTemplate.findOne(new Query(Criteria.where("_id").is("rList")), RowColList.class, excelId);
-		List<RowCol> rcList = rowColList.getRcList();
-		for(int i=0;i < rcList.size();i++) {
-			rcList.get(i).setTop(getTop(rcList, i));
-		}
-		RowColList colList = mongoTemplate.findOne(new Query(Criteria.where("_id").is("cList")), RowColList.class, excelId);
-		List<RowCol> cList = colList.getRcList();
-		for(int i=0;i < cList.size();i++) {
-			cList.get(i).setTop(getTop(cList, i));
-		}
-		
-	}
-	
-	public MExcel getMExcel(String excelId){
-	     MExcel mExcel = mongoTemplate.findOne(new Query(Criteria.where("_id").is(excelId)), MExcel.class, excelId);//查找sheet属性
+	public MSheet getMExcel(String excelId){
+		MSheet mExcel = mongoTemplate.findOne(new Query(Criteria.where("_id").is(excelId)), MSheet.class, excelId);//查找sheet属性
 	     return mExcel;
 	}
 	
@@ -334,7 +318,7 @@ public class MongodbServiceImpl {
 		}
 		List<ExcelSheet> excelSheets = excelBook.getSheets();
 		ExcelSheet excelSheet = excelSheets.get(0);
-		MExcel mExcel = new MExcel();
+		MSheet mExcel = new MSheet();
 		mExcel.setId(excelId);
 		mExcel.setStep(0);
 		mExcel.setMaxrow(excelSheet.getMaxrow());
@@ -666,8 +650,8 @@ public class MongodbServiceImpl {
 	public MExcelSheet getSheetByIndex(int rowBeginIndex, int rowEndIndex,
 			int colBeginIndex,int colEndIndex ,String excelId,List<RowCol> sortRclist,
 			List<RowCol> sortClList) {
-		MExcel mExcel = mongoTemplate.findOne(new Query(Criteria.where("_id").is(excelId)), 
-				MExcel.class, excelId);//查找sheet属性
+		MSheet mExcel = mongoTemplate.findOne(new Query(Criteria.where("_id").is(excelId)), 
+				MSheet.class, excelId);//查找sheet属性
 		MExcelSheet excelSheet = new MExcelSheet();
 		excelSheet.setMaxcol(mExcel.getMaxcol());
 		excelSheet.setMaxrow(mExcel.getMaxrow());

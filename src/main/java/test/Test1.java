@@ -1,22 +1,29 @@
 package test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.xbean.spring.context.ClassPathXmlApplicationContext;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 
-import com.acmr.excel.model.RowColCell;
-import com.acmr.excel.model.mongo.MExcel;
+import com.acmr.excel.dao.base.BaseDao;
+import com.acmr.excel.model.complete.Content;
+import com.acmr.excel.model.complete.OperProp;
+import com.acmr.excel.model.mongo.MCol;
+import com.acmr.excel.model.mongo.MRow;
+
 
 public class Test1 {
+	
+	
 
 	public static void main(String[] args) {
 		
 		ApplicationContext applicationContext = new ClassPathXmlApplicationContext("/config/mongodb.xml");
+		//ApplicationContext app = new ClassPathXmlApplicationContext("/config/applicationContext-core.xml");
 		MongoTemplate mongoTemplate = (MongoTemplate) applicationContext.getBean("mongoTemplate");
-		
+		//BaseDao base  =(BaseDao) applicationContext.getBean("baseDao");
 		/*Criteria criatira = new Criteria();
 		criatira.andOperator(Criteria.where("_id").is("cList"),
 						Criteria.where("rcList.alias").is("1"));
@@ -57,11 +64,24 @@ public class Test1 {
 		mongoTemplate.save(cell, "9dad6428-2b6d-42dd-9e9a-185fdcfc0e12");
 		mongoTemplate.remove(cell, "9dad6428-2b6d-42dd-9e9a-185fdcfc0e12");
 		*/
-		Query query = new Query();
-		query.addCriteria(Criteria.where("_id").is("rList").and("rcList.alias").is("9"));
-		Update update = new Update();
-		update.set("rcList.$.preAlias", "8");
-		mongoTemplate.updateFirst(query, update, "0c8d6409-700f-4d18-875a-d948b4c8c07c");
+		List<Object> list = new ArrayList<Object>();
+		//list.add("das");
+		MRow row  = new MRow();
+		MRow rwo1 = new MRow();
+		list.add(row);
+		list.add(rwo1);
+		row.setAlias("3");
+		row.setSheetId("23");
+		rwo1.setSheetId("23");
+		
+		Content content = row.getProps().getContent();
+		
+		MCol mcol = new MCol();
+		mcol.setAlias("7");
+		
+		//list.add(mcol);
+		mongoTemplate.insert(list, "aa");
+		//mongoTemplate.dropCollection("aa");
 	}
 
 }

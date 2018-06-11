@@ -17,4 +17,12 @@ public interface MSheetService {
 	 * @param step
 	 */
 	void unFrozen(String excelId,Integer step);
+	
+	/**
+	 * 获取步骤值
+	 * @param excelId
+	 * @param sheetId
+	 * @return
+	 */
+	int getStep(String excelId,String sheetId);
 }

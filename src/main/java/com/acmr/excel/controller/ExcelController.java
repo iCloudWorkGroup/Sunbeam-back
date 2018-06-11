@@ -31,23 +31,22 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.acmr.excel.controller.excelbase.BaseController;
-import com.acmr.excel.dao.MExcelDao;
+import com.acmr.excel.dao.MSheetDao;
 import com.acmr.excel.dao.base.BaseDao;
 import com.acmr.excel.model.Constant;
+import com.acmr.excel.model.Position;
+import com.acmr.excel.model.RowCol;
 import com.acmr.excel.model.complete.CompleteExcel;
 import com.acmr.excel.model.complete.Frozen;
 import com.acmr.excel.model.complete.SheetElement;
 import com.acmr.excel.model.history.VersionHistory;
-import com.acmr.excel.model.mongo.MExcel;
-import com.acmr.excel.model.position.Position;
-import com.acmr.excel.model.position.RowCol;
+import com.acmr.excel.model.mongo.MSheet;
 import com.acmr.excel.service.ExcelService;
-import com.acmr.excel.service.HandleExcelService;
+import com.acmr.excel.service.MBookService;
 import com.acmr.excel.service.impl.MongodbServiceImpl;
 import com.acmr.excel.util.ExcelUtil;
 import com.acmr.excel.util.FileUtil;
 import com.acmr.excel.util.JsonReturn;
-import com.acmr.excel.util.StringUtil;
 import com.acmr.excel.util.UUIDUtil;
 import com.acmr.excel.util.UploadThread;
 
@@ -69,16 +68,17 @@ import acmr.excel.pojo.ExcelSheet;
  @Scope("singleton")
 public class ExcelController extends BaseController {
 	private static Logger log = Logger.getLogger(ExcelController.class); 
-	@Resource
-	private HandleExcelService handleExcelService;
-	@Resource
-	private ExcelService excelService;
+	
 	@Resource
 	private MongodbServiceImpl mongodbServiceImpl;
 	@Resource
 	private BaseDao baseDao;
 	@Resource
-	private MExcelDao mexcelDao;
+	private MSheetDao mexcelDao;
+	@Resource
+	private ExcelService excelService;
+	@Resource
+	private MBookService mbookService;
 
 	/**
 	 * excel下载
@@ -205,31 +205,7 @@ public class ExcelController extends BaseController {
 	 */
 	@RequestMapping(value="/getscript/{excelId}",method=RequestMethod.GET)
 	public void getscript(@PathVariable String excelId,HttpServletRequest req, HttpServletResponse resp) {
-		//String excelId = req.getParameter("excelId");
-		//String realPath = req.getSession().getServletContext().getRealPath("/");
-		String jsString = readFile(Constant.outPath);
-		String buildState = "window.SPREADSHEET_BUILD_STATE=";
-		if (StringUtil.isEmpty(excelId)) {
-			excelId = UUIDUtil.getUUID();
-			handleExcelService.createNewExcel(excelId,mongodbServiceImpl);
-			//storeService.set(excelId, null);
-			//storeService.set(excelId+"_ope",  0);
-			buildState += "\"true\";";
-			// ExcelBook e = (ExcelBook)memcachedClient.get(excelId);
-		} else {
-			buildState += "\"false\";";
-		}
-		String excelIdString = "window.SPREADSHEET_AUTHENTIC_KEY=\"" + excelId
-				+ "\";";
-
-		// } <input type="hidden" id="excelId" value="(.*)"/>
-		resp.setContentType("application/javascript; charset=utf-8");
-		try {
-			resp.getWriter().print(
-					excelIdString + "\r\n" + buildState + "\r\n" + jsString);
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+		
 
 	}
 	@RequestMapping(value="/getscript",method=RequestMethod.GET)
@@ -300,22 +276,20 @@ public class ExcelController extends BaseController {
 		} else {
 			excel.LoadExcel(files.get(0).getInputStream(), XLSTYPE.XLSX);
 		}
-		long b4 = System.currentTimeMillis();
 		
-		ExcelSheet excelSheet = excel.getSheets().get(0);
+		/*ExcelSheet excelSheet = excel.getSheets().get(0);
 		List<ExcelColumn> colList = excelSheet.getCols();
 		int colSize = colList.size();
 		if (colSize < 26) {
 			for (int i = colSize; i < 26; i++) {
 				excelSheet.addColumn();
 			}
-		}
+		}*/
 		String excelId = UUIDUtil.getUUID();
-		excelSheet.getExps().put("ifUpload", "true");
-
+		
 		JsonReturn data = new JsonReturn("");
 		
-		boolean result =  mongodbServiceImpl.saveExcelBook(excel, excelId);
+		boolean result =  mbookService.saveExcelBook(excel, excelId);
 		
 		if(result){
 			data.setReturncode(200);
@@ -349,54 +323,12 @@ public class ExcelController extends BaseController {
 	@RequestMapping(value="/reload")
 	public void position(HttpServletRequest req, HttpServletResponse resp) throws Exception {
 		String excelId = req.getHeader("X-Book-Id");
+		String sheetId = excelId+0;
 		Position position = getJsonDataParameter(req, Position.class);
 		int height = position.getBottom();
 		int right = position.getRight();
 		
-		mexcelDao.updateStep(excelId, 0);
-		
-		List<RowCol> sortRcList = new ArrayList<RowCol>();//存贮整理顺序后的行
-		List<RowCol> sortClList = new ArrayList<RowCol>();//存储整理顺序后的列
-		int rowEnd = mongodbServiceImpl.getRowEndIndex(excelId,height,sortRcList);
-		int colEnd = mongodbServiceImpl.getColEndIndex(excelId,right,sortClList);
-		
-
-		ExcelSheet excelSheet = mongodbServiceImpl.getSheetBySort(0,rowEnd,0,colEnd, excelId,sortRcList,sortClList);
-		
-		
-		CompleteExcel excel = new CompleteExcel();
-		SheetElement sheet = new SheetElement();
-		
-		MExcel mExcel = mongodbServiceImpl.getMExcel(excelId);
-		
-		RowCol row = sortRcList.get(sortRcList.size()-1);
-		RowCol col = sortClList.get(sortClList.size()-1);
-		sheet.setMaxRowPixel(row.getTop()+row.getLength());
-		sheet.setMaxRowAlias(mExcel.getMaxrow()+"");
-		sheet.setMaxColPixel(col.getTop()+col.getLength());
-		sheet.setMaxColAlias(mExcel.getMaxcol()+"");
-		
-		sheet.setName(mExcel.getSheetName());
-		excelSheet.setMaxrow(mExcel.getMaxrow());
-		excelSheet.setMaxcol(mExcel.getMaxcol());
-		Frozen frozen = new Frozen();
-		if(mExcel.isFreeze()){
-		 
-		  frozen.setRowAlias(mExcel.getRowAlias());
-		  frozen.setColAlias(mExcel.getColAlias());
-		  sheet.setViewColAlias(mExcel.getViewColAlias());
-		  sheet.setViewRowAlias(mExcel.getViewRowAlias());
-		  sheet.setFrozen(frozen);
-		}else{
-		  sheet.setViewColAlias("1");
-		  sheet.setViewRowAlias("1");
-		}
-		
-		if (excelSheet != null) {
-			sheet = excelService.positionExcel(excelSheet, sheet,height, rowEnd);
-		}
-		excel.getSheets().add(sheet);
-		
+		CompleteExcel excel = mbookService.reload(excelId, sheetId, 0, height, 0, right);
 	
 		this.sendJson(resp, excel);
 		

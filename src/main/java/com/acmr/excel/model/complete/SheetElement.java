@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.acmr.excel.model.mongo.MSheet;
+
 
 
 public class SheetElement implements Serializable{
@@ -21,7 +23,7 @@ public class SheetElement implements Serializable{
 	private Integer sort = 0;
 	private boolean protect = false;
 	private List<Validate> validate = new ArrayList<Validate>();
-	private Frozen frozen;
+	private Frozen frozen = new Frozen();
 	public String getName() {
 		return name;
 	}
@@ -106,5 +108,31 @@ public class SheetElement implements Serializable{
 	public void setFrozen(Frozen frozen) {
 		this.frozen = frozen;
 	}
-
+	
+	public SheetElement(MSheet msheet){
+		this.name = msheet.getSheetName();
+		this.maxRowAlias = msheet.getMaxrow()+"";
+		this.maxColAlias = msheet.getMaxcol()+"";
+		this.viewRowAlias = msheet.getViewRowAlias();
+		this.viewColAlias = msheet.getViewColAlias();
+		if(msheet.getFreeze()){
+			this.frozen.setRowAlias(msheet.getRowAlias());
+			this.frozen.setColAlias(msheet.getColAlias());
+		}else{
+			this.frozen = null;
+		}
+		
+	}
+	
+	public SheetElement(){
+		
+	}
+     
+    public SheetElement(SheetElement se){
+		this.cells = se.getCells();
+		this.gridLineRow = se.getGridLineRow();
+		this.gridLineCol = se.getGridLineCol();
+	}
+	
+	
 }

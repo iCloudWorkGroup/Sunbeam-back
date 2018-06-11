@@ -1,25 +1,14 @@
 package com.acmr.rmi.service.impl;
 
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.concurrent.ExecutionException;
 
-import javax.annotation.Resource;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
-import net.spy.memcached.MemcachedClient;
-import net.spy.memcached.internal.OperationFuture;
-
-import org.springframework.stereotype.Service;
+import com.acmr.rmi.service.RmiService;
 
 import acmr.excel.pojo.ExcelBook;
-
-import com.acmr.excel.model.Constant;
-import com.acmr.excel.service.StoreService;
-import com.acmr.rmi.service.RmiService;
+import net.spy.memcached.MemcachedClient;
+import net.spy.memcached.internal.OperationFuture;
 
 public class RmiServiceImpl extends UnicastRemoteObject implements RmiService {
 	private MemcachedClient memCachedClient;

@@ -1,7 +1,7 @@
 package com.acmr.excel.service;
 
+import com.acmr.excel.model.ColOperate;
 import com.acmr.excel.model.ColWidth;
-import com.acmr.excel.model.complete.rows.ColOperate;
 
 public interface MColService {
 	

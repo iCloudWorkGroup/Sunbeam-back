@@ -5,15 +5,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Content implements Serializable {
-	private String alignCol = "";
-	private String alignRow = "";
+	private String alignCol;
+	private String alignRow ;
 	private Boolean weight;
-	private String color = "rgb(0,0,0)";
+	private String color ;
 	private String displayTexts;
-	private String family = "SimSun";
-	private Boolean italic = false;
-	private String size = "11px";
-	private String texts = "";
+	private String family ;
+	private Boolean italic ;
+	private String size ;
+	private String texts ;
 	private Integer underline;
 	private Boolean wordWrap;
 	private String type;

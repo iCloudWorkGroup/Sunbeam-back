@@ -2,6 +2,8 @@ package com.acmr.excel.model.complete;
 
 import java.io.Serializable;
 
+import com.acmr.excel.model.mongo.MCell;
+
 public class OneCell  implements Serializable {
 	private Border border = new Border();
 	private Content content = new Content();
@@ -40,6 +42,15 @@ public class OneCell  implements Serializable {
 	public void setOccupy(Occupy occupy) {
 		this.occupy = occupy;
 	}
+	
+	public OneCell(MCell mcell){
+		this.border = mcell.getBorder();
+		this.content = mcell.getContent();
+		this.customProp = mcell.getCustomProp();
+	}
 
+	public OneCell(){
+		
+	}
 	
 }

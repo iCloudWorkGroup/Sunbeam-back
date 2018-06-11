@@ -1,5 +1,6 @@
 package com.acmr.excel.dao.base;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -8,9 +9,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.StringUtils;
 
-import com.acmr.excel.model.mongo.MExcel;
+import com.acmr.excel.model.mongo.MSheet;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
@@ -27,9 +27,15 @@ public class BaseDao {
 		return true;
 	}
 	
-	public boolean upsert(String excelId, Object object) {
+	public boolean insert(String excelId, Object object) {
 	
 		mongoTemplate.insert(object, excelId);
+		return true;
+	}
+	
+	public boolean insert(String excelId, Collection<? extends Object> object) {
+		
+		mongoTemplate.insert(object,excelId);;
 		return true;
 	}
 	
@@ -39,7 +45,7 @@ public class BaseDao {
 		BasicDBObject fieldsObject = new BasicDBObject();
 		fieldsObject.put("step", true);
 		Query query = new BasicQuery(dbObject, fieldsObject);
-		List<MExcel> result = mongoTemplate.find(query, MExcel.class, id);
+		List<MSheet> result = mongoTemplate.find(query, MSheet.class, id);
 		return result.get(0).getStep();
 	}
 

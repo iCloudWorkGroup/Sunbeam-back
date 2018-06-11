@@ -12,7 +12,9 @@ import org.springframework.stereotype.Repository;
 
 import com.acmr.excel.dao.MCellDao;
 import com.acmr.excel.model.RowColCell;
+import com.acmr.excel.model.mongo.MCell;
 import com.acmr.excel.model.mongo.MExcelCell;
+import com.acmr.excel.model.mongo.MRowColCell;
 
 @Repository("mcellDao")
 public class MCellDaoImpl implements MCellDao {
@@ -21,42 +23,43 @@ public class MCellDaoImpl implements MCellDao {
 	private MongoTemplate mongoTemplate;
 
 	@Override
-	public List<RowColCell> getRowColCellList(String excelId,Integer row) {
+	public List<MRowColCell> getMRowColCellList(String excelId,String sheetId,String alias,String type) {
 		
 		Criteria criatira = new Criteria();
-		criatira.andOperator(Criteria.where("row").is(row));
-		List<RowColCell> list = mongoTemplate.find(new Query(criatira), RowColCell.class,excelId);
+		criatira.andOperator(Criteria.where(type).is(alias).and("sheetId").is(sheetId).and("_class").is(MRowColCell.class.getName()));
+		List<MRowColCell> list = mongoTemplate.find(new Query(criatira), MRowColCell.class,excelId);
 		return list;
 	}
 	
 	@Override
-	public void delRowColCell(String excelId, String field,Integer alias) {
+	public void delMRowColCell(String excelId,String sheetId, String field,String alias) {
 		
-		mongoTemplate.remove(new Query(Criteria.where(field).is(alias)),RowColCell.class, excelId);
+		mongoTemplate.remove(new Query(Criteria.where(field).is(alias).and("_class").is(MRowColCell.class.getName()).and("sheetId").is(sheetId)),
+				MRowColCell.class, excelId);
 		
 	}
 
 	@Override
-	public void delRowColCell(Integer col, String excelId) {
+	public void delMRowColCell(Integer col, String excelId) {
 		
 		mongoTemplate.remove(new Query(Criteria.where("col").is(col)),RowColCell.class, excelId);
 		
 	}
 	
 	@Override
-	public void updateRowColCell(String excelId, String originalId, String modifiedId) {
+	public void updateMRowColCell(String excelId,String sheetId, String originalId, String modifiedId) {
 		Query query = new Query();
-		query.addCriteria(Criteria.where("cellId").is(originalId));
+		query.addCriteria(Criteria.where("cellId").is(originalId).and("sheetId").is(sheetId).and("_class").is(MRowColCell.class.getName()));
 		Update update = new Update();
 		update.set("cellId", modifiedId);
-		mongoTemplate.updateMulti(query, update, RowColCell.class,excelId);
+		mongoTemplate.updateMulti(query, update, MRowColCell.class,excelId);
 		
 	}
 
 	@Override
-	public List<MExcelCell> getMCellList(String excelId, List<String> cellIdList) {
+	public List<MCell> getMCellList(String excelId,String sheetId, List<String> cellIdList) {
 		
-		List<MExcelCell> list = mongoTemplate.find(new Query(Criteria.where("_id").in(cellIdList)), MExcelCell.class,excelId);
+		List<MCell> list = mongoTemplate.find(new Query(Criteria.where("_id").in(cellIdList).and("sheetId").is(sheetId)), MCell.class,excelId);
 		return list;
 	}
 	
@@ -67,21 +70,14 @@ public class MCellDaoImpl implements MCellDao {
 		return mexcelCell;
 	}
 
-	@Override
-	public List<RowColCell> getRowColCellList(Integer col, String excelId) {
-		
-		Criteria criatira = new Criteria();
-		criatira.andOperator(Criteria.where("col").is(col));
-		List<RowColCell> list = mongoTemplate.find(new Query(criatira), RowColCell.class,excelId);
-		return list;
-	}
+
 
 	@Override
-	public void delCell(String excelId, List<String> cellIdList) {
+	public void delMCell(String excelId,String sheetId, List<String> cellIdList) {
 		
 		Criteria criatira = new Criteria();
-		criatira.andOperator(Criteria.where("_id").in(cellIdList));
-		mongoTemplate.remove(new Query(criatira), MExcelCell.class,excelId);
+		criatira.andOperator(Criteria.where("_id").in(cellIdList).and("sheetId").is(sheetId).and("_class").is(MCell.class.getName()));
+		mongoTemplate.remove(new Query(criatira), MCell.class,excelId);
 		
 	}
 

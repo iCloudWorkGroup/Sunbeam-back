@@ -9,13 +9,13 @@ import javax.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import com.acmr.excel.dao.MCellDao;
-import com.acmr.excel.dao.MExcelDao;
+import com.acmr.excel.dao.MSheetDao;
 import com.acmr.excel.dao.MRowColDao;
 import com.acmr.excel.dao.base.BaseDao;
 import com.acmr.excel.model.Cell;
+import com.acmr.excel.model.RowCol;
 import com.acmr.excel.model.RowColCell;
 import com.acmr.excel.model.mongo.MExcelCell;
-import com.acmr.excel.model.position.RowCol;
 import com.acmr.excel.service.MCellService;
 import com.acmr.excel.util.CellFormateUtil;
 
@@ -29,7 +29,7 @@ public class MCellServiceImpl implements MCellService {
 	@Resource
 	private BaseDao baseDao;
 	@Resource
-	private MExcelDao mexcelDao;
+	private MSheetDao mexcelDao;
 	@Resource
 	private MCellDao mcellDao;
 
@@ -42,8 +42,8 @@ public class MCellServiceImpl implements MCellService {
 		int colEnd = cell.getCoordinate().getEndCol();*/
 		List<RowCol> sortRcList = new ArrayList<RowCol>();
 		List<RowCol> sortClList = new ArrayList<RowCol>();
-		mrowColDao.getColList(sortClList, excelId);
-		mrowColDao.getRowList(sortRcList, excelId);
+		mrowColDao.getColList(sortClList, excelId,"");
+		mrowColDao.getRowList(sortRcList, excelId,"");
 		String rowAlias = sortRcList.get(rowIndex).getAlias();
 		String colAlias = sortClList.get(colIndex).getAlias();
 		String id = rowAlias+"_"+colAlias;
@@ -91,7 +91,7 @@ public class MCellServiceImpl implements MCellService {
 			}
 			baseDao.update(excelId, relationList);//存关系映射表
 */			
-			mexcelDao.updateStep(excelId, step);
+			mexcelDao.updateStep(excelId,"", step);
 			
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();

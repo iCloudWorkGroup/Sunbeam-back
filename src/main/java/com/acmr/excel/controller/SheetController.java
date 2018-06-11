@@ -1,10 +1,6 @@
 package com.acmr.excel.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -14,28 +10,22 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.acmr.excel.controller.excelbase.BaseController;
-import com.acmr.excel.model.Constant;
 import com.acmr.excel.model.Frozen;
+import com.acmr.excel.model.OpenExcel;
 import com.acmr.excel.model.OperatorConstant;
 import com.acmr.excel.model.Paste;
 import com.acmr.excel.model.complete.CompleteExcel;
-import com.acmr.excel.model.complete.ReturnParam;
 import com.acmr.excel.model.complete.SheetElement;
-import com.acmr.excel.model.complete.SpreadSheet;
 import com.acmr.excel.model.copy.Copy;
-import com.acmr.excel.model.mongo.MExcelSheet;
-import com.acmr.excel.model.position.OpenExcel;
-import com.acmr.excel.model.position.RowCol;
 import com.acmr.excel.service.ExcelService;
+import com.acmr.excel.service.MBookService;
 import com.acmr.excel.service.MExcelService;
-import com.acmr.excel.service.PasteService;
+import com.acmr.excel.service.MSheetService;
 import com.acmr.excel.service.impl.MongodbServiceImpl;
 import com.acmr.excel.util.AnsycDataReturn;
-import com.acmr.excel.util.JsonReturn;
 import com.acmr.excel.util.StringUtil;
 
 import acmr.excel.pojo.ExcelBook;
-import acmr.excel.pojo.ExcelSheet;
 
 /**
  * SHEET操作
@@ -48,12 +38,15 @@ import acmr.excel.pojo.ExcelSheet;
 public class SheetController extends BaseController {
 	@Resource
 	private MongodbServiceImpl mongodbServiceImpl;
-	@Resource
-	private PasteService pasteService; 
+	
 	@Resource
 	private ExcelService excelService;
 	@Resource
 	private MExcelService mexcelService;
+	@Resource
+	private MSheetService msheetService;
+	@Resource
+	private MBookService mbookService;
 	
 
 	/**
@@ -134,7 +127,9 @@ public class SheetController extends BaseController {
 		}
 		Paste paste = getJsonDataParameter(req, Paste.class);
 		ExcelBook excelBook = (ExcelBook)mongodbServiceImpl.get(null, null, null);
-		boolean isAblePasteResult = pasteService.isAblePaste(paste, excelBook);
+		
+		//pasteService.isAblePaste(paste, excelBook);
+		boolean isAblePasteResult = true;
 		AnsycDataReturn ansycDataReturn = new AnsycDataReturn();
 		if(isAblePasteResult){
 			this.assembleData(req, resp, paste, OperatorConstant.paste);
@@ -159,7 +154,8 @@ public class SheetController extends BaseController {
 		}
 		Copy copy = getJsonDataParameter(req, Copy.class);
 		ExcelBook excelBook = (ExcelBook)mongodbServiceImpl.get(null, null, null);
-		boolean isAblePasteResult = pasteService.isCopyPaste(copy, excelBook);
+	    // pasteService.isCopyPaste(copy, excelBook);
+		boolean isAblePasteResult =true;
 		AnsycDataReturn ansycDataReturn = new AnsycDataReturn();
 		if(isAblePasteResult){
 			this.assembleData(req, resp, copy, OperatorConstant.copy);
@@ -184,7 +180,8 @@ public class SheetController extends BaseController {
 		}
 		Copy copy = getJsonDataParameter(req, Copy.class);
 		ExcelBook excelBook = (ExcelBook)mongodbServiceImpl.get(null, null, null);
-		boolean isAblePasteResult = pasteService.isCopyPaste(copy, excelBook);
+		//pasteService .isCopyPaste(copy, excelBook);
+		boolean isAblePasteResult = true;
 		AnsycDataReturn ansycDataReturn = new AnsycDataReturn();
 		if(isAblePasteResult){
 			this.assembleData(req, resp, copy, OperatorConstant.cut);
@@ -205,6 +202,7 @@ public class SheetController extends BaseController {
 		long b1 = System.currentTimeMillis();
 		String excelId = req.getHeader("X-Book-Id");
 		String curStep = req.getHeader("X-Step");
+		String sheetId = excelId+0;
 		int memStep = 0 ;
 		int cStep = 0;
 		
@@ -212,7 +210,7 @@ public class SheetController extends BaseController {
 			cStep = Integer.valueOf(curStep);
 		}
 		if(cStep>0){
-			memStep = mexcelService.getStep(excelId);
+			memStep = msheetService.getStep(excelId,sheetId);
 			if(cStep!=memStep){
 				try {
 					Thread.sleep(100);
@@ -229,38 +227,13 @@ public class SheetController extends BaseController {
 			return;
 		}
 		OpenExcel openExcel = getJsonDataParameter(req, OpenExcel.class);
-		
-		
 		int rowBegin = openExcel.getTop();
 		int rowEnd = openExcel.getBottom();
 		int colBegin = openExcel.getLeft();
 		int colEnd = openExcel.getRight() == 0 ? 2000 : openExcel.getRight() ;
 		
-		List<RowCol> sortRcList = new ArrayList<RowCol>();//存贮整理顺序后的行
-		List<RowCol> sortClList = new ArrayList<RowCol>();//存储整理顺序后的列
-		Map<String,RowCol> newRcMap = new HashMap<String,RowCol>();
-		Map<String,RowCol> newClMap = new HashMap<String,RowCol>();
-		mongodbServiceImpl.getRowList(sortRcList, newRcMap, excelId);
-		mongodbServiceImpl.getColList(sortClList, newClMap, excelId);
-		int rowBeginIndex = mongodbServiceImpl.getIndexByPixel(sortRcList, rowBegin);
-		int rowEndIndex = mongodbServiceImpl.getIndexByPixel(sortRcList,rowEnd);
-		int colBeginIndex = mongodbServiceImpl.getIndexByPixel(sortClList,colBegin);
-		int colEndIndex = mongodbServiceImpl.getIndexByPixel(sortClList,colEnd);
-		
-		CompleteExcel excel = new CompleteExcel();
-		SheetElement sheet = new SheetElement();
-		
-
-			ExcelSheet excelSheet = mongodbServiceImpl.getSheetBySort(rowBeginIndex,rowEndIndex,colBeginIndex,colEndIndex, excelId,sortRcList,sortClList);
-			
-			if (excelSheet != null) {
-				
-				excel.getSheets().add(sheet);
-				sheet = excelService.openExcel(sheet, excelSheet, rowBeginIndex, rowEndIndex, colBeginIndex, colEndIndex,  sortRcList, sortClList);
-			
-			} else {
-				
-			}
+		CompleteExcel excel =  mbookService.reload(excelId, sheetId, rowBegin, rowEnd, colBegin, colEnd);
+		SheetElement sheet = new SheetElement(excel.getSheets().get(0));
 		
 		long b2 = System.currentTimeMillis();
 		System.out.println("openexcel=====================" + (b2 - b1));

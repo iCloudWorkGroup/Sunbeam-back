@@ -16,15 +16,13 @@ import javax.jms.TextMessage;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
-import com.acmr.excel.service.CellService;
-import com.acmr.excel.service.HandleExcelService;
+
 import com.acmr.excel.service.MCellService;
 import com.acmr.excel.service.MColService;
 import com.acmr.excel.service.MExcelService;
 import com.acmr.excel.service.MRowService;
 import com.acmr.excel.service.MSheetService;
-import com.acmr.excel.service.PasteService;
-import com.acmr.excel.service.SheetService;
+
 import com.acmr.excel.service.impl.MongodbServiceImpl;
 import com.acmr.mq.Model;
 
@@ -37,16 +35,10 @@ import com.acmr.mq.Model;
 @Service
 public class QueueReceiver implements MessageListener {
 	private static Logger logger = Logger.getLogger(QueueReceiver.class);
-	@Resource
-	private HandleExcelService handleExcelService;
+	
 	@Resource
 	private MongodbServiceImpl mongodbServiceImpl;
-	@Resource
-	private CellService cellService;
-	@Resource
-	private PasteService pasteService;
-	@Resource
-	private SheetService sheetService;
+	
 	@Resource
 	private MExcelService mexcelService;
 	@Resource

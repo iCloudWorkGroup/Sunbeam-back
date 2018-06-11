@@ -6,9 +6,10 @@ import java.util.List;
 import acmr.excel.pojo.ExcelColumn;
 import acmr.excel.pojo.ExcelRow;
 
+import com.acmr.excel.model.RowCol;
 import com.acmr.excel.model.complete.Glx;
 import com.acmr.excel.model.complete.Gly;
-import com.acmr.excel.model.position.RowCol;
+
 /**
  * 二分查找又称折半查找，它是一种效率较高的查找方法。 　　【二分查找要求】：1.必须采用顺序存储结构 2.必须按关键字大小有序排列。
  * 
