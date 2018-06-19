@@ -832,15 +832,17 @@ public class MBookServiceImpl implements MBookService {
 				oc.getRow().add(ids[0]);
 				oc.getCol().add(ids[1]);
 			}else{
+				int indexRow = rMap.get(ids[0]);
 				for(int i=0;i<mc.getRowspan();i++){
-					int index = rMap.get(ids[0]);
-					oc.getRow().add(sortRList.get(index).getAlias());
-					index++;
+					
+					oc.getRow().add(sortRList.get(indexRow).getAlias());
+					indexRow++;
 				}
+				int indexCol = cMap.get(ids[1]);
 				for(int i=0;i<mc.getColspan();i++){
-					int index = cMap.get(ids[1]);
-					oc.getCol().add(sortCList.get(index).getAlias());
-					index++;
+					
+					oc.getCol().add(sortCList.get(indexCol).getAlias());
+					indexCol++;
 				}
 				
 			}

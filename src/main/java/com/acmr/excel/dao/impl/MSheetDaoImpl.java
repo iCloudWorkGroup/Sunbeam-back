@@ -29,9 +29,9 @@ public class MSheetDaoImpl implements MSheetDao {
 	}
 
 	@Override
-	public void updateFrozen(MSheet msheet, String excelId) {
+	public void updateFrozen(MSheet msheet, String excelId,String sheetId) {
 		Query query = new Query();
-		query.addCriteria(Criteria.where("_id").is(excelId));
+		query.addCriteria(Criteria.where("_id").is(sheetId));
 		Update update = new Update();
 		update.set("step", msheet.getStep());
 		update.set("viewRowAlias", msheet.getViewRowAlias());
@@ -44,9 +44,9 @@ public class MSheetDaoImpl implements MSheetDao {
 	}
 
 	@Override
-	public void updateUnFrozen(MSheet msheet, String excelId) {
+	public void updateUnFrozen(MSheet msheet, String excelId,String sheetId) {
 		Query query = new Query();
-		query.addCriteria(Criteria.where("_id").is(excelId));
+		query.addCriteria(Criteria.where("_id").is(sheetId));
 		Update update = new Update();
 		update.set("step", msheet.getStep());
 		update.set("freeze", msheet.getFreeze());

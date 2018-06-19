@@ -1,15 +1,17 @@
 package com.acmr.excel.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Cell implements Serializable {
 	private int sheetId;
-	private Coordinate coordinate = new Coordinate();
+	private List<Coordinate> coordinate = new ArrayList<Coordinate>();
 	private String direction;
 	private String align;
 	private String isBold;
-	private String italic;
-	private String wordWrap;
+	private Boolean italic;
+	private Boolean auto;
 
 	/**
 	 * 行索引
@@ -68,11 +70,11 @@ public class Cell implements Serializable {
 		this.sheetId = sheetId;
 	}
 
-	public Coordinate getCoordinate() {
+	public List<Coordinate> getCoordinate() {
 		return coordinate;
 	}
 
-	public void setCoordinate(Coordinate coordinate) {
+	public void setCoordinate(List<Coordinate> coordinate) {
 		this.coordinate = coordinate;
 	}
 
@@ -196,11 +198,11 @@ public class Cell implements Serializable {
 		this.isBold = isBold;
 	}
 
-	public String getItalic() {
+	public Boolean getItalic() {
 		return italic;
 	}
 
-	public void setItalic(String italic) {
+	public void setItalic(Boolean italic) {
 		this.italic = italic;
 	}
 
@@ -212,12 +214,14 @@ public class Cell implements Serializable {
 		this.bgcolor = bgcolor;
 	}
 
-	public String getWordWrap() {
-		return wordWrap;
+	public Boolean getAuto() {
+		return auto;
 	}
 
-	public void setWordWrap(String wordWrap) {
-		this.wordWrap = wordWrap;
+	public void setAuto(Boolean auto) {
+		this.auto = auto;
 	}
+
+	
 
 }

@@ -1,15 +1,19 @@
 package test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.xbean.spring.context.ClassPathXmlApplicationContext;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 
-import com.acmr.excel.dao.base.BaseDao;
 import com.acmr.excel.model.complete.Content;
-import com.acmr.excel.model.complete.OperProp;
+import com.acmr.excel.model.mongo.MCell;
 import com.acmr.excel.model.mongo.MCol;
 import com.acmr.excel.model.mongo.MRow;
 
@@ -68,20 +72,36 @@ public class Test1 {
 		//list.add("das");
 		MRow row  = new MRow();
 		MRow rwo1 = new MRow();
-		list.add(row);
-		list.add(rwo1);
 		row.setAlias("3");
 		row.setSheetId("23");
 		rwo1.setSheetId("23");
 		
-		Content content = row.getProps().getContent();
+		list.add(row);
+		list.add(rwo1);
+		list.remove(row);
+		
+		/*Content content = row.getProps().getContent();
 		
 		MCol mcol = new MCol();
 		mcol.setAlias("7");
+		MCell mc = new MCell();
+		mc.setId("1_2");
+		mc.setColspan(2);
+		mc.setRowspan(6);
 		
 		//list.add(mcol);
-		mongoTemplate.insert(list, "aa");
+		//mongoTemplate.save(mc, "aa");
 		//mongoTemplate.dropCollection("aa");
+		Map<String,String> map = new HashMap<String,String>();
+		map.put("1", "aa");
+		String a = map.get("a");
+		String b = map.get("1");*/
+		/*Query query = new Query();
+	    query.addCriteria(Criteria.where("alias").is("7"));
+	    Update update = new Update();
+	    update.set("content."+"famly", "sun");
+	    mongoTemplate.updateMulti(query, update, MCol.class,"aa");
+		*/
 	}
 
 }

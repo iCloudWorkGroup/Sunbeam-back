@@ -32,6 +32,27 @@ public class MCellDaoImpl implements MCellDao {
 	}
 	
 	@Override
+	public List<MRowColCell> getMRowColCellList(String excelId, String sheetId, List<String> aliasList, String type) {
+		
+		Criteria criatira = new Criteria();
+		criatira.andOperator(Criteria.where(type).in(aliasList).and("sheetId").is(sheetId).and("_class").is(MRowColCell.class.getName()));
+		List<MRowColCell> list = mongoTemplate.find(new Query(criatira), MRowColCell.class,excelId);
+		return list;
+	}
+	
+	@Override
+	public List<MRowColCell> getMRowColCellList(String excelId, String sheetId, List<String> rowList,
+			List<String> colList) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("_class").is(MRowColCell.class.getName()).and("sheetId").is(sheetId)
+				.and("row").in(rowList).and("col").in(colList));
+		
+		List<MRowColCell> list = mongoTemplate.find(query, MRowColCell.class,excelId);
+
+		return list;
+	}
+	
+	@Override
 	public void delMRowColCell(String excelId,String sheetId, String field,String alias) {
 		
 		mongoTemplate.remove(new Query(Criteria.where(field).is(alias).and("_class").is(MRowColCell.class.getName()).and("sheetId").is(sheetId)),
@@ -43,6 +64,23 @@ public class MCellDaoImpl implements MCellDao {
 	public void delMRowColCell(Integer col, String excelId) {
 		
 		mongoTemplate.remove(new Query(Criteria.where("col").is(col)),RowColCell.class, excelId);
+		
+	}
+	
+	@Override
+	public void delMRowColCellList(String excelId, String sheetId, List<String> rowList, List<String> colList) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("_class").is(MRowColCell.class.getName()).and("sheetId").is(sheetId)
+				.and("row").in(rowList).and("col").in(colList));
+		mongoTemplate.remove(query,MRowColCell.class,excelId);
+	}
+	
+	@Override
+	public void delMRowColCellList(String excelId, String sheetId, List<String> cellIdList) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("_class").is(MRowColCell.class.getName()).and("sheetId").is(sheetId)
+				.and("cellId").in(cellIdList));
+		mongoTemplate.remove(query,MRowColCell.class,excelId);
 		
 	}
 	
@@ -64,10 +102,11 @@ public class MCellDaoImpl implements MCellDao {
 	}
 	
 	@Override
-	public MExcelCell getMCell(String excelId, String id) {
+	public MCell getMCell(String excelId,String sheetId, String id) {
 		
-		MExcelCell mexcelCell =  mongoTemplate.findOne(new Query(Criteria.where("_id").is(id)), MExcelCell.class,excelId);
-		return mexcelCell;
+		MCell mcell =  mongoTemplate.findOne(new Query(Criteria.where("_id").is(id).and("sheetId").is(sheetId)), 
+				MCell.class,excelId);
+		return mcell;
 	}
 
 
@@ -81,15 +120,6 @@ public class MCellDaoImpl implements MCellDao {
 		
 	}
 
-	@Override
-	public void updateFont(String name,Object property,List<String> idList,String excelId) {
-		Query query = new Query();
-	    query.addCriteria(Criteria.where("_id").in(idList));
-	    Update update = new Update();
-	    update.set("excelCell.cellstyle.font."+name, property);
-	    mongoTemplate.updateMulti(query, update, MExcelCell.class,excelId);
-	}
-
 
 	@Override
 	public void updateHidden(String type, String alias,boolean state, String excelId) {
@@ -100,5 +130,25 @@ public class MCellDaoImpl implements MCellDao {
 	    mongoTemplate.updateFirst(query, update, MExcelCell.class,excelId);
 		
 	}
+	
+	@Override
+	public void updateContent(String property,Object content,List<String> idList,String excelId,String sheetId) {
+		Query query = new Query();
+	    query.addCriteria(Criteria.where("_id").in(idList).and("sheetId").is(sheetId));
+	    Update update = new Update();
+	    update.set("content."+property, content);
+	    mongoTemplate.updateMulti(query, update, MCell.class,excelId);
+	}
+
+	@Override
+	public void updateSpan(List<String> cellIdList, String excelId, String sheetId) {
+		Query query = new Query();
+	    query.addCriteria(Criteria.where("_id").in(cellIdList).and("sheetId").is(sheetId));
+	    Update update = new Update();
+	    update.set("rowspan", 1);
+	    update.set("colspan", 1);
+	    mongoTemplate.updateMulti(query, update, MCell.class,excelId);
+	}
+
 
 }

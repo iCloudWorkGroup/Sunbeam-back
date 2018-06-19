@@ -32,7 +32,7 @@ public interface MRowColDao {
 	void updateRowCol(String excelId,String sheetId, String id,String alias,String preAlias);
 	
 	/**
-	 * 根据条件更新一条行或类记录
+	 * 插入一条行或列记录
 	 * @param excelId  数据集ID
 	 * @param sheetId  sheet ID
 	 * @param rowCol   行列对象
@@ -49,5 +49,13 @@ public interface MRowColDao {
 	 */
     void delRowCol(String excelId,String sheetId,String alias,String id);
     
-    void updateRowColLength(String excelId,String id,String alias,Integer length);
+    /**
+     * 根据别名更新行或列长度
+     * @param excelId
+     * @param sheetId
+     * @param id
+     * @param alias
+     * @param length
+     */
+    void updateRowColLength(String excelId,String sheetId,String id,String alias,Integer length);
 }

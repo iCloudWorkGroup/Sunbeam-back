@@ -5,20 +5,16 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
-
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.ModelAndView;
 
 import com.acmr.excel.controller.excelbase.BaseController;
 import com.acmr.excel.model.Cell;
+import com.acmr.excel.model.CellContent;
 import com.acmr.excel.model.CellFormate;
 import com.acmr.excel.model.ColorSet;
 import com.acmr.excel.model.Comment;
 import com.acmr.excel.model.OperatorConstant;
-
-import acmr.excel.pojo.ExcelBook;
 
 
 /**
@@ -189,7 +185,7 @@ public class CellController extends BaseController {
 	 */
     @RequestMapping("/data-set")
 	public void data(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-		Cell cell = getJsonDataParameter(req, Cell.class);
+    	CellContent cell = getJsonDataParameter(req, CellContent.class);
 		this.assembleData(req, resp, cell, OperatorConstant.textData);
 	}
 	/**

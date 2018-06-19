@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import com.acmr.excel.model.complete.Content;
 import com.acmr.excel.model.complete.Format;
+import com.acmr.excel.model.mongo.MCell;
 
 import acmr.excel.pojo.Constants.CELLTYPE;
 import acmr.excel.pojo.ExcelCell;
@@ -380,6 +381,7 @@ public class CellFormateUtil {
 		return true;
 		//return NumberUtils.isNumber(str);
 	}
+	
 	/**
 	 * 自动识别
 	 * @param content
@@ -417,6 +419,41 @@ public class CellFormateUtil {
 			excelCell.getCellstyle().setDataformat("m/d/yy");
 			//excelCell.setShowText(content);
 			excelCell.getExps().put("displayText", content);
+		}
+	}
+	
+	/**
+	 * 自动识别
+	 * @param content
+	 */
+	
+	public static void autoRecognise(String text,MCell mcell){
+		String pattern1 = "yyyy年MM月dd日"; 
+		String pattern2 = "yyyy年MM月";
+		String pattern3 = "yyyy/MM/dd";
+		Date d1 = getDate(text, pattern1);
+		Date d2 = getDate(text, pattern2);
+		Date d3 = getDate(text, pattern3);
+		Content content = mcell.getContent();
+		if(isNumeric(text)){
+			text = getPrettyNumber(text);
+			content.setType(CELLTYPE.NUMERIC.name());
+			content.setExpress("General");
+			
+		}else if(d1 != null){
+			content.setType(CELLTYPE.DATE.name());
+			content.setExpress("[$-F800]dddd\\,\\ mmmm\\ dd\\,\\ yyyy");
+			
+			
+		}else if(d2 != null){
+			content.setType(CELLTYPE.DATE.name());
+			content.setExpress("yyyy\"年\"m\"月\";@");
+			
+			
+		}else if(d3 != null){
+			content.setType(CELLTYPE.DATE.name());
+			content.setExpress("m/d/yy");
+
 		}
 	}
 	

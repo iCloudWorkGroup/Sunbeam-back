@@ -63,5 +63,19 @@ public class MCell implements Serializable{
 	public void setCustomProp(CustomProp customProp) {
 		this.customProp = customProp;
 	}
+	
+	public MCell(){
+		
+	}
+	
+	public MCell(String id,String sheetId){
+		this.id = id;
+		this.colspan =1;
+		this.rowspan =1;
+		this.sheetId = sheetId;
+		this.getContent().setAlignCol("middle");
+		this.getContent().setAlignRow("center");
+		
+	}
 
 }

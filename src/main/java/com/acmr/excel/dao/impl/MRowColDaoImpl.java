@@ -149,9 +149,9 @@ public class MRowColDaoImpl  implements MRowColDao{
 	}
 
 	@Override
-	public void updateRowColLength(String excelId, String id, String alias, Integer length) {
+	public void updateRowColLength(String excelId,String sheetId, String id, String alias, Integer length) {
 		Query query = new Query();
-		query.addCriteria(Criteria.where("_id").is(id).and("rcList.alias").is(alias));
+		query.addCriteria(Criteria.where("_id").is(id).and("rcList.alias").is(alias).and("sheetId").is(sheetId));
 		Update update = new Update();
 		update.set("rcList.$.length", length);
 		mongoTemplate.updateFirst(query, update, excelId);

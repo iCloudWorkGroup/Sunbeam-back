@@ -10,19 +10,22 @@ public interface MSheetDao {
   * @param sheetId
   */
   void 	updateStep(String excelId,String sheetId,Integer step);
+ 
   /**
    * 更新冻结属性
-   * @param mexcel
+   * @param msheet
    * @param excelId
+   * @param sheetId
    */
-  void updateFrozen(MSheet msheet,String excelId);
+  void updateFrozen(MSheet msheet,String excelId,String sheetId);
   
   /**
    * 解除冻结
-   * @param mexcel
+   * @param msheet
    * @param excelId
+   * @param sheetId
    */
-  void updateUnFrozen(MSheet msheet,String excelId);
+  void updateUnFrozen(MSheet msheet,String excelId,String sheetId);
   
   /**
    * 更新最大列值

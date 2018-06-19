@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import com.acmr.excel.dao.MCellDao;
@@ -39,12 +40,12 @@ public class MColServiceImpl implements MColService {
 	private MRowColDao mrowColDao;
 	@Resource
 	private MCellDao mcellDao;
-	@Resource
-	private MExcelColDao mexcelColDao;
+	
 	@Resource
 	private MSheetDao msheetDao;
 	@Resource
 	private MColDao mcolDao;
+	
 
 	@Override
 	public void insertCol(ColOperate colOperate, String excelId,Integer step) {
@@ -52,7 +53,7 @@ public class MColServiceImpl implements MColService {
 		List<RowCol> sortRcList = new ArrayList<RowCol>();
 		List<RowCol> sortClList = new ArrayList<RowCol>();
 		mrowColDao.getColList(sortClList, excelId,sheetId);
-		mrowColDao.getColList(sortRcList, excelId,sheetId);
+		mrowColDao.getRowList(sortRcList, excelId,sheetId);
 		if(colOperate.getCol()>sortClList.size()-1){
 			return;
 		}
@@ -68,23 +69,23 @@ public class MColServiceImpl implements MColService {
 		
 		RowCol rowCol = new RowCol();
 		rowCol.setAlias(alias);
-		rowCol.setLength(19);
+		rowCol.setLength(69);
 		if(colOperate.getCol() == 0){
 			rowCol.setPreAlias(null);
 		}else{
-			rowCol.setPreAlias(sortRcList.get(colOperate.getCol()-1).getAlias());
+			rowCol.setPreAlias(sortClList.get(colOperate.getCol()-1).getAlias());
 		}
 		
 		mrowColDao.insertRowCol(excelId,sheetId, rowCol, "cList");
 		//修改这列前列别名
-		String nextAlias = sortRcList.get(colOperate.getCol()).getAlias();
+		String nextAlias = sortClList.get(colOperate.getCol()).getAlias();
 		mrowColDao.updateRowCol(excelId,sheetId, "cList", nextAlias, alias);
 		//存一个列样式
 		MCol mcol = new MCol();
 		mcol.setSheetId(sheetId);
 		mcol.setAlias(alias);
 		mcol.setHidden(false);
-		mcol.setWidth(19);
+		mcol.setWidth(69);
 		
 		baseDao.insert(excelId, mcol);
 		
@@ -100,29 +101,32 @@ public class MColServiceImpl implements MColService {
 		}
 		List<MCell> mcellList = mcellDao.getMCellList(excelId,sheetId, cellIdList);
 		
-		List<Object> tempList = new ArrayList<Object>();
+		List<Object> insertList = new ArrayList<Object>();//存需要插入的对象
+ 		
 		for(MCell mc : mcellList){
 			String[] ids = mc.getId().split("_");
 			if((mc.getColspan()>1)&&(!ids[1].equals(col))){
 				mc.setColspan(mc.getColspan()+1);
-			}
-			tempList.add(mc);
-			for(int i=0;i<mc.getRowspan();i++){
-				MRowColCell mrcc = new MRowColCell();
-				String row = ids[0];
-				Integer index = rowMap.get(row);
-				row = sortRcList.get(index).getAlias();
-				index++;
-				mrcc.setCellId(mc.getId());
-				mrcc.setRow(row);
-				mrcc.setCol(alias);
-				mrcc.setSheetId(sheetId);
-				tempList.add(mrcc);
+				baseDao.update(excelId, mc);
+				for(int i=0;i<mc.getRowspan();i++){
+					MRowColCell mrcc = new MRowColCell();
+					String row = ids[0];
+					Integer index = rowMap.get(row);
+					row = sortRcList.get(index).getAlias();
+					index++;
+					mrcc.setCellId(mc.getId());
+					mrcc.setRow(row);
+					mrcc.setCol(alias);
+					mrcc.setSheetId(sheetId);
+					insertList.add(mrcc);
+				}
 			}
 			
+			
+			
 		}
-		if(tempList.size()>0){
-			baseDao.update(excelId, tempList);
+		if(insertList.size()>0){
+			baseDao.insert(excelId, insertList);
 		}
 		msheetDao.updateStep(excelId,sheetId, step);
 		
@@ -208,7 +212,7 @@ public class MColServiceImpl implements MColService {
 		List<RowCol> sortRList = new ArrayList<RowCol>();
 		List<RowCol> sortCList = new ArrayList<RowCol>();
 		mrowColDao.getColList(sortRList, excelId,sheetId);
-		mrowColDao.getColList(sortCList, excelId,sheetId);
+		mrowColDao.getRowList(sortCList, excelId,sheetId);
 		if(colOperate.getCol()>sortCList.size()-1){
 			return;
 		}
@@ -242,7 +246,8 @@ public class MColServiceImpl implements MColService {
         //删除关系表
         mcellDao.delMRowColCell(excelId,sheetId,"col", alias);
         cellIdList.clear();//存需要删除的MExcelCell的Id
-		cellList.clear();//存需要修改或增加的MExcelCell对象
+		cellList.clear();//存需要插入的MExcelCell对象
+		
 		for(MCell mc:cellList){
 			if(mc.getColspan()==1){
 				cellIdList.add(mc.getId());
@@ -262,14 +267,15 @@ public class MColServiceImpl implements MColService {
 				}else{
 					MCell mec = mc;
 					mec.setColspan(mc.getColspan()-1);
-					cellList.add(mec);
+					baseDao.update(excelId, mec);
 				}
 			}
 		}
 		
 		mcellDao.delMCell(excelId,sheetId, cellIdList);
 		if(cellList.size()>0){
-		 baseDao.update(excelId, cellList);
+		 baseDao.insert(excelId, cellList);
+		
 		}
 		msheetDao.updateStep(excelId,sheetId, step);
         
@@ -326,41 +332,44 @@ public class MColServiceImpl implements MColService {
 
 	@Override
 	public void hideCol(ColOperate colOperate, String excelId,Integer step) {
+		String sheetId = excelId+0;
 		List<RowCol> sortCList = new ArrayList<RowCol>();
-		mrowColDao.getColList(sortCList, excelId,"");
+		mrowColDao.getColList(sortCList, excelId,sheetId);
 		String alias = sortCList.get(colOperate.getCol()).getAlias();
 		
-		mexcelColDao.updateColHiddenStatus(excelId, alias, true);
+		mcolDao.updateColHiddenStatus(excelId,sheetId, alias, true);
 		
-		mrowColDao.updateRowColLength(excelId, "cList", alias, 0);
+		mrowColDao.updateRowColLength(excelId,sheetId, "cList", alias, 0);
 		//mcellDao.updateHidden("colId", alias, true, excelId);
-		msheetDao.updateStep(excelId,"", step);
+		msheetDao.updateStep(excelId,sheetId, step);
 	}
 
 	@Override
 	public void showCol(ColOperate colOperate, String excelId,Integer step) {
+		String sheetId = excelId+0;
 		List<RowCol> sortCList = new ArrayList<RowCol>();
-		mrowColDao.getColList(sortCList, excelId,"");
+		mrowColDao.getColList(sortCList, excelId,sheetId);
 		String alias = sortCList.get(colOperate.getCol()).getAlias();
-		mexcelColDao.updateColHiddenStatus(excelId, alias, false);
+		mcolDao.updateColHiddenStatus(excelId,sheetId, alias, false);
 		
-		MExcelColumn mcol = mexcelColDao.getMExcelCol(excelId, alias);
-		mrowColDao.updateRowColLength(excelId, "cList", alias, mcol.getExcelColumn().getWidth());
+		MCol mcol = mcolDao.getMCol(excelId,sheetId,alias);
+		mrowColDao.updateRowColLength(excelId,sheetId, "cList", alias, mcol.getWidth());
 		//mcellDao.updateHidden("colId", alias, false, excelId);
-		msheetDao.updateStep(excelId,"", step);
+		msheetDao.updateStep(excelId,sheetId, step);
 	}
 
 	@Override
 	public void updateColWidth(ColWidth colWidth, String excelId, Integer step) {
+		String sheetId = excelId+0;
 		List<RowCol> sortCList = new ArrayList<RowCol>();
-		mrowColDao.getColList(sortCList, excelId,"");
+		mrowColDao.getColList(sortCList, excelId,sheetId);
 		String alias = sortCList.get(colWidth.getCol()).getAlias();
 		Integer width = colWidth.getOffset();
 		
-		mexcelColDao.updateColWidth(excelId, alias, width);
-		mrowColDao.updateRowColLength(excelId, "cList", alias, width);
+		mcolDao.updateColWidth(excelId,sheetId, alias, width);
+		mrowColDao.updateRowColLength(excelId,sheetId, "cList", alias, width);
 		
-		msheetDao.updateStep(excelId,"", step);
+		msheetDao.updateStep(excelId,sheetId, step);
 		
 	}
 

@@ -22,33 +22,31 @@ public class MSheetServiceImpl implements MSheetService {
 	
 	@Override
 	public void frozen(Frozen frozen, String excelId, Integer step) {
-		/*List<RowCol> sortRList = new ArrayList<RowCol>();
-		List<RowCol> sortCList = new ArrayList<RowCol>();
-		mrowColDao.getRowList(sortRList, excelId);
-		mrowColDao.getColList(sortCList, excelId);*/
+		String sheetId = excelId+0;
 		String oprRow = frozen.getOprRow();
 		String oprCol = frozen.getOprCol();
 		String viewRow = frozen.getViewRow();
 		String viewCol = frozen.getViewCol();
-		MSheet mexcel = new MSheet();
-		mexcel.setFreeze(true);
-		mexcel.setRowAlias(oprRow);
-		mexcel.setColAlias(oprCol);
-		mexcel.setViewRowAlias(viewRow);
-		mexcel.setViewColAlias(viewCol);
-		mexcel.setStep(step);
+		MSheet msheet = new MSheet();
+		msheet.setFreeze(true);
+		msheet.setRowAlias(oprRow);
+		msheet.setColAlias(oprCol);
+		msheet.setViewRowAlias(viewRow);
+		msheet.setViewColAlias(viewCol);
+		msheet.setStep(step);
 		
-		msheetDao.updateFrozen(mexcel, excelId);
+		msheetDao.updateFrozen(msheet, excelId,sheetId);
 
 	}
 
 	@Override
 	public void unFrozen(String excelId, Integer step) {
+		String sheetId = excelId+0;
 		MSheet mexcel = new MSheet();
 		mexcel.setFreeze(false);
 		mexcel.setStep(step);
 		mexcel.setId(excelId);
-		msheetDao.updateUnFrozen(mexcel, excelId);
+		msheetDao.updateUnFrozen(mexcel, excelId,sheetId);
 		
 	}
 

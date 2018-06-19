@@ -19,7 +19,7 @@ import com.acmr.excel.model.complete.SheetElement;
 import com.acmr.excel.model.copy.Copy;
 import com.acmr.excel.service.ExcelService;
 import com.acmr.excel.service.MBookService;
-import com.acmr.excel.service.MExcelService;
+
 import com.acmr.excel.service.MSheetService;
 import com.acmr.excel.service.impl.MongodbServiceImpl;
 import com.acmr.excel.util.AnsycDataReturn;
@@ -41,8 +41,7 @@ public class SheetController extends BaseController {
 	
 	@Resource
 	private ExcelService excelService;
-	@Resource
-	private MExcelService mexcelService;
+
 	@Resource
 	private MSheetService msheetService;
 	@Resource
@@ -96,9 +95,6 @@ public class SheetController extends BaseController {
 		Frozen frozen = getJsonDataParameter(req, Frozen.class);
 		this.assembleData(req, resp,frozen,OperatorConstant.unFrozen);
 	}
-
-	
-	
 	
 	/**
 	 * 回退

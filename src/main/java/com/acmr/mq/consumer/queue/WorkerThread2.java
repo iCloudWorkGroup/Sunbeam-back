@@ -1,11 +1,10 @@
 package com.acmr.mq.consumer.queue;
 
 
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 
 import com.acmr.excel.model.Cell;
+import com.acmr.excel.model.CellContent;
 import com.acmr.excel.model.ColOperate;
 import com.acmr.excel.model.ColWidth;
 import com.acmr.excel.model.Frozen;
@@ -14,11 +13,8 @@ import com.acmr.excel.model.RowHeight;
 import com.acmr.excel.model.RowOperate;
 import com.acmr.excel.service.MCellService;
 import com.acmr.excel.service.MColService;
-import com.acmr.excel.service.MExcelService;
 import com.acmr.excel.service.MRowService;
 import com.acmr.excel.service.MSheetService;
-
-import com.acmr.excel.service.impl.MongodbServiceImpl;
 import com.acmr.mq.Model;
 
 
@@ -28,33 +24,28 @@ public class WorkerThread2 implements Runnable{
 	private int step;  
 	private String key;
 	private Model model;
-	
-	private MongodbServiceImpl mongodbServiceImpl;
-	
 	private MCellService mcellService;
-	private MExcelService mexcelService;
 	private MRowService mrowService;
 	private MColService mcolService;
 	private MSheetService msheetService;
 	
     
-	public WorkerThread2(int step,String key,Model model,MCellService mcellService,MExcelService mexcelService,
-			MRowService mrowService,MColService mcolService,MSheetService msheetservice){  
+	public WorkerThread2(int step,String key,Model model,MCellService mcellService,
+			MRowService mrowService,MColService mcolService,MSheetService msheetService){  
 	       
 		this.step=step;
 	    this.key = key;
 	    this.model = model;
 	    this.mcellService = mcellService;
-	    this.mexcelService = mexcelService;
 	    this.mrowService = mrowService;
 	    this.mcolService = mcolService;
-	    this.msheetService = msheetservice;
+	    this.msheetService = msheetService;
 	}
    
     @Override  
     public void run() {  
     	while(true){
-    		int memStep = mexcelService.getStep(key);
+    		int memStep =msheetService.getStep(key,key+0);
     		if(memStep + 1 == step){
     			System.out.println(step + "开始执行");
     			logger.info("**********begin excelId : "+model.getExcelId() + " === step : " + step + "== reqPath : "+ model.getReqPath());
@@ -87,45 +78,38 @@ public class WorkerThread2 implements Runnable{
 		Cell cell = null;
 		switch (reqPath) {
 		case OperatorConstant.textData:
-			cell = (Cell) model.getObject();
-			mcellService.saveContent(cell, step, excelId);
+			CellContent	cellContent = (CellContent) model.getObject();
+			mcellService.saveContent(cellContent, step, excelId);
 			break;
-//		case OperatorConstant.fontsize:
-//			cell = (Cell) model.getObject();
-//			handleExcelService.updateCells(CellUpdateType.font_size, cell,excelBook,versionHistory,step);
-//			storeService.set(excelId+"_history",  versionHistory);
-//			break;
-//		case OperatorConstant.fontfamily:
-//			cell = (Cell) model.getObject();
-//			handleExcelService.updateCells(CellUpdateType.font_family, cell,excelBook,versionHistory,step);
-//			storeService.set(excelId+"_history", versionHistory);
-//			break;
-//		case OperatorConstant.fontweight:
-//			cell = (Cell) model.getObject();
-//			handleExcelService.updateCells(CellUpdateType.font_weight, cell,excelBook,versionHistory,step);
-//			storeService.set(excelId+"_history", versionHistory);
-//			break;
-//		case OperatorConstant.fontitalic:
-//			cell = (Cell) model.getObject();
-//			handleExcelService.updateCells(CellUpdateType.font_italic, cell,excelBook,versionHistory,step);
-//			storeService.set(excelId+"_history", versionHistory);
-//			break;
-//		case OperatorConstant.fontcolor:
-//			cell = (Cell) model.getObject();
-//			handleExcelService.updateCells(CellUpdateType.font_color, cell,excelBook,versionHistory,step);
-//			storeService.set(excelId+"_history", versionHistory);
-//			break;
-//		case OperatorConstant.wordWrap:
-//			cell = (Cell) model.getObject();
-//			handleExcelService.updateCells(CellUpdateType.word_wrap, cell,excelBook,versionHistory,step);
-//			storeService.set(excelId+"_history", versionHistory);
-//			break;
-//
-//		case OperatorConstant.fillbgcolor:
-//			cell = (Cell) model.getObject();
-//			handleExcelService.updateCells(CellUpdateType.fill_bgcolor, cell,excelBook,versionHistory,step);
-//			storeService.set(excelId+"_history", versionHistory);
-//			break;
+		case OperatorConstant.fontsize:
+			cell = (Cell) model.getObject();
+			mcellService.updateFontSize(cell, step, excelId);
+			break;
+		case OperatorConstant.fontfamily:
+			cell = (Cell) model.getObject();
+			mcellService.updateFontFamily(cell, step, excelId);
+			break;
+		case OperatorConstant.fontweight:
+			cell = (Cell) model.getObject();
+			mcellService.updateFontWeight(cell, step, excelId);
+			break;
+		case OperatorConstant.fontitalic:
+			cell = (Cell) model.getObject();
+			mcellService.updateFontItalic(cell, step, excelId);
+			break;
+		case OperatorConstant.fontcolor:
+			cell = (Cell) model.getObject();
+			mcellService.updateFontColor(cell, step, excelId);
+			break;
+		case OperatorConstant.wordWrap:
+			cell = (Cell) model.getObject();
+			mcellService.updateWordwrap(cell, step, excelId);
+			break;
+
+		case OperatorConstant.fillbgcolor:
+			cell = (Cell) model.getObject();
+		    mcellService.updateBgColor(cell, step, excelId);
+			break;
 //		case OperatorConstant.textDataformat:
 //			CellFormate cellFormate = (CellFormate) model.getObject();
 //			handleExcelService.setCellFormate(cellFormate, excelBook,versionHistory,step);
@@ -137,30 +121,26 @@ public class WorkerThread2 implements Runnable{
 //			handleExcelService.setComment(excelBook, comment,versionHistory,step);
 //			storeService.set(excelId+"_history", versionHistory);
 //			break;
-//		case OperatorConstant.merge:
-//			cell = (Cell) model.getObject();
-//			cellService.mergeCell(excelBook.getSheets().get(0), cell,versionHistory,step);
-//			storeService.set(excelId+"_history",versionHistory);
-//			break;
-//		case OperatorConstant.mergedelete:
-//			cell = (Cell) model.getObject();
-//			cellService.splitCell(excelBook.getSheets().get(0), cell,versionHistory,step);
-//			storeService.set(excelId+"_history", versionHistory);
-//			break;
+		case OperatorConstant.merge:
+			cell = (Cell) model.getObject();
+			mcellService.mergeCell(cell, step, excelId);
+			break;
+		case OperatorConstant.mergedelete:
+			cell = (Cell) model.getObject();
+			mcellService.splitCell(cell, step, excelId);
+			break;
 //		case OperatorConstant.frame:
 //			cell = (Cell) model.getObject();
 //			handleExcelService.updateCells(CellUpdateType.frame, cell,excelBook,versionHistory,step);
 //			storeService.set(excelId+"_history",  versionHistory);
 //			break;
-//		case OperatorConstant.alignlevel:
-//			cell = (Cell) model.getObject();
-//			handleExcelService.updateCells(CellUpdateType.align_level, cell,excelBook,versionHistory,step);
-//			storeService.set(excelId+"_history",  versionHistory);
-//			break;
-//		case OperatorConstant.alignvertical:
-//			cell = (Cell) model.getObject();
-//			handleExcelService.updateCells(CellUpdateType.align_vertical, cell,excelBook,versionHistory,step);
-//			break;
+		case OperatorConstant.alignlevel:
+			cell = (Cell) model.getObject();
+			mcellService.updateAlignlevel(cell, step, excelId);
+			break;
+		case OperatorConstant.alignvertical:
+			cell = (Cell) model.getObject();
+			mcellService.updateAlignvertical(cell, step, excelId);
 		case OperatorConstant.rowsinsert:
 			RowOperate rowOperate = (RowOperate) model.getObject();
 			mrowService.insertRow(rowOperate, excelId,step);

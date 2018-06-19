@@ -3,15 +3,8 @@ package test;
 import org.apache.xbean.spring.context.ClassPathXmlApplicationContext;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 
-import com.acmr.excel.model.mongo.MExcelCell;
-
-import acmr.excel.pojo.ExcelCellStyle;
-import acmr.excel.pojo.ExcelColor;
-import acmr.excel.pojo.ExcelFont;
+import com.acmr.excel.model.mongo.MCell;
 
 
 public class CellTest {
@@ -26,7 +19,10 @@ public static void main(String[] args) {
     font.setSize((short) 300);
     update.set("excelCell.cellstyle.font", font);
     mongoTemplate.updateFirst(query, update, MExcelCell.class,"9dad6428-2b6d-42dd-9e9a-185fdcfc0e12");*/
-    MExcelCell mexcelCell =  mongoTemplate.findOne(new Query(Criteria.where("_id").is("10_1")), MExcelCell.class,"9dad6428-2b6d-42dd-9e9a-185fdcfc0e12");
-    System.out.println(mexcelCell.getColId());
+   /* MExcelCell mexcelCell =  mongoTemplate.findOne(new Query(Criteria.where("_id").is("10_1")), MExcelCell.class,"9dad6428-2b6d-42dd-9e9a-185fdcfc0e12");
+    System.out.println(mexcelCell.getColId());*/
+	MCell mc = new MCell();
+	mc.setId("11");
+	
 }
 }
