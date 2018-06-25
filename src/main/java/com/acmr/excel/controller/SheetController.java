@@ -13,6 +13,7 @@ import com.acmr.excel.controller.excelbase.BaseController;
 import com.acmr.excel.model.Frozen;
 import com.acmr.excel.model.OpenExcel;
 import com.acmr.excel.model.OperatorConstant;
+import com.acmr.excel.model.OuterPaste;
 import com.acmr.excel.model.Paste;
 import com.acmr.excel.model.complete.CompleteExcel;
 import com.acmr.excel.model.complete.SheetElement;
@@ -116,19 +117,17 @@ public class SheetController extends BaseController {
 	 */
 	@RequestMapping("/paste")
 	public void paste(HttpServletRequest req,HttpServletResponse resp) throws Exception{
-		String excelId = req.getHeader("excelId");
+		String excelId = req.getHeader("X-Book-Id");
 		if (StringUtil.isEmpty(excelId)) {
 			resp.setStatus(400);
 			return;
 		}
-		Paste paste = getJsonDataParameter(req, Paste.class);
-		ExcelBook excelBook = (ExcelBook)mongodbServiceImpl.get(null, null, null);
+		OuterPaste outerPaste = getJsonDataParameter(req, OuterPaste.class);
 		
-		//pasteService.isAblePaste(paste, excelBook);
-		boolean isAblePasteResult = true;
+		boolean isAblePasteResult = msheetService.isAblePaste(outerPaste, excelId);
 		AnsycDataReturn ansycDataReturn = new AnsycDataReturn();
 		if(isAblePasteResult){
-			this.assembleData(req, resp, paste, OperatorConstant.paste);
+			this.assembleData(req, resp, outerPaste, OperatorConstant.paste);
 			ansycDataReturn.setIsLegal(true);
 			this.sendJson(resp, ansycDataReturn);
 		}else{
@@ -143,15 +142,13 @@ public class SheetController extends BaseController {
 	 */
 	@RequestMapping("/copy")
 	public void copy(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-		String excelId = req.getHeader("excelId");
+		String excelId = req.getHeader("X-Book-Id");
 		if (StringUtil.isEmpty(excelId)) {
 			resp.setStatus(400);
 			return;
 		}
 		Copy copy = getJsonDataParameter(req, Copy.class);
-		ExcelBook excelBook = (ExcelBook)mongodbServiceImpl.get(null, null, null);
-	    // pasteService.isCopyPaste(copy, excelBook);
-		boolean isAblePasteResult =true;
+		boolean isAblePasteResult = msheetService.isCutCopy(copy, excelId);
 		AnsycDataReturn ansycDataReturn = new AnsycDataReturn();
 		if(isAblePasteResult){
 			this.assembleData(req, resp, copy, OperatorConstant.copy);
@@ -169,15 +166,14 @@ public class SheetController extends BaseController {
 	 */
 	@RequestMapping("/cut")
 	public void cut(HttpServletRequest req,HttpServletResponse resp) throws Exception{
-		String excelId = req.getHeader("excelId");
+		String excelId = req.getHeader("X-Book-Id");
 		if (StringUtil.isEmpty(excelId)) {
 			resp.setStatus(400);
 			return;
 		}
 		Copy copy = getJsonDataParameter(req, Copy.class);
-		ExcelBook excelBook = (ExcelBook)mongodbServiceImpl.get(null, null, null);
-		//pasteService .isCopyPaste(copy, excelBook);
-		boolean isAblePasteResult = true;
+		
+		boolean isAblePasteResult = msheetService.isCutCopy(copy, excelId);
 		AnsycDataReturn ansycDataReturn = new AnsycDataReturn();
 		if(isAblePasteResult){
 			this.assembleData(req, resp, copy, OperatorConstant.cut);

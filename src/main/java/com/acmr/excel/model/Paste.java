@@ -4,8 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 public class Paste implements Serializable {
-	private int oprCol;
-	private int oprRow;
+	
 	private List<OuterPasteData> pasteData;
 	private int colLen;
 	private int rowLen;
@@ -33,22 +32,6 @@ public class Paste implements Serializable {
 
 	public void setRowLen(int rowLen) {
 		this.rowLen = rowLen;
-	}
-
-	public int getOprCol() {
-		return oprCol;
-	}
-
-	public void setOprCol(int oprCol) {
-		this.oprCol = oprCol;
-	}
-
-	public int getOprRow() {
-		return oprRow;
-	}
-
-	public void setOprRow(int oprRow) {
-		this.oprRow = oprRow;
 	}
 
 }

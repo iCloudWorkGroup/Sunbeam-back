@@ -228,9 +228,12 @@ public class MRowServiceImpl implements MRowService {
 		}else{
 			frontAlias = sortRList.get(index-1).getAlias();//前一行别名
 		}
-		 
-		String backAlias = sortRList.get(index+1).getAlias();//下一行别名
-		mrowColDao.updateRowCol(excelId,sheetId, "rList", backAlias, frontAlias);
+		String backAlias = null;
+		//当删除的是最后一行，不用修改它后面一行的前行别名
+		if(index != sortRList.size()-1){
+		 backAlias = sortRList.get(index+1).getAlias();//下一行别名
+		 mrowColDao.updateRowCol(excelId,sheetId, "rList", backAlias, frontAlias);
+		}
 		//删除行样式记录
 		mrowDao.delMRow(excelId,sheetId, alias);
 	    List<MRowColCell> relationList = mcellDao.getMRowColCellList(excelId,sheetId, alias,"row");
@@ -248,6 +251,7 @@ public class MRowServiceImpl implements MRowService {
       	cellList.clear();//存需要修改或增加的MExcelCell对象
       	for(MCell mc:cellList){
 			if(mc.getRowspan()==1){
+				//删除老的MExcelCell
 				cellIdList.add(mc.getId());
 			}else{
 				String[] ids = mc.getId().split("_");

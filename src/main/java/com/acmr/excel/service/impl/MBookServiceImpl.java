@@ -777,14 +777,19 @@ public class MBookServiceImpl implements MBookService {
 		Map<String,Integer> rMap = new HashMap<String,Integer>();
 		List<String> colList = new ArrayList<String>();
 		Map<String,Integer> cMap = new HashMap<String,Integer>();
-		for(int i = rowBeginIndex;i<rowEndIndex+1;i++){
-			rowList.add(sortRList.get(i).getAlias());
-			rMap.put(sortRList.get(i).getAlias(), i);
+		if(sortRList.size() > 0){
+			for(int i = rowBeginIndex;i<rowEndIndex+1;i++){
+				rowList.add(sortRList.get(i).getAlias());
+				rMap.put(sortRList.get(i).getAlias(), i);
+			}
 		}
-		for(int j = colBeginIndex;j<colEndIndex+1;j++){
-			colList.add(sortCList.get(j).getAlias());
-			cMap.put(sortCList.get(j).getAlias(), j);
+		if(sortCList.size()>0){
+			for(int j = colBeginIndex;j<colEndIndex+1;j++){
+				colList.add(sortCList.get(j).getAlias());
+				cMap.put(sortCList.get(j).getAlias(), j);
+			}
 		}
+		
 		
 		//行样式
 		List<MRow> rList = mrowDao.getMRowList(excelId, sheetId, rowList);
@@ -851,10 +856,15 @@ public class MBookServiceImpl implements MBookService {
 		
 		MSheet msheet = msheetDao.getMSheet(excelId, sheetId);
 		SheetElement sheet = new SheetElement(msheet);
-		RowCol row = sortRList.get(sortRList.size()-1);
-		sheet.setMaxRowPixel(row.getTop()+row.getLength()+1);
-		RowCol col = sortCList.get(sortCList.size()-1);
-		sheet.setMaxColPixel(col.getTop()+col.getLength()+1);
+		if(sortRList.size()>0){
+			RowCol row = sortRList.get(sortRList.size()-1);
+			sheet.setMaxRowPixel(row.getTop()+row.getLength()+1);
+		}
+		if(sortCList.size()>0){
+			RowCol col = sortCList.get(sortCList.size()-1);
+			sheet.setMaxColPixel(col.getTop()+col.getLength()+1);
+		}
+		
 		sheet.setCells(ceList);
 		sheet.setGridLineRow(yList);
 		sheet.setGridLineCol(xList);
@@ -867,6 +877,9 @@ public class MBookServiceImpl implements MBookService {
 	}
 	
    private int getIndexByPixel(List<RowCol> sortRclist,int pixel){
+	    if(sortRclist.size()==0){
+	    	return 0;
+	    }
 		
 		RowCol rowColTop = sortRclist.get(sortRclist.size() - 1);
 		int maxTop = rowColTop.getTop() + rowColTop.getLength();

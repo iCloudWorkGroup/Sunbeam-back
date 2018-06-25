@@ -21,6 +21,11 @@ public class MCell implements Serializable{
 	private Content content = new Content();
 	/*注释*/
 	private CustomProp customProp = new CustomProp();
+	/*用于复制操作，相对于起始行的距离*/
+	private Integer row;
+	/*用于复制操作，相对于起始行的距离*/
+	private Integer col;
+	
 	public String getId() {
 		return id;
 	}
@@ -64,6 +69,18 @@ public class MCell implements Serializable{
 		this.customProp = customProp;
 	}
 	
+	public Integer getRow() {
+		return row;
+	}
+	public void setRow(Integer row) {
+		this.row = row;
+	}
+	public Integer getCol() {
+		return col;
+	}
+	public void setCol(Integer col) {
+		this.col = col;
+	}
 	public MCell(){
 		
 	}
@@ -74,8 +91,15 @@ public class MCell implements Serializable{
 		this.rowspan =1;
 		this.sheetId = sheetId;
 		this.getContent().setAlignCol("middle");
-		this.getContent().setAlignRow("center");
+		//this.getContent().setAlignRow("center");
 		
+	}
+	
+	public MCell(MCell mc){
+		this.sheetId = mc.getSheetId();
+		this.content = mc.getContent().clone();
+		this.border = mc.getBorder();
+		this.customProp = mc.getCustomProp();
 	}
 
 }

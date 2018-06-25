@@ -63,5 +63,15 @@ public class MCol implements Serializable{
 	public void setProps(OperProp props) {
 		this.props = props;
 	}
+	public MCol(){
+		
+	}
+	public MCol(String col,String sheetId){
+		this.sheetId = sheetId;
+		this.alias = col;
+		this.hidden = false;
+		this.width = 69;
+		
+	}
 	
 }

@@ -24,7 +24,6 @@ import com.acmr.excel.model.ConverCell;
 import com.acmr.excel.model.Coordinate;
 import com.acmr.excel.model.RowCol;
 import com.acmr.excel.model.complete.Occupy;
-import com.acmr.excel.model.complete.OneCell;
 import com.acmr.excel.model.mongo.MCell;
 import com.acmr.excel.model.mongo.MCol;
 import com.acmr.excel.model.mongo.MRow;
@@ -198,7 +197,7 @@ public class MCellServiceImpl implements MCellService {
 	public void updateBgColor(Cell cell, int step, String excelId) {
 		String sheetId = excelId+0;
 		List<Coordinate> coordinates = cell.getCoordinate();
-		String background = cell.getBgcolor();
+		String background = cell.getColor();
 		
 		try {
 			updateContent(coordinates, "background",  background, step,  excelId, sheetId);
@@ -328,8 +327,19 @@ public class MCellServiceImpl implements MCellService {
 		String sheetId = excelId+0;
 		List<RowCol> sortRList = new ArrayList<RowCol>();
 		List<RowCol> sortCList = new ArrayList<RowCol>();
+		Map<String,Integer> rowMap = new HashMap<String,Integer>();
+		Map<String,Integer> colMap = new HashMap<String,Integer>();
 		mrowColDao.getRowList(sortRList, excelId, sheetId);
 		mrowColDao.getColList(sortCList, excelId, sheetId);
+		for(int i = 0;i<sortRList.size();i++){
+			rowMap.put(sortRList.get(i).getAlias(),i);
+		}
+		for(int i = 0;i<sortCList.size();i++){
+			colMap.put(sortCList.get(i).getAlias(), i);
+		}
+		
+		
+		
 		List<Coordinate> coordinates = cell.getCoordinate();
 		   List<String> colList = new ArrayList<String>();
 	       List<String> rowList = new ArrayList<String>();
@@ -355,23 +365,50 @@ public class MCellServiceImpl implements MCellService {
 	        			cellIdList.add(mrcc.getCellId());
 	        		}
 	        		List<MCell> mcellList = mcellDao.getMCellList(excelId, sheetId, cellIdList);
+	        		List<MCell> mcList = new ArrayList<MCell>();//用于存储新生成的MCell对象
 	        		cellIdList.clear();//清空，用于存贮是合并单元格的id
 	        		relationList.clear();//清空，用于存储新的关系表
                     for(MCell mc:mcellList){
                     	if(mc.getColspan()>1||mc.getRowspan()>1){
+                    		
                     		cellIdList.add(mc.getId());
-                    		MRowColCell mrcc = new MRowColCell();
                     		String[] ids = mc.getId().split("_");
-                    		mrcc.setCellId(mc.getId());
-                    		mrcc.setRow(ids[0]);
-                    		mrcc.setCol(ids[1]);
-                    		mrcc.setSheetId(sheetId);
-                    		relationList.add(mrcc);
+                    		int rowIndex = rowMap.get(ids[0]);
+            				int colIndex = colMap.get(ids[1]);
+                    		for(int i=0;i<mc.getRowspan();i++){
+                    			for(int j=0;j<mc.getColspan();j++){
+                    				String row = sortRList.get(rowIndex+i).getAlias();
+                    				String col = sortCList.get(colIndex+j).getAlias();
+                    				MCell mcell = new MCell(mc);
+                    				String id = row+"_"+col;
+                    				mcell.setId(id);
+                					mcell.setColspan(1);
+                					mcell.setRowspan(1);
+                    				if(!((i==0)&&(j==0))){
+                    					mcell.getContent().setDisplayTexts(null);
+                    					mcell.getContent().setTexts(null);
+                    				}
+                    				mcList.add(mcell);
+                    				//存关系表
+                    				MRowColCell mrcc = new MRowColCell();
+                            		mrcc.setCellId(id);
+                            		mrcc.setRow(row);
+                            		mrcc.setCol(col);
+                            		mrcc.setSheetId(sheetId);
+                            		relationList.add(mrcc);
+                    			}
+                    		}
+                    		
                     	}
                     }
+                    //删除老的合并单元格关系表
                     mcellDao.delMRowColCellList(excelId, sheetId, cellIdList);
+                    //插入拆分之后的关系表
                     baseDao.insert(excelId, relationList);
-                    mcellDao.updateSpan(cellIdList, excelId, sheetId);
+                    //删除合并单元格
+                    mcellDao.delMCell(excelId, sheetId, cellIdList);
+                    //存入拆分之后的单元格
+                    baseDao.insert(excelId, mcList);
                     //更新步骤
 	        		msheetDao.updateStep(excelId, sheetId, step);
 	         }
@@ -621,4 +658,55 @@ public class MCellServiceImpl implements MCellService {
 		return list;
 	}
 
+	
+	
+	
+	/*public void OperationCellByCord(ArrayList<Object> al){
+		//查找关系表
+	    List<MRowColCell> relationList = mcellDao.getMRowColCellList(excelId,sheetId,alias,"col");
+	    List<String> cellIdList = new ArrayList<String>();
+	    //Map<String,String> relationMap = new HashMap<String,String>();
+	    for(MRowColCell mrcc:relationList){
+	    	
+	    	//relationMap.put(rcc.getRow()+"_"+rcc.getCol(), rcc.getCellId());
+	    	cellIdList.add(mrcc.getCellId());
+	    }
+        List<MCell> cellList = mcellDao.getMCellList(excelId,sheetId, cellIdList);
+        //删除关系表
+        mcellDao.delMRowColCell(excelId,sheetId,"col", alias);
+        cellIdList.clear();//存需要删除的MExcelCell的Id
+		cellList.clear();//存需要插入的MExcelCell对象
+		
+		for(MCell mc:cellList){
+			if(mc.getColspan()==1){
+				cellIdList.add(mc.getId());
+			}else{
+				String[] ids = mc.getId().split("_");
+				if(ids[1].equals(alias)){
+					//删除老的MExcelCell
+					cellIdList.add(mc.getId());
+					MCell mec = mc;
+					String id = ids[0]+"_"+backAlias;
+					//修改合并单元格其他关系表的cellId
+					mcellDao.updateMRowColCell(excelId,sheetId, mec.getId(), id);
+					mec.setId(id);
+					mec.setColspan(mc.getColspan()-1);
+					
+					cellList.add(mec);//插入新MCell
+				}else{
+					MCell mec = mc;
+					mec.setColspan(mc.getColspan()-1);
+					baseDao.update(excelId, mec);
+				}
+			}
+		}
+		
+		mcellDao.delMCell(excelId,sheetId, cellIdList);
+		if(cellList.size()>0){
+		 baseDao.insert(excelId, cellList);
+		
+		}
+		
+	}*/
+	
 }

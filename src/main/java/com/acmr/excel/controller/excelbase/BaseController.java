@@ -88,6 +88,7 @@ public class BaseController extends MultiActionController {
 			}
 		}
 		body = stringBuilder.toString();
+		//System.out.println(body);
 		if (StringUtil.isEmpty(body)) {
 			try {
 				return clazz.newInstance();

@@ -9,8 +9,11 @@ import com.acmr.excel.model.ColOperate;
 import com.acmr.excel.model.ColWidth;
 import com.acmr.excel.model.Frozen;
 import com.acmr.excel.model.OperatorConstant;
+import com.acmr.excel.model.OuterPaste;
+import com.acmr.excel.model.Paste;
 import com.acmr.excel.model.RowHeight;
 import com.acmr.excel.model.RowOperate;
+import com.acmr.excel.model.copy.Copy;
 import com.acmr.excel.service.MCellService;
 import com.acmr.excel.service.MColService;
 import com.acmr.excel.service.MRowService;
@@ -157,21 +160,18 @@ public class WorkerThread2 implements Runnable{
 			ColOperate colOperate2 = (ColOperate) model.getObject();
 			mcolService.delCol(colOperate2,excelId,step);
 			break;
-//		case OperatorConstant.paste:
-//			Paste paste = (Paste) model.getObject();
-//			pasteService.data(paste, excelBook,versionHistory,step);
-//			storeService.set(excelId+"_history",  versionHistory);
-//			break;
-//		case OperatorConstant.copy:
-//			Copy copy = (Copy) model.getObject();
-//			pasteService.copy(copy, excelBook,versionHistory,step);
-//			storeService.set(excelId+"_history", versionHistory);
-//			break;
-//		case OperatorConstant.cut:
-//			Copy copy2 = (Copy) model.getObject();
-//			pasteService.cut(copy2, excelBook,versionHistory,step);
-//			storeService.set(excelId+"_history",versionHistory);
-//			break;
+		case OperatorConstant.paste:
+			OuterPaste outerPaste = (OuterPaste) model.getObject();
+			msheetService.paste(outerPaste, excelId, step);
+			break;
+		case OperatorConstant.copy:
+			Copy copy = (Copy) model.getObject();
+			msheetService.copy(copy, excelId, step);
+			break;
+		case OperatorConstant.cut:
+			Copy copy2 = (Copy) model.getObject();
+			msheetService.cut(copy2, excelId, step);
+			break;
 		case OperatorConstant.frozen:
 			Frozen frozen = (Frozen) model.getObject();
 			msheetService.frozen(frozen, excelId, step);

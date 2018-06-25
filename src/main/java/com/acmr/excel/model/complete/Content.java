@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Content implements Serializable {
+public class Content implements Serializable,Cloneable {
 	private String alignCol;
 	private String alignRow ;
 	private Boolean weight;
@@ -142,6 +142,17 @@ public class Content implements Serializable {
 
 	public void setBackground(String background) {
 		this.background = background;
+	}
+	
+	public Content clone(){
+		Content o = null;
+		try {
+			o =(Content)super.clone();
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		 return o;
 	}
 
 

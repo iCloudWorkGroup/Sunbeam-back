@@ -28,9 +28,10 @@ public class MRowColDaoImpl  implements MRowColDao{
 	public void getRowList(List<RowCol> sortRcList, String excelId,String sheetId) {
 		
 		MRowColList rowColList = mongoTemplate.findOne(new Query(Criteria.where("_id").is("rList").and("sheetId").is(sheetId)), MRowColList.class, excelId);
-		//long ceb2 = System.currentTimeMillis();
-		//System.out.println("获得rcList的时间为:" + (ceb2-ceb1));
 		List<RowCol> rcList = rowColList.getRcList();//得到行列表
+		if(rcList.size() == 0){
+			return;
+		}
 		Map<String,RowCol> map = new HashMap<String,RowCol>();
 		RowCol rowCol = null;
 		
@@ -70,6 +71,9 @@ public class MRowColDaoImpl  implements MRowColDao{
 		
 		MRowColList colList = mongoTemplate.findOne(new Query(Criteria.where("_id").is("cList").and("sheetId").is(sheetId)), MRowColList.class, excelId);
 		List<RowCol> cList = colList.getRcList();
+		if(cList.size() == 0){
+			return;
+		}
 		Map<String,RowCol> map = new HashMap<String,RowCol>();
 		RowCol rowCol = null;
 		

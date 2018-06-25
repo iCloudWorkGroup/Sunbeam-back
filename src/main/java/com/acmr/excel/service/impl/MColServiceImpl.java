@@ -211,8 +211,8 @@ public class MColServiceImpl implements MColService {
 		String sheetId = excelId+0;
 		List<RowCol> sortRList = new ArrayList<RowCol>();
 		List<RowCol> sortCList = new ArrayList<RowCol>();
-		mrowColDao.getColList(sortRList, excelId,sheetId);
-		mrowColDao.getRowList(sortCList, excelId,sheetId);
+		mrowColDao.getColList(sortCList, excelId,sheetId);
+		mrowColDao.getRowList(sortRList, excelId,sheetId);
 		if(colOperate.getCol()>sortCList.size()-1){
 			return;
 		}
@@ -228,11 +228,16 @@ public class MColServiceImpl implements MColService {
 		}else{
 			frontAlias = sortCList.get(index-1).getAlias();//前一列别名
 		}
-		 
-		String backAlias = sortCList.get(index+1).getAlias();//后一列别名
-		mrowColDao.updateRowCol(excelId,sheetId, "cList", backAlias, frontAlias);
+		String backAlias = null;
+		//如果删除的是最后一列，它没有后一行
+		if(index != sortCList.size()-1){
+		 backAlias = sortCList.get(index+1).getAlias();//后一列别名
+		 mrowColDao.updateRowCol(excelId,sheetId, "cList", backAlias, frontAlias);
+		}
 		//删除列样式记录
 		mcolDao.delExcelCol(excelId,sheetId, alias);
+	
+		
 		//查找关系表
 	    List<MRowColCell> relationList = mcellDao.getMRowColCellList(excelId,sheetId,alias,"col");
 	    List<String> cellIdList = new ArrayList<String>();
@@ -277,6 +282,7 @@ public class MColServiceImpl implements MColService {
 		 baseDao.insert(excelId, cellList);
 		
 		}
+		
 		msheetDao.updateStep(excelId,sheetId, step);
         
        /* List<MExcelCell> sortMcellList = new ArrayList<MExcelCell>();

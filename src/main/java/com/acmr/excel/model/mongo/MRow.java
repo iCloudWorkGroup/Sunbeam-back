@@ -63,5 +63,16 @@ public class MRow implements Serializable{
 	public void setProps(OperProp props) {
 		this.props = props;
 	} 
+	
+	public MRow(){
+		
+	}
+	
+	public MRow(String row,String sheetId){
+		this.alias = row;
+		this.sheetId = sheetId;
+		this.hidden = false;
+		this.height = 19;
+	}
 
 }

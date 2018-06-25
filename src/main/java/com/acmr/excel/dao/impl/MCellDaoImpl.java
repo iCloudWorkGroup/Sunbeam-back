@@ -136,7 +136,13 @@ public class MCellDaoImpl implements MCellDao {
 		Query query = new Query();
 	    query.addCriteria(Criteria.where("_id").in(idList).and("sheetId").is(sheetId));
 	    Update update = new Update();
-	    update.set("content."+property, content);
+	    if("displayTexts".equals(property)){
+	    	update.set("content.displayTexts", null);
+	    	update.set("content.texts", null);
+	    }else{
+	    	update.set("content."+property, content);
+	    }
+	    
 	    mongoTemplate.updateMulti(query, update, MCell.class,excelId);
 	}
 
