@@ -21,5 +21,5 @@ public class RowHeight implements Serializable {
 	public void setRow(int row) {
 		this.row = row;
 	}
-	
+
 }

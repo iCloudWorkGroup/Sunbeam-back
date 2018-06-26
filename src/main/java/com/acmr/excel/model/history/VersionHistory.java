@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class VersionHistory implements Serializable{
+public class VersionHistory implements Serializable {
 
 	private Map<Integer, History> map = new HashMap<Integer, History>();
 	private Map<Integer, Integer> version = new HashMap<Integer, Integer>();

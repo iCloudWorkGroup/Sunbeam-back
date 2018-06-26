@@ -4,11 +4,10 @@ import java.io.Serializable;
 import java.util.List;
 
 public class Paste implements Serializable {
-	
+
 	private List<OuterPasteData> pasteData;
 	private int colLen;
 	private int rowLen;
-
 
 	public List<OuterPasteData> getPasteData() {
 		return pasteData;

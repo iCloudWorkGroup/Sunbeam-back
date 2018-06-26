@@ -222,6 +222,4 @@ public class Cell implements Serializable {
 		this.auto = auto;
 	}
 
-	
-
 }

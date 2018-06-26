@@ -1,6 +1,6 @@
 package com.acmr.excel.util;
 
-public class UploadThread implements Runnable{
+public class UploadThread implements Runnable {
 	private String partFileName;
 	private byte[] fileByte;
 

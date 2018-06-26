@@ -60,8 +60,8 @@ public class OnlineExcel implements RowMapper<OnlineExcel> {
 		OnlineExcel oe = new OnlineExcel();
 		oe.setId(rs.getLong("id"));
 		oe.setExcelId(rs.getString("excelId"));
-		//oe.setExcelObject(rs.getNString("excelObject"));
-		//oe.setName(rs.getString("name"));
+		// oe.setExcelObject(rs.getNString("excelObject"));
+		// oe.setName(rs.getString("name"));
 		String currentTime = rs.getString("currentTime");
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		try {

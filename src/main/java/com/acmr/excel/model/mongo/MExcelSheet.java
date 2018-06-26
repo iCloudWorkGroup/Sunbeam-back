@@ -10,8 +10,8 @@ import acmr.excel.pojo.ExcelColumn;
 import acmr.excel.pojo.ExcelSheetFreeze;
 import acmr.util.ListHashMap;
 
-public class MExcelSheet implements Serializable{
-	
+public class MExcelSheet implements Serializable {
+
 	private String name; // sheet名称
 	private int hiddenstate; // 隐藏类型
 	private ListHashMap<ExcelColumn> cols; // sheet的列集合
@@ -24,7 +24,7 @@ public class MExcelSheet implements Serializable{
 
 	private int maxrow;
 	private int maxcol;
-	
+
 	/**
 	 * 构造函数
 	 */

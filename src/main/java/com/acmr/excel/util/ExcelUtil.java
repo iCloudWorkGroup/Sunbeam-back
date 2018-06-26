@@ -1,7 +1,5 @@
 package com.acmr.excel.util;
 
-
-
 import org.apache.poi.POIXMLDocument;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -13,7 +11,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import acmr.excel.pojo.ExcelColor;
 
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -24,7 +21,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
-
 
 public class ExcelUtil {
 
@@ -98,8 +94,8 @@ public class ExcelUtil {
 	 * @throws InvalidFormatException
 	 */
 
-	public static Workbook createWorkbook(InputStream in) throws IOException,
-			InvalidFormatException {
+	public static Workbook createWorkbook(InputStream in)
+			throws IOException, InvalidFormatException {
 		if (!in.markSupported()) {
 			in = new PushbackInputStream(in, 8);
 		}
@@ -179,8 +175,8 @@ public class ExcelUtil {
 		color = color.substring(4, color.length() - 1);
 		String[] colors = color.split(",");
 		return new ExcelColor(Integer.valueOf(colors[0].trim()),
-				Integer.valueOf(colors[1].trim()), Integer.valueOf(colors[2]
-						.trim()));
+				Integer.valueOf(colors[1].trim()),
+				Integer.valueOf(colors[2].trim()));
 	}
 
 	/**
@@ -204,13 +200,13 @@ public class ExcelUtil {
 		return Math.round(height / 20) + 7;
 	}
 
-//	public static Length getLength(short length) {
-//		return new Length(length / 20.0F, Length.UNIT.PT);
-//	}
-//
-//	public static String getLengthStr(Length len) {
-//		return len.getLength() + len.getUnit().toString();
-//	}
+	// public static Length getLength(short length) {
+	// return new Length(length / 20.0F, Length.UNIT.PT);
+	// }
+	//
+	// public static String getLengthStr(Length len) {
+	// return len.getLength() + len.getUnit().toString();
+	// }
 
 	/**
 	 * 判断是不是为2003的excel

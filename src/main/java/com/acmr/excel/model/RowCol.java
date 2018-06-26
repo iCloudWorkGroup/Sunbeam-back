@@ -4,9 +4,7 @@ public class RowCol {
 	private String alias;
 	private Integer length;
 	private Integer top;
-	private String preAlias;//用于指向它的前一行或前一列
-	
-	
+	private String preAlias;// 用于指向它的前一行或前一列
 
 	public String getAlias() {
 		return alias;

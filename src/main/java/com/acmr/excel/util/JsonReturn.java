@@ -1,6 +1,5 @@
 package com.acmr.excel.util;
 
-
 /**
  * 自定义返回json类
  *
@@ -43,8 +42,6 @@ public class JsonReturn {
 	private String aliasColCounter;
 
 	// private Object returnParam;
-	
-	
 
 	public int getMaxPixel() {
 		return maxPixel;

@@ -22,16 +22,17 @@ public class PayloadUtil {
 	 * @throws IOException
 	 */
 
-	public static  <T> T getJsonDataParameter(ServletInputStream servletInputStream,
-			Class<T> clazz) throws IOException {
+	public static <T> T getJsonDataParameter(
+			ServletInputStream servletInputStream, Class<T> clazz)
+					throws IOException {
 		String body = null;
 		StringBuilder stringBuilder = new StringBuilder();
 		BufferedReader bufferedReader = null;
 		try {
 			InputStream inputStream = servletInputStream;
 			if (inputStream != null) {
-				bufferedReader = new BufferedReader(new InputStreamReader(
-						inputStream));
+				bufferedReader = new BufferedReader(
+						new InputStreamReader(inputStream));
 				char[] charBuffer = new char[128];
 				int bytesRead = -1;
 				while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {

@@ -49,13 +49,10 @@ public class OpenExcel {
 	public void setRight(int right) {
 		this.right = right;
 	}
-	
+
 	public static void main(String[] args) {
 		List<String> arr = new ArrayList<>(100);
-		arr.add(60,"a");
+		arr.add(60, "a");
 	}
-	
-	
-	
 
 }

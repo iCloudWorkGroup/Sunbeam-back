@@ -2,7 +2,7 @@ package com.acmr.excel.model.copy;
 
 import java.io.Serializable;
 
-public class Copy implements Serializable{
+public class Copy implements Serializable {
 	private Orignal orignal;
 	private Target target;
 

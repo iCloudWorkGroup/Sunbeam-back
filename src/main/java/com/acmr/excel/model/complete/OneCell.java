@@ -4,12 +4,11 @@ import java.io.Serializable;
 
 import com.acmr.excel.model.mongo.MCell;
 
-public class OneCell  implements Serializable {
+public class OneCell implements Serializable {
 	private Border border = new Border();
 	private Content content = new Content();
 	private CustomProp customProp = new CustomProp();
 	private Occupy occupy = new Occupy();
-	
 
 	public Border getBorder() {
 		return border;
@@ -42,15 +41,15 @@ public class OneCell  implements Serializable {
 	public void setOccupy(Occupy occupy) {
 		this.occupy = occupy;
 	}
-	
-	public OneCell(MCell mcell){
+
+	public OneCell(MCell mcell) {
 		this.border = mcell.getBorder();
 		this.content = mcell.getContent();
 		this.customProp = mcell.getCustomProp();
 	}
 
-	public OneCell(){
-		
+	public OneCell() {
+
 	}
-	
+
 }

@@ -21,8 +21,8 @@ public class BinarySearchDemo {
 			if (array.length - 1 == i && num != array[i]) {
 				System.out.println("抱歉，没有找到");
 			} else if (num == array[i]) {
-				System.out.println(array[i] + "找到了，在数组下标为" + i + "的地方，查找了"
-						+ count + "次。");
+				System.out.println(
+						array[i] + "找到了，在数组下标为" + i + "的地方，查找了" + count + "次。");
 				break;
 			}
 		}

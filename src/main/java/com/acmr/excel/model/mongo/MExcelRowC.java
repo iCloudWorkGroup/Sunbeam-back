@@ -8,8 +8,8 @@ import java.util.Map;
 
 import acmr.excel.pojo.ExcelRow;
 
-public class MExcelRowC implements Serializable{
-	
+public class MExcelRowC implements Serializable {
+
 	private int height; // 网页上行高 poi高度=网页高度*18 行高 实际高度*20
 
 	private String code; // 唯一编号
@@ -44,7 +44,7 @@ public class MExcelRowC implements Serializable{
 		inlist = false;
 		rowhidden = false;
 	}
-	
+
 	public MExcelRowC(ExcelRow row) {
 		cells = new ArrayList<MExcelCell>();
 		exps = row.getExps();

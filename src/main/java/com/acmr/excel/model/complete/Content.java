@@ -4,23 +4,22 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Content implements Serializable,Cloneable {
+public class Content implements Serializable, Cloneable {
 	private String alignCol;
-	private String alignRow ;
+	private String alignRow;
 	private Boolean weight;
-	private String color ;
+	private String color;
 	private String displayTexts;
-	private String family ;
-	private Boolean italic ;
-	private String size ;
-	private String texts ;
+	private String family;
+	private Boolean italic;
+	private String size;
+	private String texts;
 	private Integer underline;
 	private Boolean wordWrap;
 	private String type;
 	private String express;
 	private String background;
 	private Boolean locked;
-	
 
 	public String getSize() {
 		return size;
@@ -86,7 +85,6 @@ public class Content implements Serializable,Cloneable {
 		this.displayTexts = displayTexts;
 	}
 
-
 	public Boolean getWeight() {
 		return weight;
 	}
@@ -119,7 +117,6 @@ public class Content implements Serializable,Cloneable {
 		this.underline = underline;
 	}
 
-
 	public String getType() {
 		return type;
 	}
@@ -143,18 +140,17 @@ public class Content implements Serializable,Cloneable {
 	public void setBackground(String background) {
 		this.background = background;
 	}
-	
-	public Content clone(){
+
+	public Content clone() {
 		Content o = null;
 		try {
-			o =(Content)super.clone();
+			o = (Content) super.clone();
 		} catch (CloneNotSupportedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		 return o;
+		return o;
 	}
-
 
 	public static void main(String[] args) {
 		Map<String, String> map = new HashMap<String, String>();

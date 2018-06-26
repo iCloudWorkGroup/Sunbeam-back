@@ -2,7 +2,7 @@ package com.acmr.excel.model.history;
 
 import java.io.Serializable;
 
-public class ChangeArea implements Serializable{
+public class ChangeArea implements Serializable {
 	private int colIndex;
 	private int rowIndex;
 	private Object originalValue;
@@ -48,5 +48,5 @@ public class ChangeArea implements Serializable{
 	public void setExist(boolean isExist) {
 		this.isExist = isExist;
 	}
-	
+
 }

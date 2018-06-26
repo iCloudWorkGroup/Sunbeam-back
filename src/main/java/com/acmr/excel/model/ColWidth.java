@@ -6,7 +6,6 @@ public class ColWidth implements Serializable {
 	private int col;
 	private int offset;
 
-
 	public int getOffset() {
 		return offset;
 	}
@@ -23,5 +22,4 @@ public class ColWidth implements Serializable {
 		this.col = col;
 	}
 
-	
 }

@@ -1,11 +1,11 @@
 package com.acmr.excel.model;
 
 public class RowColCell {
-    //行
+	// 行
 	private Integer row;
-	//列
+	// 列
 	private Integer col;
-	//表格对应的ID
+	// 表格对应的ID
 	private String cellId;
 
 	public Integer getRow() {
@@ -31,6 +31,5 @@ public class RowColCell {
 	public void setCellId(String cellId) {
 		this.cellId = cellId;
 	}
-	
-	
+
 }

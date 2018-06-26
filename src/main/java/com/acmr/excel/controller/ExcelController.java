@@ -7,10 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -35,22 +31,15 @@ import com.acmr.excel.dao.MSheetDao;
 import com.acmr.excel.dao.base.BaseDao;
 import com.acmr.excel.model.Constant;
 import com.acmr.excel.model.Position;
-import com.acmr.excel.model.RowCol;
 import com.acmr.excel.model.complete.CompleteExcel;
-import com.acmr.excel.model.complete.Frozen;
-import com.acmr.excel.model.complete.SheetElement;
 import com.acmr.excel.model.history.VersionHistory;
-import com.acmr.excel.model.mongo.MSheet;
-import com.acmr.excel.service.ExcelService;
 import com.acmr.excel.service.MBookService;
-import com.acmr.excel.service.impl.MongodbServiceImpl;
 import com.acmr.excel.util.ExcelUtil;
 import com.acmr.excel.util.FileUtil;
 import com.acmr.excel.util.JsonReturn;
 import com.acmr.excel.util.UUIDUtil;
 import com.acmr.excel.util.UploadThread;
 
-import acmr.excel.ExcelException;
 import acmr.excel.pojo.Constants.XLSTYPE;
 import acmr.excel.pojo.ExcelBook;
 import acmr.excel.pojo.ExcelCell;
@@ -70,13 +59,10 @@ public class ExcelController extends BaseController {
 	private static Logger log = Logger.getLogger(ExcelController.class); 
 	
 	@Resource
-	private MongodbServiceImpl mongodbServiceImpl;
-	@Resource
 	private BaseDao baseDao;
 	@Resource
 	private MSheetDao mexcelDao;
-	@Resource
-	private ExcelService excelService;
+	
 	@Resource
 	private MBookService mbookService;
 
@@ -85,7 +71,7 @@ public class ExcelController extends BaseController {
 	 */
 	@RequestMapping(value="/download/{excelId}",method=RequestMethod.GET)
 	public void download(@PathVariable String excelId,HttpServletRequest req, HttpServletResponse resp) {
-		ExcelBook excelBook = (ExcelBook) mongodbServiceImpl.get(null, null, null);
+		/*ExcelBook excelBook;
 		if (excelBook != null) {
 			//excelService.changeHeightOrWidth(excelBook);
 			try {
@@ -102,7 +88,7 @@ public class ExcelController extends BaseController {
 			} catch (ExcelException e) {
 				e.printStackTrace();
 			}
-		}
+		}*/
 
 	}
 

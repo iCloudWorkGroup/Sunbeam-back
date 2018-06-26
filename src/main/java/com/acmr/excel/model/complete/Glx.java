@@ -6,6 +6,7 @@ import com.acmr.excel.model.mongo.MCol;
 
 /***
  * 返回到页面的列属性
+ * 
  * @author liucb
  *
  */
@@ -15,10 +16,9 @@ public class Glx implements Serializable {
 	private int width;
 	private Boolean hidden;
 	private int sort;
-	
+
 	private OperProp props = new OperProp();
 
-    
 	public String getAlias() {
 		return alias;
 	}
@@ -66,16 +66,16 @@ public class Glx implements Serializable {
 	public void setHidden(Boolean hidden) {
 		this.hidden = hidden;
 	}
-	
-	public Glx(MCol mcol){
+
+	public Glx(MCol mcol) {
 		this.alias = mcol.getAlias();
 		this.width = mcol.getWidth();
 		this.hidden = mcol.getHidden();
 		this.props = mcol.getProps();
 	}
-	
-	public Glx(){
-		
+
+	public Glx() {
+
 	}
 
 }

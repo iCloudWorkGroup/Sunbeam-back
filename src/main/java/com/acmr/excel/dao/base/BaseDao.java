@@ -16,29 +16,30 @@ import com.mongodb.DBObject;
 
 @Repository("baseDao")
 public class BaseDao {
-	
+
 	@Resource
 	private MongoTemplate mongoTemplate;
-	
+
 	public boolean update(String excelId, Object object) {
-		if(!object.equals(null)){
-		 mongoTemplate.save(object, excelId);
+		if (!object.equals(null)) {
+			mongoTemplate.save(object, excelId);
 		}
 		return true;
 	}
-	
+
 	public boolean insert(String excelId, Object object) {
-	
+
 		mongoTemplate.insert(object, excelId);
 		return true;
 	}
-	
+
 	public boolean insert(String excelId, Collection<? extends Object> object) {
-		
-		mongoTemplate.insert(object,excelId);;
+
+		mongoTemplate.insert(object, excelId);
+		;
 		return true;
 	}
-	
+
 	public int getStep(String id) {
 		DBObject dbObject = new BasicDBObject();
 		dbObject.put("_id", id);

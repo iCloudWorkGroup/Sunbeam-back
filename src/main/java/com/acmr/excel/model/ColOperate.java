@@ -13,6 +13,4 @@ public class ColOperate implements Serializable {
 		this.col = col;
 	}
 
-	
-	
 }

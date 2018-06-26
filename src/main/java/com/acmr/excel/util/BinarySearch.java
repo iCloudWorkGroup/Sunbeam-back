@@ -11,7 +11,7 @@ import com.acmr.excel.model.complete.Glx;
 import com.acmr.excel.model.complete.Gly;
 
 /**
- * 二分查找又称折半查找，它是一种效率较高的查找方法。 　　【二分查找要求】：1.必须采用顺序存储结构 2.必须按关键字大小有序排列。
+ * 二分查找又称折半查找，它是一种效率较高的查找方法。 【二分查找要求】：1.必须采用顺序存储结构 2.必须按关键字大小有序排列。
  * 
  * @author Administrator
  *
@@ -100,6 +100,7 @@ public class BinarySearch {
 		}
 		return result;
 	}
+
 	/**
 	 * 二分查询
 	 * 
@@ -141,6 +142,7 @@ public class BinarySearch {
 		}
 		return result;
 	}
+
 	/**
 	 * 二分查询列索引
 	 * 

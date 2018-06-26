@@ -7,7 +7,7 @@ public class BaseCell implements Serializable {
 	private Border border = new Border();
 	private CustomProp customProp = new CustomProp();
 	private Format format = new Format();
-	
+
 	public Format getFormat() {
 		return format;
 	}

@@ -14,15 +14,15 @@
 		<activemq>5.9.0</activemq>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	
-	 
+
+
 	<repositories>
 		<repository>
 			<id>nexus-releases</id>
 			<name>Nexus Release Repository</name>
-		    <url>http://excel-inc.acmr.com.cn:20064/nexus/content/repositories/releases/</url>
+			<url>http://excel-inc.acmr.com.cn:20064/nexus/content/repositories/releases/</url>
 			<!-- 内网地址 -->
-		    <!--<url>http://192.168.1.228:8080/nexus/content/repositories/releases/</url> -->
+			<!--<url>http://192.168.1.228:8080/nexus/content/repositories/releases/</url> -->
 			<releases>
 				<enabled>true</enabled>
 			</releases>
@@ -216,19 +216,19 @@
 			<artifactId>excelutil</artifactId>
 			<version>7.2</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.0.1</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>net.spy</groupId>
 			<artifactId>spymemcached</artifactId>
 			<version>2.12.3</version>
 		</dependency>
-	
+
 		<dependency>
 			<groupId>com.thetransactioncompany</groupId>
 			<artifactId>cors-filter</artifactId>
@@ -253,19 +253,35 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<finalName>spreadsheet</finalName>
+		<finalName>sunbeam</finalName>
+
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.3</version>
-			   <configuration>
-                    <fork>true</fork>  
-        			<source>1.7</source>  
-        			<target>1.7</target>
-        			<sourceEncoding>UTF-8</sourceEncoding> 
-        		</configuration>
+				<configuration>
+					<fork>true</fork>
+					<source>1.7</source>
+					<target>1.7</target>
+					<sourceEncoding>UTF-8</sourceEncoding>
+				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<warName>${project.build.finalName}</warName>
+					<!-- <excludes>
+						js/plugins/*.*
+					</excludes> -->
+					<packagingExcludes>
+						META-INF/*
+					</packagingExcludes>
+				</configuration>
+			</plugin>
+
 			<plugin>
 
 				<groupId>org.eluder.coveralls</groupId>

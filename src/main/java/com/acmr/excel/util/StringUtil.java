@@ -20,13 +20,12 @@ public class StringUtil {
 	 * @return 空返回true,非空返回false
 	 */
 	public static boolean isEmpty(String s) {
-		if (null == s || s.trim().equals("") || s.trim().equals("null") || s.trim().equals("undefined")) {
+		if (null == s || s.trim().equals("") || s.trim().equals("null")
+				|| s.trim().equals("undefined")) {
 			return true;
 		}
 		return false;
 	}
-
-
 
 	/**
 	 * 解码URL中的中文，默认使用UTF-8进行解码
@@ -42,7 +41,6 @@ public class StringUtil {
 			return str;
 		}
 	}
-	
 
 	private final static String[] hex = { "00", "01", "02", "03", "04", "05",
 			"06", "07", "08", "09", "0A", "0B", "0C", "0D", "0E", "0F", "10",
@@ -277,7 +275,7 @@ public class StringUtil {
 	 * @param length
 	 *            字符串长度
 	 * @return String
-	 * */
+	 */
 	public static String numberToString(int number, int length) {
 
 		String numberStr = String.valueOf(number);
@@ -295,7 +293,6 @@ public class StringUtil {
 		value.append(numberStr);
 		return value.toString();
 	}
-
 
 	/**
 	 * 全角转半角
@@ -331,7 +328,7 @@ public class StringUtil {
 		}
 		return list1;
 	}
-	
+
 	/**
 	 * 获取uuid
 	 * 
@@ -339,7 +336,7 @@ public class StringUtil {
 	 * @return
 	 */
 	public static String getUUID() {
-		UUID uuid  =  UUID.randomUUID(); 
+		UUID uuid = UUID.randomUUID();
 		return uuid.toString();
 	}
 

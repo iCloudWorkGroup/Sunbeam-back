@@ -2,7 +2,7 @@ package com.acmr.excel.model;
 
 import java.io.Serializable;
 
-public class Comment implements Serializable{
+public class Comment implements Serializable {
 	private String excelId;
 	private String comment;
 	private Coordinate coordinate;
@@ -30,5 +30,5 @@ public class Comment implements Serializable{
 	public void setCoordinate(Coordinate coordinate) {
 		this.coordinate = coordinate;
 	}
-	
+
 }

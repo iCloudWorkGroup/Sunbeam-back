@@ -218,8 +218,8 @@ public class FileUtil {
 		File file = new File(fileName);
 		int count = (int) Math.ceil(file.length() / (double) byteSize);
 		int countLen = (count + "").length();
-		ThreadPoolExecutor threadPool = new ThreadPoolExecutor(count,
-				count * 3, 1, TimeUnit.SECONDS,
+		ThreadPoolExecutor threadPool = new ThreadPoolExecutor(count, count * 3,
+				1, TimeUnit.SECONDS,
 				new ArrayBlockingQueue<Runnable>(count * 2));
 		for (int i = 0; i < count; i++) {
 			String leftPadName = leftPad((i + 1) + "", countLen, '0');
@@ -255,8 +255,8 @@ public class FileUtil {
 				+ partFiles.get(partFiles.size() - 1).length());
 		randomAccessFile.close();
 
-		ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
-				partFiles.size(), partFiles.size() * 3, 1, TimeUnit.SECONDS,
+		ThreadPoolExecutor threadPool = new ThreadPoolExecutor(partFiles.size(),
+				partFiles.size() * 3, 1, TimeUnit.SECONDS,
 				new ArrayBlockingQueue<Runnable>(partFiles.size() * 2));
 		for (int i = 0; i < partFiles.size(); i++) {
 			threadPool.execute(new MergeRunnable(i * partFileSize,
@@ -325,7 +325,8 @@ public class FileUtil {
 		String mergeFileName;
 		File partFile;
 
-		public MergeRunnable(long startPos, String mergeFileName, File partFile) {
+		public MergeRunnable(long startPos, String mergeFileName,
+				File partFile) {
 			this.startPos = startPos;
 			this.mergeFileName = mergeFileName;
 			this.partFile = partFile;

@@ -10,7 +10,6 @@ public class CellFormate implements Serializable {
 	private String dateFormat;
 	private String currencySymbol;
 
-
 	public Coordinate getCoordinate() {
 		return coordinate;
 	}

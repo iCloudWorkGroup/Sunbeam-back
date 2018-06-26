@@ -12,6 +12,5 @@ public class RowOperate implements Serializable {
 	public void setRow(int row) {
 		this.row = row;
 	}
-	
-	
+
 }

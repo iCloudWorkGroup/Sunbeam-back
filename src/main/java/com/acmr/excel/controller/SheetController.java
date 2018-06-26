@@ -14,19 +14,13 @@ import com.acmr.excel.model.Frozen;
 import com.acmr.excel.model.OpenExcel;
 import com.acmr.excel.model.OperatorConstant;
 import com.acmr.excel.model.OuterPaste;
-import com.acmr.excel.model.Paste;
 import com.acmr.excel.model.complete.CompleteExcel;
 import com.acmr.excel.model.complete.SheetElement;
 import com.acmr.excel.model.copy.Copy;
-import com.acmr.excel.service.ExcelService;
 import com.acmr.excel.service.MBookService;
-
 import com.acmr.excel.service.MSheetService;
-import com.acmr.excel.service.impl.MongodbServiceImpl;
 import com.acmr.excel.util.AnsycDataReturn;
 import com.acmr.excel.util.StringUtil;
-
-import acmr.excel.pojo.ExcelBook;
 
 /**
  * SHEET操作
@@ -37,11 +31,6 @@ import acmr.excel.pojo.ExcelBook;
 @Controller
 @RequestMapping("/sheet")
 public class SheetController extends BaseController {
-	@Resource
-	private MongodbServiceImpl mongodbServiceImpl;
-	
-	@Resource
-	private ExcelService excelService;
 
 	@Resource
 	private MSheetService msheetService;

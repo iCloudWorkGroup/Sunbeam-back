@@ -27,13 +27,14 @@ public class PropertiesReaderUtil {
 	 */
 	public static String get(String key) {
 		if (p == null) {
-			InputStream inputStream = DataQueryPool.class.getClassLoader().getResourceAsStream("properties/param.properties");
+			InputStream inputStream = DataQueryPool.class.getClassLoader()
+					.getResourceAsStream("properties/param.properties");
 			p = new Properties();
 			try {
 				p.load(inputStream);
 				inputStream.close();
 			} catch (Exception e) {
-				//System.out.println("init PropertiesReader error!" + e);
+				// System.out.println("init PropertiesReader error!" + e);
 				return "";
 			}
 		}
@@ -41,10 +42,10 @@ public class PropertiesReaderUtil {
 	}
 
 	/**
-	 * 返回　Properties
+	 * 返回 Properties
 	 * 
 	 * @param fileName
-	 *            文件名　(注意：加载的是src下的文件,如果在某个包下．请把包名加上)
+	 *            文件名 (注意：加载的是src下的文件,如果在某个包下．请把包名加上)
 	 * @param
 	 * @return
 	 */
@@ -65,8 +66,8 @@ public class PropertiesReaderUtil {
 			// 从输入流中读取属性列表（键和元素对）
 			Properties prop = getProperties();
 			prop.setProperty(key, value);
-			String path = PropertiesReaderUtil.class.getResource(
-					"config/acmr.properties").getPath();
+			String path = PropertiesReaderUtil.class
+					.getResource("config/acmr.properties").getPath();
 			FileOutputStream outputFile = new FileOutputStream(path);
 			prop.store(outputFile, "modify");
 			outputFile.close();

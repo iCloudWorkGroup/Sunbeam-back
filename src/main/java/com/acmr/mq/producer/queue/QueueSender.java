@@ -24,24 +24,27 @@ import com.acmr.mq.Model;
  */
 @Service
 public class QueueSender {
-	
+
 	@Autowired
 	@Qualifier("jmsQueueTemplate")
-	private JmsTemplate jmsTemplate;//通过@Qualifier修饰符来注入对应的bean
-	
+	private JmsTemplate jmsTemplate;// 通过@Qualifier修饰符来注入对应的bean
+
 	/**
 	 * 发送一条消息到指定的队列（目标）
-	 * @param queueName 队列名称
-	 * @param message 消息内容
+	 * 
+	 * @param queueName
+	 *            队列名称
+	 * @param message
+	 *            消息内容
 	 */
-	public void send(String queueName,final Model model){
-			
-			jmsTemplate.send(Constant.queueName, new MessageCreator() {
-				@Override
-				public Message createMessage(Session session) throws JMSException {
-					return session.createObjectMessage(model);
-				}
-			});
+	public void send(String queueName, final Model model) {
+
+		jmsTemplate.send(Constant.queueName, new MessageCreator() {
+			@Override
+			public Message createMessage(Session session) throws JMSException {
+				return session.createObjectMessage(model);
+			}
+		});
 	}
-	
+
 }

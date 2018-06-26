@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class CustomProp implements Serializable {
 
-    private Boolean highlight;
+	private Boolean highlight;
 	private String comment;
 
 	public String getComment() {

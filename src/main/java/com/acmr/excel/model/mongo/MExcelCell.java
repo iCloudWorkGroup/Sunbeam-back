@@ -7,14 +7,12 @@ import acmr.excel.pojo.ExcelCell;
 public class MExcelCell implements Serializable {
 
 	private String id;
-	private String rowId;//开始行
-	private String colId;//开始列
-	private int rowspan;//合并几行,判断是否为合并单元格,计算完整的合并信息,当变化的时候，直接+、-就可以，不用遍历所有包含对象
-	private int colspan;//合并几列
+	private String rowId;// 开始行
+	private String colId;// 开始列
+	private int rowspan;// 合并几行,判断是否为合并单元格,计算完整的合并信息,当变化的时候，直接+、-就可以，不用遍历所有包含对象
+	private int colspan;// 合并几列
 
 	private ExcelCell excelCell;
-
-
 
 	public String getId() {
 		return id;

@@ -12,6 +12,5 @@ public class AliasX {
 	public void setY(List<String> y) {
 		this.y = y;
 	}
-	
-	
+
 }

@@ -2,7 +2,6 @@ package com.acmr.excel.model.complete;
 
 import java.io.Serializable;
 
-
 public class OperProp implements Serializable {
 	private Border border = new Border();
 	private Content content = new Content();

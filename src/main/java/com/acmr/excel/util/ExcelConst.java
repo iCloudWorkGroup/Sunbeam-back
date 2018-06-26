@@ -1,6 +1,7 @@
 package com.acmr.excel.util;
+
 /**
- *excel常量类 
+ * excel常量类
  */
 
 public class ExcelConst {
@@ -11,5 +12,5 @@ public class ExcelConst {
 	public static final int SESSION_INVALID = 502;
 	public static final String SESSION_INVALID_WARN = "session失效";
 	public static final int SUCCESS = 200;
-	
+
 }

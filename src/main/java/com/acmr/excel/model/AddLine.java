@@ -5,7 +5,6 @@ import java.io.Serializable;
 public class AddLine implements Serializable {
 	private int num;
 
-
 	public int getNum() {
 		return num;
 	}

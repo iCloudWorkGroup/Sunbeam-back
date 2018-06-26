@@ -2,10 +2,10 @@ package com.acmr.excel.model;
 
 import java.io.Serializable;
 
-public class CellContent implements Serializable{
-	
+public class CellContent implements Serializable {
+
 	private Coordinate coordinate;
-	
+
 	private String content;
 
 	public Coordinate getCoordinate() {

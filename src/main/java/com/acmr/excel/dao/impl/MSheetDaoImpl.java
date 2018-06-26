@@ -13,23 +13,23 @@ import com.acmr.excel.model.mongo.MSheet;
 
 @Repository("msheetDao")
 public class MSheetDaoImpl implements MSheetDao {
-	
+
 	@Resource
 	private MongoTemplate mongoTemplate;
 
 	@Override
-	public void updateStep(String excelId,String sheetId, Integer step) {
-		
+	public void updateStep(String excelId, String sheetId, Integer step) {
+
 		Query query = new Query();
 		query.addCriteria(Criteria.where("_id").is(sheetId));
 		Update update = new Update();
 		update.set("step", step);
-		mongoTemplate.updateFirst(query, update,MSheet.class, excelId);
+		mongoTemplate.updateFirst(query, update, MSheet.class, excelId);
 
 	}
 
 	@Override
-	public void updateFrozen(MSheet msheet, String excelId,String sheetId) {
+	public void updateFrozen(MSheet msheet, String excelId, String sheetId) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("_id").is(sheetId));
 		Update update = new Update();
@@ -39,45 +39,57 @@ public class MSheetDaoImpl implements MSheetDao {
 		update.set("rowAlias", msheet.getRowAlias());
 		update.set("colAlias", msheet.getColAlias());
 		update.set("freeze", msheet.getFreeze());
-		mongoTemplate.updateFirst(query, update,MSheet.class, excelId);
-		
+		mongoTemplate.updateFirst(query, update, MSheet.class, excelId);
+
 	}
 
 	@Override
-	public void updateUnFrozen(MSheet msheet, String excelId,String sheetId) {
+	public void updateUnFrozen(MSheet msheet, String excelId, String sheetId) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("_id").is(sheetId));
 		Update update = new Update();
 		update.set("step", msheet.getStep());
 		update.set("freeze", msheet.getFreeze());
-		mongoTemplate.updateFirst(query, update,MSheet.class, excelId);
-		
+		mongoTemplate.updateFirst(query, update, MSheet.class, excelId);
+
 	}
 
 	@Override
-	public void updateMaxRow(Integer alias, String excelId,String sheetId) {
+	public void updateMaxRow(Integer alias, String excelId, String sheetId) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("_id").is(sheetId));
 		Update update = new Update();
 		update.set("maxrow", alias);
-		
-		mongoTemplate.updateFirst(query, update,MSheet.class, excelId);
-		
+
+		mongoTemplate.updateFirst(query, update, MSheet.class, excelId);
+
 	}
 
 	@Override
-	public void updateMaxCol(Integer alias, String excelId,String sheetId) {
+	public void updateMaxCol(Integer alias, String excelId, String sheetId) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("_id").is(sheetId));
 		Update update = new Update();
 		update.set("maxcol", alias);
-		
-		mongoTemplate.updateFirst(query, update,MSheet.class, excelId);
-		
+
+		mongoTemplate.updateFirst(query, update, MSheet.class, excelId);
+
 	}
 
-	public MSheet getMSheet(String excelId,String sheetId){
-		MSheet msheet = mongoTemplate.findOne(new Query(Criteria.where("_id").is(sheetId)), MSheet.class, excelId);//查找sheet属性
-	     return msheet;
+	public MSheet getMSheet(String excelId, String sheetId) {
+		MSheet msheet = mongoTemplate.findOne(
+				new Query(Criteria.where("_id").is(sheetId)), MSheet.class,
+				excelId);// 查找sheet属性
+		return msheet;
+	}
+
+	@Override
+	public void updateMSheetProperty(String excelId, String sheetId,
+			String proterty, Object value) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("_id").is(sheetId));
+		Update update = new Update();
+		update.set(proterty, value);
+		mongoTemplate.updateFirst(query, update, MSheet.class, excelId);
 	}
 }

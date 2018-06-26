@@ -8,8 +8,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.springframework.data.mongodb.core.MongoTemplate;
 
-import com.acmr.excel.service.impl.MongodbServiceImpl;
-
 public class Master {
 
 	//1 有一个盛放任务的容器
@@ -62,18 +60,5 @@ public class Master {
 		}
 		return priceResult;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 }
