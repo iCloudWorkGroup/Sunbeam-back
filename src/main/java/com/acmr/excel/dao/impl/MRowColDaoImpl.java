@@ -44,6 +44,7 @@ public class MRowColDaoImpl implements MRowColDao {
 			RowCol rc = rcList.get(i);
 			if ("".equals(rc.getPreAlias()) || (null == rc.getPreAlias())) {
 				rowCol = rc;
+				rowCol.setTop(0);
 				continue;
 			}
 			map.put(rc.getPreAlias(), rc);
@@ -53,10 +54,12 @@ public class MRowColDaoImpl implements MRowColDao {
 		sortRcList.add(rowCol);
 		boolean flag = true;
 		while (flag) {
+			int top = rowCol.getTop()+rowCol.getLength()+1;
 			rowCol = map.get(rowCol.getAlias());
 			if (null == rowCol) {
 				break;
 			}
+			rowCol.setTop(top);
 			sortRcList.add(rowCol);
 			if (sortRcList.size() == rcList.size()) {// 跳出循环
 				break;
@@ -64,10 +67,10 @@ public class MRowColDaoImpl implements MRowColDao {
 
 		}
 
-		for (int i = 0; i < sortRcList.size(); i++) {
+		/*for (int i = 0; i < sortRcList.size(); i++) {
 			sortRcList.get(i).setTop(getTop(sortRcList, i));
 
-		}
+		}*/
 
 	}
 
@@ -92,6 +95,7 @@ public class MRowColDaoImpl implements MRowColDao {
 
 			if ("".equals(cl.getPreAlias()) || (null == cl.getPreAlias())) {
 				rowCol = cl;
+				rowCol.setTop(0);
 				continue;
 			}
 			map.put(cl.getPreAlias(), cl);
@@ -101,10 +105,13 @@ public class MRowColDaoImpl implements MRowColDao {
 		sortClList.add(rowCol);
 		boolean flag = true;
 		while (flag) {
+			int top = rowCol.getTop()+rowCol.getLength()+1;
 			rowCol = map.get(rowCol.getAlias());
+			
 			if (null == rowCol) {
 				break;
 			}
+			rowCol.setTop(top);
 			sortClList.add(rowCol);
 			if (sortClList.size() == cList.size()) {// 跳出循环
 				break;
@@ -112,10 +119,10 @@ public class MRowColDaoImpl implements MRowColDao {
 
 		}
 
-		for (int i = 0; i < sortClList.size(); i++) {
+		/*for (int i = 0; i < sortClList.size(); i++) {
 
 			sortClList.get(i).setTop(getTop(sortClList, i));
-		}
+		}*/
 
 	}
 

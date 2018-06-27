@@ -155,7 +155,7 @@ public class MSheetServiceImpl implements MSheetService {
 					rowCol.setPreAlias((maxCol - 1) + "");
 				}
 				sortCList.add(rowCol);
-				// 存入简化的行
+				// 存入简化的列
 				mrowColDao.insertRowCol(excelId, sheetId, rowCol, "cList");
 				// 存入列样式
 				baseDao.insert(excelId, mcol);

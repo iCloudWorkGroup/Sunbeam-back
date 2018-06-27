@@ -14,6 +14,14 @@ public interface MRowService {
 	 *            步骤
 	 */
 	void insertRow(RowOperate rowOperate, String excelId, Integer step);
+	
+	/**
+	 * 批量增加行
+	 * @param num
+	 * @param excelId
+	 * @param step
+	 */
+	void addRow(int num,String excelId,Integer step);
 
 	/**
 	 * 删除一行

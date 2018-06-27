@@ -18,6 +18,7 @@ import com.acmr.excel.model.RowCol;
 import com.acmr.excel.model.RowHeight;
 import com.acmr.excel.model.RowOperate;
 import com.acmr.excel.model.mongo.MCell;
+import com.acmr.excel.model.mongo.MCol;
 import com.acmr.excel.model.mongo.MRow;
 import com.acmr.excel.model.mongo.MRowColCell;
 import com.acmr.excel.model.mongo.MSheet;
@@ -172,6 +173,39 @@ public class MRowServiceImpl implements MRowService {
 	}
 
 	@Override
+	public void addRow(int num, String excelId, Integer step) {
+		String sheetId = excelId + 0;
+		MSheet msheet = msheetDao.getMSheet(excelId, sheetId);
+		int maxRow = msheet.getMaxcol();
+		List<RowCol> sortRList = new ArrayList<>();
+		mrowColDao.getRowList(sortRList, excelId, sheetId);
+		// 增加新的行
+		for (int i = 0; i < num; i++) {
+			maxRow = maxRow + 1;
+			String row = maxRow + "";
+			MRow mrow = new MRow(row, sheetId);
+			RowCol rowCol = new RowCol();
+			rowCol.setAlias(row);
+			rowCol.setLength(19);
+			if (i == 0) {
+				rowCol.setPreAlias(
+						sortRList.get(sortRList.size() - 1).getAlias());
+
+			} else {
+				rowCol.setPreAlias((maxRow - 1) + "");
+			}
+			// 存入简化的行
+			mrowColDao.insertRowCol(excelId, sheetId, rowCol, "rList");
+			// 存入行样式
+			baseDao.insert(excelId, mrow);
+		}
+		msheet.setMaxrow(maxRow);
+		msheet.setStep(step);
+		baseDao.update(excelId, msheet);// 更新最大列及步骤
+		
+	}
+
+	@Override
 	public void delRow(RowOperate rowOperate, String excelId, Integer step) {
 		String sheetId = excelId + 0;
 		List<RowCol> sortRList = new ArrayList<RowCol>();
@@ -193,7 +227,7 @@ public class MRowServiceImpl implements MRowService {
 		} else {
 			frontAlias = sortRList.get(index - 1).getAlias();// 前一行别名
 		}
-		
+
 		MSheet msheet = msheetDao.getMSheet(excelId, sheetId);
 		String backAlias = null;
 		// 当删除的是最后一行，不用修改它后面一行的前行别名
@@ -201,41 +235,45 @@ public class MRowServiceImpl implements MRowService {
 			backAlias = sortRList.get(index + 1).getAlias();// 下一行别名
 			mrowColDao.updateRowCol(excelId, sheetId, "rList", backAlias,
 					frontAlias);
-			
+
 			// 当删除行是可视行与冻结行时
 			if ((null != msheet.getFreeze())
 					&& (alias.equals(msheet.getViewRowAlias())
 							&& (msheet.getFreeze()))) {
-				msheetDao.updateMSheetProperty(excelId, sheetId, "viewRowAlias", backAlias);
+				msheetDao.updateMSheetProperty(excelId, sheetId, "viewRowAlias",
+						backAlias);
 
 			}
-			
+
 			if ((null != msheet.getFreeze())
 					&& (alias.equals(msheet.getRowAlias())
 							&& (msheet.getFreeze()))) {
-				msheetDao.updateMSheetProperty(excelId, sheetId, "rowAlias", backAlias);
+				msheetDao.updateMSheetProperty(excelId, sheetId, "rowAlias",
+						backAlias);
 
 			}
-		}else{
+		} else {
 			// 当删除行时冻结行时
 			if ((null != msheet.getFreeze())
 					&& (alias.equals(msheet.getViewRowAlias())
 							&& (msheet.getFreeze()))) {
-				msheetDao.updateMSheetProperty(excelId, sheetId, "viewRowAlias", frontAlias);
+				msheetDao.updateMSheetProperty(excelId, sheetId, "viewRowAlias",
+						frontAlias);
 
 			}
-			
+
 			if ((null != msheet.getFreeze())
 					&& (alias.equals(msheet.getRowAlias())
 							&& (msheet.getFreeze()))) {
-				msheetDao.updateMSheetProperty(excelId, sheetId, "rowAlias", frontAlias);
+				msheetDao.updateMSheetProperty(excelId, sheetId, "rowAlias",
+						frontAlias);
 
 			}
-			
-	   }
+
+		}
 		// 删除行样式记录
 		mrowDao.delMRow(excelId, sheetId, alias);
-		
+
 		List<MRowColCell> relationList = mcellDao.getMRowColCellList(excelId,
 				sheetId, alias, "row");
 		List<String> cellIdList = new ArrayList<String>();

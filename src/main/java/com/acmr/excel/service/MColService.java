@@ -15,6 +15,14 @@ public interface MColService {
 	 *            步骤
 	 */
 	void insertCol(ColOperate colOperate, String excelId, Integer step);
+	
+	/**
+	 * 批量增加列
+	 * @param num
+	 * @param excelId
+	 * @param step
+	 */
+	void addCol(int num,String excelId,Integer step);
 
 	/**
 	 * 删除一列

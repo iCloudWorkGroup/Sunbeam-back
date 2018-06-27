@@ -11,6 +11,7 @@ import com.acmr.excel.model.OperatorConstant;
 import com.acmr.excel.model.OuterPaste;
 import com.acmr.excel.model.RowHeight;
 import com.acmr.excel.model.RowOperate;
+import com.acmr.excel.model.RowOrColExpand;
 import com.acmr.excel.model.copy.Copy;
 import com.acmr.excel.service.MCellService;
 import com.acmr.excel.service.MColService;
@@ -205,6 +206,15 @@ public class WorkerThread2 implements Runnable {
 			RowHeight rowHeight = (RowHeight) model.getObject();
 			mrowService.updateRowHeight(rowHeight, excelId, step);
 			break;
+		case OperatorConstant.expand:
+			RowOrColExpand expand = (RowOrColExpand) model.getObject();
+			String type = expand.getType();
+			if("row".equals(type)){
+				 mrowService.addRow(expand.getNum(), excelId, step);
+			}else{
+				 mcolService.addCol(expand.getNum(), excelId, step);
+			}	 
+		    break;
 		// case OperatorConstant.addRowLine:
 		// RowLine rowLine = (RowLine) model.getObject();
 		// int rowNum = rowLine.getNum();

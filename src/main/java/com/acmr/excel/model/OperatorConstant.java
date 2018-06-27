@@ -42,6 +42,7 @@ public class OperatorConstant {
 	public static final int addColLine = 33;
 	public static final int colhideCancel = 29;
 	public static final int rowhideCancel = 32;
+	public static final int expand = 36;
 
 	// 回退
 	public static final int undo = 34;

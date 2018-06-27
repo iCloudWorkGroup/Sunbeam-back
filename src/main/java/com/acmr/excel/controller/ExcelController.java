@@ -34,6 +34,7 @@ import com.acmr.excel.model.Position;
 import com.acmr.excel.model.complete.CompleteExcel;
 import com.acmr.excel.model.history.VersionHistory;
 import com.acmr.excel.service.MBookService;
+import com.acmr.excel.service.MSheetService;
 import com.acmr.excel.util.ExcelUtil;
 import com.acmr.excel.util.FileUtil;
 import com.acmr.excel.util.JsonReturn;
@@ -96,17 +97,27 @@ public class ExcelController extends BaseController {
 	/**
 	 * 初始化excel页面
 	 */
-	@RequestMapping
+	@RequestMapping("main")
 	public ModelAndView main(HttpServletRequest req, HttpServletResponse resp) {
-		String excelId = UUIDUtil.getUUID();
+		String excelId = req.getParameter("excelId");
 		//handleExcelService.createNewExcel(excelId,mongodbServiceImpl);
 		//VersionHistory versionHistory = new VersionHistory();
 		//storeService.set(excelId+"_history", versionHistory);
 		log.info("初始化excel");
 		// ExcelBook e = (ExcelBook)memcachedClient.get(excelId);
 		// } <input type="hidden" id="excelId" value="(.*)"/>
-		return new ModelAndView("/index").addObject("sheetId", "1").addObject("build", true).addObject("excelId", excelId).
+		return new ModelAndView("/index").addObject("sbmId", excelId).
 				addObject("frontName",Constant.frontName);
+	}
+	
+	/**
+	 * 初始化表明列表页面
+	 */
+	@RequestMapping("/")
+	public ModelAndView welcom(HttpServletRequest req, HttpServletResponse resp) {
+		List<String> excels = mbookService.getExcels();
+		
+		return new ModelAndView("/show").addObject("excels", excels);
 	}
 	
 	/**
@@ -314,7 +325,7 @@ public class ExcelController extends BaseController {
 		int height = position.getBottom();
 		int right = position.getRight();
 		
-		CompleteExcel excel = mbookService.reload(excelId, sheetId, 0, height, 0, right);
+		CompleteExcel excel = mbookService.reload(excelId, sheetId, 0, height, 0, right,0);
 	
 		this.sendJson(resp, excel);
 		

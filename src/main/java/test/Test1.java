@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.xbean.spring.context.ClassPathXmlApplicationContext;
 import org.springframework.context.ApplicationContext;
@@ -102,6 +103,8 @@ public class Test1 {
 	    update.set("content."+"famly", "sun");
 	    mongoTemplate.updateMulti(query, update, MCol.class,"aa");
 		*/
+	 
+	  
 	}
 
 }

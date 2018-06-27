@@ -1,5 +1,9 @@
 package com.acmr.excel.dao.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import javax.annotation.Resource;
 
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -91,5 +95,12 @@ public class MSheetDaoImpl implements MSheetDao {
 		Update update = new Update();
 		update.set(proterty, value);
 		mongoTemplate.updateFirst(query, update, MSheet.class, excelId);
+	}
+
+	@Override
+	public List<String> getTableList() {
+		 Set<String> set = mongoTemplate.getCollectionNames();
+		 List<String> excels = new ArrayList<>(set);
+		 return excels;
 	}
 }

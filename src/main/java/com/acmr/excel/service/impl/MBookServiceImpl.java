@@ -332,7 +332,6 @@ public class MBookServiceImpl implements MBookService {
 		}
 	}
 
-	
 	private void getMRow(List<ExcelRow> rows, List<MRow> mrows,
 			MRowColList rList, List<Object> tempList, String sheetId) {
 		for (int i = 0; i < rows.size(); i++) {
@@ -756,14 +755,29 @@ public class MBookServiceImpl implements MBookService {
 	@Override
 	public CompleteExcel reload(String excelId, String sheetId,
 			Integer rowBegin, Integer rowEnd, Integer colBegin,
-			Integer colEnd) {
+			Integer colEnd,int type ) {
+		
 		// 将步骤重置为0
-		msheetDao.updateStep(excelId, sheetId, 0);
+		if(type == 0){
+		 msheetDao.updateStep(excelId, sheetId, 0);
+		}
 		CompleteExcel excel = new CompleteExcel();
 		List<RowCol> sortRList = new ArrayList<RowCol>();
 		List<RowCol> sortCList = new ArrayList<RowCol>();
 		mrowColDao.getRowList(sortRList, excelId, sheetId);
 		mrowColDao.getColList(sortCList, excelId, sheetId);
+		if(type == 0){
+			addRowOrCol(excelId,sheetId,sortRList,sortCList,rowEnd,colEnd);
+		}
+
+		Map<String, Integer> rMap = new HashMap<String, Integer>();
+		for (int i = 0; i < sortRList.size(); i++) {
+			rMap.put(sortRList.get(i).getAlias(), i);
+		}
+		Map<String, Integer> cMap = new HashMap<String, Integer>();
+		for (int i = 0; i < sortCList.size(); i++) {
+			cMap.put(sortCList.get(i).getAlias(), i);
+		}
 		int rowBeginIndex = getIndexByPixel(sortRList, rowBegin);
 		int rowEndIndex = getIndexByPixel(sortRList, rowEnd);
 		int colBeginIndex = getIndexByPixel(sortCList, colBegin);
@@ -783,19 +797,17 @@ public class MBookServiceImpl implements MBookService {
 			left = rc.getTop();
 		}
 		List<String> rowList = new ArrayList<String>();
-		Map<String, Integer> rMap = new HashMap<String, Integer>();
+
 		List<String> colList = new ArrayList<String>();
-		Map<String, Integer> cMap = new HashMap<String, Integer>();
+
 		if (sortRList.size() > 0) {
 			for (int i = rowBeginIndex; i < rowEndIndex + 1; i++) {
 				rowList.add(sortRList.get(i).getAlias());
-				rMap.put(sortRList.get(i).getAlias(), i);
 			}
 		}
 		if (sortCList.size() > 0) {
 			for (int j = colBeginIndex; j < colEndIndex + 1; j++) {
 				colList.add(sortCList.get(j).getAlias());
-				cMap.put(sortCList.get(j).getAlias(), j);
 			}
 		}
 
@@ -885,6 +897,87 @@ public class MBookServiceImpl implements MBookService {
 
 	}
 
+	private void addRowOrCol(String excelId, String sheetId,
+			List<RowCol> sortRList, List<RowCol> sortCList, int rowEnd,
+			int colEnd) {
+		MSheet msheet = msheetDao.getMSheet(excelId, sheetId);
+		int maxRow = msheet.getMaxrow();
+		int maxCol = msheet.getMaxcol();
+
+		RowCol rowTop = sortRList.get(sortRList.size() - 1);
+		if (rowEnd > rowTop.getTop() + rowTop.getLength()) {
+			int length = rowEnd - rowTop.getTop() - rowTop.getLength();
+			int rowNum = (length / 20) + 1;
+            int top = rowTop.getTop()+rowTop.getLength()+1;
+			// 增加新的行
+			for (int i = 0; i < rowNum; i++) {
+				maxRow = maxRow + 1;
+				String row = maxRow + "";
+				MRow mrow = new MRow(row, sheetId);
+				RowCol rowCol = new RowCol();
+				rowCol.setAlias(row);
+				rowCol.setLength(19);
+				if (i == 0) {
+					rowCol.setPreAlias(
+							sortRList.get(sortRList.size() - 1).getAlias());
+					
+				} else {
+					rowCol.setPreAlias((maxRow - 1) + "");
+				}
+				// 存入简化的行
+				mrowColDao.insertRowCol(excelId, sheetId, rowCol, "rList");
+				// 存入行样式
+				baseDao.insert(excelId, mrow);
+				
+				if(i == 0){
+					rowCol.setTop(top);
+				}else{
+					top = top +19+1;
+					rowCol.setTop(top);
+				}
+				sortRList.add(rowCol);
+				
+			}
+		}
+		RowCol colTop = sortCList.get(sortCList.size() - 1);
+		if (rowEnd > rowTop.getTop() + rowTop.getLength()) {
+			int length = colEnd - colTop.getTop() - colTop.getLength();
+			int colNum = (length / 70) + 1;
+			int left = colTop.getTop()+colTop.getLength()+1;
+			// 增加新的列
+			for (int i = 0; i < colNum; i++) {
+				maxCol = maxCol + 1;
+				String col = maxCol + "";
+				MCol mcol = new MCol(col, sheetId);
+				RowCol rowCol = new RowCol();
+				rowCol.setAlias(col);
+				rowCol.setLength(69);
+				if (i == 0) {
+					rowCol.setPreAlias(
+							sortCList.get(sortCList.size() - 1).getAlias());
+				} else {
+					rowCol.setPreAlias((maxCol - 1) + "");
+				}
+				// 存入简化的列
+				mrowColDao.insertRowCol(excelId, sheetId, rowCol, "cList");
+				// 存入列样式
+				baseDao.insert(excelId, mcol);
+				if(i == 0){
+					rowCol.setTop(left);
+				}else{
+					left = left +69+1;
+					rowCol.setTop(left);
+				}
+				sortCList.add(rowCol);
+				
+			}
+			
+			msheet.setMaxcol(maxCol);
+			msheet.setMaxrow(maxRow);
+			baseDao.update(excelId, msheet);// 更新最大行，最大列
+		}
+	}
+
 	private int getIndexByPixel(List<RowCol> sortRclist, int pixel) {
 		if (sortRclist.size() == 0) {
 			return 0;
@@ -928,6 +1021,12 @@ public class MBookServiceImpl implements MBookService {
 		}
 
 		return gly.getTop() + tempHeight + 1;
+	}
+
+	@Override
+	public List<String> getExcels() {
+		
+		return msheetDao.getTableList();
 	}
 
 }

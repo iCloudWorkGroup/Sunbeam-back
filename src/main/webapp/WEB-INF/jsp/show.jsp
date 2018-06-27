@@ -10,8 +10,8 @@
 	<table>
 		<c:forEach items="${excels}" var="e" >
 			<tr>
-				<td><a href="excel.htm?m=reOpen&excelId=${e.excelId}">${e.excelId}</a></td>
-				<td>${e.currentTime}</td>
+				<td><a href="main?excelId=${e}">${e}</a></td>
+				
 			</tr>
 		</c:forEach>
 	</table>

@@ -14,6 +14,7 @@ import com.acmr.excel.model.Frozen;
 import com.acmr.excel.model.OpenExcel;
 import com.acmr.excel.model.OperatorConstant;
 import com.acmr.excel.model.OuterPaste;
+import com.acmr.excel.model.RowOrColExpand;
 import com.acmr.excel.model.complete.CompleteExcel;
 import com.acmr.excel.model.complete.SheetElement;
 import com.acmr.excel.model.copy.Copy;
@@ -191,6 +192,7 @@ public class SheetController extends BaseController {
 			cStep = Integer.valueOf(curStep);
 		}
 		if(cStep>0){
+		  while(true){
 			memStep = msheetService.getStep(excelId,sheetId);
 			if(cStep!=memStep){
 				try {
@@ -199,7 +201,10 @@ public class SheetController extends BaseController {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+			}else{
+				break;
 			}
+		  }
 		}
        
 		
@@ -213,13 +218,22 @@ public class SheetController extends BaseController {
 		int colBegin = openExcel.getLeft();
 		int colEnd = openExcel.getRight() == 0 ? 2000 : openExcel.getRight() ;
 		
-		CompleteExcel excel =  mbookService.reload(excelId, sheetId, rowBegin, rowEnd, colBegin, colEnd);
+		CompleteExcel excel =  mbookService.reload(excelId, sheetId, rowBegin, rowEnd, colBegin, colEnd,1);
 		SheetElement sheet = new SheetElement(excel.getSheets().get(0));
 		
 		long b2 = System.currentTimeMillis();
 		System.out.println("openexcel=====================" + (b2 - b1));
 
 		this.sendJson(resp, sheet);
+	}
+	
+	/**
+	 * 通过像素动态加载excel
+	 */
+	@RequestMapping("/expand")
+	public void addRowOrCol(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		RowOrColExpand expand = getJsonDataParameter(req, RowOrColExpand.class);
+		this.assembleData(req, resp,expand,OperatorConstant.expand);
 	}
 	
 }

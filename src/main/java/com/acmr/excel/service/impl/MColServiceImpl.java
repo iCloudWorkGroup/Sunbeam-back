@@ -83,7 +83,8 @@ public class MColServiceImpl implements MColService {
 		baseDao.insert(excelId, mcol);
 
 		// 当选中行是当前可视行时
-		if ((null != msheet.getFreeze()) && (msheet.getViewColAlias().equals(nextAlias))
+		if ((null != msheet.getFreeze())
+				&& (msheet.getViewColAlias().equals(nextAlias))
 				&& (msheet.getFreeze())) {
 			msheetDao.updateMSheetProperty(excelId, sheetId, "viewColAlias",
 					alias);
@@ -169,6 +170,38 @@ public class MColServiceImpl implements MColService {
 		 * rcc.setRow(Integer.parseInt(rc.getAlias())); tempList.add(rcc); } } }
 		 * }
 		 */
+	}
+
+	@Override
+	public void addCol(int num, String excelId, Integer step) {
+		String sheetId = excelId+0;
+		MSheet msheet = msheetDao.getMSheet(excelId, sheetId);
+		int maxCol = msheet.getMaxcol();
+		List<RowCol> sortCList = new ArrayList<>();
+		mrowColDao.getColList(sortCList, excelId, sheetId);
+		// 增加新的列
+		for (int i = 0; i < num; i++) {
+			maxCol = maxCol + 1;
+			String col = maxCol + "";
+			MCol mcol = new MCol(col, sheetId);
+			RowCol rowCol = new RowCol();
+			rowCol.setAlias(col);
+			rowCol.setLength(69);
+			if (i == 0) {
+				rowCol.setPreAlias(
+						sortCList.get(sortCList.size() - 1).getAlias());
+			} else {
+				rowCol.setPreAlias((maxCol - 1) + "");
+			}
+			// 存入简化的列
+			mrowColDao.insertRowCol(excelId, sheetId, rowCol, "cList");
+			// 存入列样式
+			baseDao.insert(excelId, mcol);
+
+		}
+		msheet.setMaxcol(maxCol);
+		msheet.setStep(step);
+		baseDao.update(excelId, msheet);// 更新最大列及步骤
 	}
 
 	@Override
@@ -271,7 +304,6 @@ public class MColServiceImpl implements MColService {
 					mec.setId(id);
 					mec.setColspan(mc.getColspan() - 1);
 
-					
 				} else {
 					// 删除老的MExcelCell
 					cellIdList.add(mc.getId());

@@ -1,5 +1,7 @@
 package com.acmr.excel.dao;
 
+import java.util.List;
+
 import com.acmr.excel.model.mongo.MSheet;
 
 public interface MSheetDao {
@@ -65,4 +67,6 @@ public interface MSheetDao {
 	 * @param value    属性值
 	 */
 	void updateMSheetProperty(String excelId,String sheetId,String proterty,Object value);
+	
+	List<String> getTableList();
 }
