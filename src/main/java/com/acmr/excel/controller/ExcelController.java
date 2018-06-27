@@ -97,16 +97,15 @@ public class ExcelController extends BaseController {
 	/**
 	 * 初始化excel页面
 	 */
-	@RequestMapping("main")
-	public ModelAndView main(HttpServletRequest req, HttpServletResponse resp) {
-		String excelId = req.getParameter("excelId");
+	@RequestMapping(value="/main/{sbmId}")
+	public ModelAndView main(@PathVariable String sbmId) {
 		//handleExcelService.createNewExcel(excelId,mongodbServiceImpl);
 		//VersionHistory versionHistory = new VersionHistory();
 		//storeService.set(excelId+"_history", versionHistory);
 		log.info("初始化excel");
 		// ExcelBook e = (ExcelBook)memcachedClient.get(excelId);
 		// } <input type="hidden" id="excelId" value="(.*)"/>
-		return new ModelAndView("/index").addObject("sbmId", excelId).
+		return new ModelAndView("/index").addObject("sbmId", sbmId).
 				addObject("frontName",Constant.frontName);
 	}
 	

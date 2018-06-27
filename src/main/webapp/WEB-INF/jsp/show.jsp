@@ -8,10 +8,10 @@
 </head>
 <body>
 	<table>
-		<c:forEach items="${excels}" var="e" >
+		<c:forEach items="${excels}" var="item" >
 			<tr>
-				<td><a href="main?excelId=${e}">${e}</a></td>
-				
+				<td><a href="main/${item}">${item}</a>
+				</td>
 			</tr>
 		</c:forEach>
 	</table>
