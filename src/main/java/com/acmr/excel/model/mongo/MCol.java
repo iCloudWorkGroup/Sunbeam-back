@@ -84,7 +84,7 @@ public class MCol implements Serializable {
 		this.sheetId = sheetId;
 		this.alias = col;
 		this.hidden = false;
-		this.width = 69;
+		this.width = 71;
 
 	}
 

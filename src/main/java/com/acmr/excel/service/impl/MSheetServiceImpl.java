@@ -147,7 +147,7 @@ public class MSheetServiceImpl implements MSheetService {
 				MCol mcol = new MCol(col, sheetId);
 				RowCol rowCol = new RowCol();
 				rowCol.setAlias(col);
-				rowCol.setLength(69);
+				rowCol.setLength(71);
 				if (i == 0) {
 					rowCol.setPreAlias(
 							sortCList.get(sortCList.size() - 1).getAlias());
@@ -525,7 +525,7 @@ public class MSheetServiceImpl implements MSheetService {
 				MCol mcol = new MCol(col, sheetId);
 				RowCol rowCol = new RowCol();
 				rowCol.setAlias(col);
-				rowCol.setLength(69);
+				rowCol.setLength(71);
 				if (i == 0) {
 					rowCol.setPreAlias(
 							sortCList.get(sortCList.size() - 1).getAlias());

@@ -103,10 +103,12 @@ public class ExcelController extends BaseController {
 		//VersionHistory versionHistory = new VersionHistory();
 		//storeService.set(excelId+"_history", versionHistory);
 		log.info("初始化excel");
+		
+		String uuid = UUIDUtil.getUUID();
 		// ExcelBook e = (ExcelBook)memcachedClient.get(excelId);
 		// } <input type="hidden" id="excelId" value="(.*)"/>
 		return new ModelAndView("/index").addObject("sbmId", sbmId).
-				addObject("frontName",Constant.frontName);
+				addObject("frontName",Constant.frontName).addObject("uuid", uuid);
 	}
 	
 	/**

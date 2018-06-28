@@ -942,7 +942,7 @@ public class MBookServiceImpl implements MBookService {
 		RowCol colTop = sortCList.get(sortCList.size() - 1);
 		if (rowEnd > rowTop.getTop() + rowTop.getLength()) {
 			int length = colEnd - colTop.getTop() - colTop.getLength();
-			int colNum = (length / 70) + 1;
+			int colNum = (length / 71) + 1;
 			int left = colTop.getTop()+colTop.getLength()+1;
 			// 增加新的列
 			for (int i = 0; i < colNum; i++) {
@@ -951,7 +951,7 @@ public class MBookServiceImpl implements MBookService {
 				MCol mcol = new MCol(col, sheetId);
 				RowCol rowCol = new RowCol();
 				rowCol.setAlias(col);
-				rowCol.setLength(69);
+				rowCol.setLength(71);
 				if (i == 0) {
 					rowCol.setPreAlias(
 							sortCList.get(sortCList.size() - 1).getAlias());
@@ -965,7 +965,7 @@ public class MBookServiceImpl implements MBookService {
 				if(i == 0){
 					rowCol.setTop(left);
 				}else{
-					left = left +69+1;
+					left = left +71+1;
 					rowCol.setTop(left);
 				}
 				sortCList.add(rowCol);

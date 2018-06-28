@@ -61,7 +61,7 @@ public class MColServiceImpl implements MColService {
 
 		RowCol rowCol = new RowCol();
 		rowCol.setAlias(alias);
-		rowCol.setLength(69);
+		rowCol.setLength(71);
 		if (colOperate.getCol() == 0) {
 			rowCol.setPreAlias(null);
 		} else {
@@ -78,7 +78,7 @@ public class MColServiceImpl implements MColService {
 		mcol.setSheetId(sheetId);
 		mcol.setAlias(alias);
 		mcol.setHidden(false);
-		mcol.setWidth(69);
+		mcol.setWidth(71);
 
 		baseDao.insert(excelId, mcol);
 
@@ -186,7 +186,7 @@ public class MColServiceImpl implements MColService {
 			MCol mcol = new MCol(col, sheetId);
 			RowCol rowCol = new RowCol();
 			rowCol.setAlias(col);
-			rowCol.setLength(69);
+			rowCol.setLength(71);
 			if (i == 0) {
 				rowCol.setPreAlias(
 						sortCList.get(sortCList.size() - 1).getAlias());
