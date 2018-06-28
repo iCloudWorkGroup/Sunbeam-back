@@ -221,7 +221,8 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.0.1</version>
-		</dependency>
+			<scope>provided</scope>
+		</dependency> 
 
 		<dependency>
 			<groupId>net.spy</groupId>

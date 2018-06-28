@@ -7,7 +7,11 @@ import java.util.List;
 public class Cell implements Serializable {
 	private int sheetId;
 	private List<Coordinate> coordinate = new ArrayList<Coordinate>();
+	/*边框类型 上下左右 all 、outer、none*/
 	private String direction;
+	/* 0 无边框 1 细边框 2 粗边框*/
+	private int line;
+	
 	private String align;
 	private String isBold;
 	private Boolean italic;
@@ -61,6 +65,7 @@ public class Cell implements Serializable {
 	 * "format" : "num: 数字类型,time：时间,text：文本"
 	 */
 	private String format;
+	
 
 	public int getSheetId() {
 		return sheetId;
@@ -220,6 +225,14 @@ public class Cell implements Serializable {
 
 	public void setAuto(Boolean auto) {
 		this.auto = auto;
+	}
+
+	public int getLine() {
+		return line;
+	}
+
+	public void setLine(int line) {
+		this.line = line;
 	}
 
 }

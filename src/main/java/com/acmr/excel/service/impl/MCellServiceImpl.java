@@ -684,6 +684,12 @@ public class MCellServiceImpl implements MCellService {
 		return list;
 	}
 
+	@Override
+	public void updateBorder(Cell cell, int step, String excelId) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	/*
 	 * public void OperationCellByCord(ArrayList<Object> al){ //查找关系表
 	 * List<MRowColCell> relationList =

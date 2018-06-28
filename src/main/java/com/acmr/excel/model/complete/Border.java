@@ -3,6 +3,7 @@ package com.acmr.excel.model.complete;
 import java.io.Serializable;
 
 public class Border implements Serializable {
+	/* 边框 0 无边框 1 细边框  2 粗边框*/
 	private Integer all;
 	private Integer bottom;
 	private Integer left;

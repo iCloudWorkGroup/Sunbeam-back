@@ -112,5 +112,13 @@ public interface MCellService {
 	 * @param excelId
 	 */
 	void splitCell(Cell cell, int step, String excelId);
+	
+	/**
+	 * 设置边框样式
+	 * @param cell
+	 * @param step
+	 * @param excelId
+	 */
+	void updateBorder(Cell cell,int step,String excelId);
 
 }
