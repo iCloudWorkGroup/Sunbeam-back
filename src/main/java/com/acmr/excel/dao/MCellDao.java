@@ -168,5 +168,16 @@ public interface MCellDao {
 	 * @param sheetId
 	 */
 	void updateSpan(List<String> cellIdList, String excelId, String sheetId);
+	
+	/**
+	 * 更新单元格的边框
+	 * @param property
+	 * @param value
+	 * @param idList
+	 * @param excelId
+	 * @param sheetId
+	 */
+	void updateBorder(String property, Object value, List<String> idList,
+			String excelId, String sheetId);
 
 }

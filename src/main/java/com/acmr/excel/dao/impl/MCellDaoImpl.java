@@ -181,4 +181,28 @@ public class MCellDaoImpl implements MCellDao {
 		mongoTemplate.updateMulti(query, update, MCell.class, excelId);
 	}
 
+	@Override
+	public void updateBorder(String property, Object value,
+			List<String> idList, String excelId, String sheetId) {
+		Query query = new Query();
+		query.addCriteria(
+				Criteria.where("_id").in(idList).and("sheetId").is(sheetId));
+		Update update = new Update();
+		if("all".equals(property)){
+			update.set("border.left" , value);
+			update.set("border.top", value);
+			update.set("border.right" , value);
+			update.set("border.bottom", value);
+		}else if("none".equals(property)){
+			update.set("border.left" , value);
+			update.set("border.top", value);
+			update.set("border.right" , value);
+			update.set("border.bottom", value);
+		}else{
+		    update.set("border." + property, value);
+		}
+		mongoTemplate.updateMulti(query, update, MCell.class, excelId);
+		
+	}
+
 }

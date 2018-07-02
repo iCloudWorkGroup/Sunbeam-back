@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import com.acmr.excel.dao.MColDao;
+import com.acmr.excel.model.mongo.MCell;
 import com.acmr.excel.model.mongo.MCol;
 import com.acmr.excel.model.mongo.MExcelColumn;
 import com.acmr.excel.model.mongo.MRow;
@@ -94,6 +95,54 @@ public class MColDaoImpl implements MColDao {
 		update.set("props.content." + property, content);
 		mongoTemplate.updateMulti(query, update, MCol.class, excelId);
 
+	}
+	
+	@Override
+	public void updateBorder(String property, Object value, List<String> aliasList,
+			String excelId, String sheetId) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("alias").in(aliasList).and("_class")
+				.is(MCol.class.getName()).and("sheetId").is(sheetId));
+		Update update = new Update();
+		if("all".equals(property)){
+			update.set("props.border.left" , value);
+			update.set("props.border.top", value);
+			update.set("props.border.right" , value);
+			update.set("props.border.bottom", value);
+		}else if("none".equals(property)){
+			update.set("props.border.left" , value);
+			update.set("props.border.top", value);
+			update.set("props.border.right" , value);
+			update.set("props.border.bottom", value);
+		}else{
+		    update.set("props.border." + property, value);
+		}
+		mongoTemplate.updateMulti(query, update, MCol.class, excelId);
+		
+	}
+
+	@Override
+	public void updateBorder(String property, Object value, String alias,
+			String excelId, String sheetId) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("alias").is(alias).and("_class")
+				.is(MCol.class.getName()).and("sheetId").is(sheetId));
+		Update update = new Update();
+		if("all".equals(property)){
+			update.set("props.border.left" , value);
+			update.set("props.border.top", value);
+			update.set("props.border.right" , value);
+			update.set("props.border.bottom", value);
+		}else if("none".equals(property)){
+			update.set("props.border.left" , value);
+			update.set("props.border.top", value);
+			update.set("props.border.right" , value);
+			update.set("props.border.bottom", value);
+		}else{
+		    update.set("props.border." + property, value);
+		}
+		mongoTemplate.updateMulti(query, update, MCol.class, excelId);
+		
 	}
 
 }

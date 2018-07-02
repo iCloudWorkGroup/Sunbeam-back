@@ -134,12 +134,10 @@ public class WorkerThread2 implements Runnable {
 			cell = (Cell) model.getObject();
 			mcellService.splitCell(cell, step, excelId);
 			break;
-		// case OperatorConstant.frame:
-		// cell = (Cell) model.getObject();
-		// handleExcelService.updateCells(CellUpdateType.frame,
-		// cell,excelBook,versionHistory,step);
-		// storeService.set(excelId+"_history", versionHistory);
-		// break;
+		case OperatorConstant.frame:
+			cell = (Cell) model.getObject();
+		    mcellService.updateBorder(cell, step, excelId);
+			break;
 		case OperatorConstant.alignlevel:
 			cell = (Cell) model.getObject();
 			mcellService.updateAlignlevel(cell, step, excelId);

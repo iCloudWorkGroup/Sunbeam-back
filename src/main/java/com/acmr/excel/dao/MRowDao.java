@@ -78,5 +78,25 @@ public interface MRowDao {
 	 */
 	void updateContent(String property, Object content, List<String> aliasList,
 			String excelId, String sheetId);
-
+	
+	/**
+	 * 更新边框属性
+	 * @param property
+	 * @param value
+	 * @param aliasList
+	 * @param excelId
+	 * @param sheetId
+	 */
+	void updateBorder(String property, Object value, List<String> aliasList,
+			String excelId, String sheetId);
+    /**
+     * 根据row别名，更新边框属性
+     * @param property
+     * @param value
+     * @param alias
+     * @param excelId
+     * @param sheetId
+     */
+	void updateBorder(String property, Object value, String alias,
+			String excelId, String sheetId);
 }
