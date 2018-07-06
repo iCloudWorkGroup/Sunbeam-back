@@ -957,7 +957,7 @@ public class MBookServiceImpl implements MBookService {
 			colWeight = colTop.getTop()+colTop.getLength();
 		}
 		
-		if (rowEnd > colWeight) {
+		if (colEnd > colWeight) {
 			int length = colEnd - colWeight;
 			int colNum = (length / 72) + 1;
 			int left = colWeight+1;
