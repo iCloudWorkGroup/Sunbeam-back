@@ -1307,7 +1307,9 @@ public class MCellServiceImpl implements MCellService {
 								tempList.add(mcell);
 							}
 						} else {
-							idList.add(cellId);
+							if(!idList.contains(cellId)){
+								idList.add(cellId);
+							}
 						}
 					}
 				}
@@ -1396,7 +1398,9 @@ public class MCellServiceImpl implements MCellService {
 								tempList.add(mcell);
 							}
 						} else {
-							idList.add(cellId);
+							if(!idList.contains(cellId)){
+							  idList.add(cellId);
+							}
 						}
 					}
 				}
@@ -1408,7 +1412,7 @@ public class MCellServiceImpl implements MCellService {
 				for (MCell mc : mcellList) {
 					String id = mc.getId();
 					String[] ids = id.split("_");
-					int colIndex = rMap.get(ids[1]);
+					int colIndex = cMap.get(ids[1]);
 					if((colIndex>=colBegin)&&(colIndex+mc.getColspan() <= colEnd+1)){
 						if("type".equals(property1)){
 							// 当时设置单元格数字格式时，需要修改displayTexts值
