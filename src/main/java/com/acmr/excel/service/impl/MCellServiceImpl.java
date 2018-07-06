@@ -20,11 +20,16 @@ import com.acmr.excel.dao.MSheetDao;
 import com.acmr.excel.dao.base.BaseDao;
 import com.acmr.excel.model.Cell;
 import com.acmr.excel.model.CellContent;
+import com.acmr.excel.model.CellFormate;
 import com.acmr.excel.model.ConverCell;
 import com.acmr.excel.model.Coordinate;
 import com.acmr.excel.model.RowCol;
+import com.acmr.excel.model.RowHeight;
 import com.acmr.excel.model.complete.Border;
+import com.acmr.excel.model.complete.Content;
+import com.acmr.excel.model.complete.CustomProp;
 import com.acmr.excel.model.complete.Occupy;
+import com.acmr.excel.model.complete.OperProp;
 import com.acmr.excel.model.mongo.MCell;
 import com.acmr.excel.model.mongo.MCol;
 import com.acmr.excel.model.mongo.MRow;
@@ -52,10 +57,7 @@ public class MCellServiceImpl implements MCellService {
 		String sheetId = excelId + 0;
 		int rowIndex = cell.getCoordinate().getStartRow();
 		int colIndex = cell.getCoordinate().getStartCol();
-		/*
-		 * int rowEnd = cell.getCoordinate().getEndRow(); int colEnd =
-		 * cell.getCoordinate().getEndCol();
-		 */
+
 		List<RowCol> sortRcList = new ArrayList<RowCol>();
 		List<RowCol> sortClList = new ArrayList<RowCol>();
 		mrowColDao.getColList(sortClList, excelId, sheetId);
@@ -65,12 +67,22 @@ public class MCellServiceImpl implements MCellService {
 		String id = rowAlias + "_" + colAlias;
 		MCell mcell = mcellDao.getMCell(excelId, sheetId, id);
 
+		MRow mrow = mrowDao.getMRow(excelId, sheetId, rowAlias);
+		OperProp rp = mrow.getProps();
+		MCol mcol = mcolDao.getMCol(excelId, sheetId, colAlias);
+		OperProp cp = mcol.getProps();
+
 		if (null == mcell) {
 			mcell = new MCell();
 			mcell.setRowspan(1);
 			mcell.setColspan(1);
 			mcell.setId(id);
 			mcell.setSheetId(sheetId);
+
+			setMCellProperty(mcell, rp.getContent(), rp.getBorder(),
+					rp.getCustomProp());
+			setMCellProperty(mcell, cp.getContent(), cp.getBorder(),
+					cp.getCustomProp());
 
 			MRowColCell mrowColCell = new MRowColCell();
 			mrowColCell.setRow(rowAlias);
@@ -80,15 +92,25 @@ public class MCellServiceImpl implements MCellService {
 			baseDao.insert(excelId, mrowColCell);// 存关系映射表
 		}
 
-		String content = cell.getContent();
+		String text = cell.getContent();
 		try {
-			content = java.net.URLDecoder.decode(content, "utf-8");
-
-			mcell.getContent().setTexts(content);
-			mcell.getContent().setDisplayTexts(content);
-			CellFormateUtil.autoRecognise(content, mcell);
+			text = java.net.URLDecoder.decode(text, "utf-8");
+			Content content = mcell.getContent();
+			content.setType("routine");
+			content.setExpress("G");
+			content.setTexts(text);
+			CellFormateUtil.setShowText(mcell.getContent());
 
 			baseDao.update(excelId, mcell);// 存cell对象
+
+			List<RowHeight> effect = cell.getEffect();
+			if (null != effect) {
+				for (RowHeight rh : effect) {
+					String row = sortRcList.get(rh.getRow()).getAlias();
+					mrowDao.updateRowHeight(excelId, sheetId, row,
+							rh.getOffset());
+				}
+			}
 
 			msheetDao.updateStep(excelId, sheetId, step);
 
@@ -105,8 +127,8 @@ public class MCellServiceImpl implements MCellService {
 		String family = cell.getFamily();
 
 		try {
-			updateContent(coordinates, "family", family, step, excelId,
-					sheetId);
+			updateContent(coordinates, "family", family, null, null, null, step,
+					excelId, sheetId);
 		} catch (NoSuchFieldException | SecurityException
 				| IllegalArgumentException | IllegalAccessException e) {
 
@@ -122,7 +144,8 @@ public class MCellServiceImpl implements MCellService {
 		String size = cell.getSize();
 
 		try {
-			updateContent(coordinates, "size", size, step, excelId, sheetId);
+			updateContent(coordinates, "size", size, null, null, null, step,
+					excelId, sheetId);
 		} catch (NoSuchFieldException | SecurityException
 				| IllegalArgumentException | IllegalAccessException e) {
 
@@ -138,8 +161,8 @@ public class MCellServiceImpl implements MCellService {
 		Boolean weight = cell.isWeight();
 
 		try {
-			updateContent(coordinates, "weight", weight, step, excelId,
-					sheetId);
+			updateContent(coordinates, "weight", weight, null, null, null, step,
+					excelId, sheetId);
 		} catch (NoSuchFieldException | SecurityException
 				| IllegalArgumentException | IllegalAccessException e) {
 
@@ -155,8 +178,8 @@ public class MCellServiceImpl implements MCellService {
 		Boolean italic = cell.getItalic();
 
 		try {
-			updateContent(coordinates, "italic", italic, step, excelId,
-					sheetId);
+			updateContent(coordinates, "italic", italic, null, null, null, step,
+					excelId, sheetId);
 		} catch (NoSuchFieldException | SecurityException
 				| IllegalArgumentException | IllegalAccessException e) {
 
@@ -172,7 +195,8 @@ public class MCellServiceImpl implements MCellService {
 		String color = cell.getColor();
 
 		try {
-			updateContent(coordinates, "color", color, step, excelId, sheetId);
+			updateContent(coordinates, "color", color, null, null, null, step,
+					excelId, sheetId);
 		} catch (NoSuchFieldException | SecurityException
 				| IllegalArgumentException | IllegalAccessException e) {
 
@@ -186,10 +210,10 @@ public class MCellServiceImpl implements MCellService {
 		String sheetId = excelId + 0;
 		List<Coordinate> coordinates = cell.getCoordinate();
 		Boolean wordWrap = cell.getAuto();
-
+		List<RowHeight> effect = cell.getEffect();
 		try {
-			updateContent(coordinates, "wordWrap", wordWrap, step, excelId,
-					sheetId);
+			updateContent(coordinates, "wordWrap", wordWrap, null, null, effect,
+					step, excelId, sheetId);
 		} catch (NoSuchFieldException | SecurityException
 				| IllegalArgumentException | IllegalAccessException e) {
 
@@ -205,8 +229,8 @@ public class MCellServiceImpl implements MCellService {
 		String background = cell.getColor();
 
 		try {
-			updateContent(coordinates, "background", background, step, excelId,
-					sheetId);
+			updateContent(coordinates, "background", background, null, null,
+					null, step, excelId, sheetId);
 		} catch (NoSuchFieldException | SecurityException
 				| IllegalArgumentException | IllegalAccessException e) {
 
@@ -222,8 +246,8 @@ public class MCellServiceImpl implements MCellService {
 		String alignRow = cell.getAlign();
 
 		try {
-			updateContent(coordinates, "alignRow", alignRow, step, excelId,
-					sheetId);
+			updateContent(coordinates, "alignRow", alignRow, null, null, null,
+					step, excelId, sheetId);
 		} catch (NoSuchFieldException | SecurityException
 				| IllegalArgumentException | IllegalAccessException e) {
 
@@ -239,8 +263,8 @@ public class MCellServiceImpl implements MCellService {
 		String alignCol = cell.getAlign();
 
 		try {
-			updateContent(coordinates, "alignCol", alignCol, step, excelId,
-					sheetId);
+			updateContent(coordinates, "alignCol", alignCol, null, null, null,
+					step, excelId, sheetId);
 		} catch (NoSuchFieldException | SecurityException
 				| IllegalArgumentException | IllegalAccessException e) {
 
@@ -431,260 +455,6 @@ public class MCellServiceImpl implements MCellService {
 
 	}
 
-	private void updateContent(List<Coordinate> coordinates, String property,
-			Object content, int step, String excelId, String sheetId)
-					throws NoSuchFieldException, SecurityException,
-					IllegalArgumentException, IllegalAccessException {
-
-		List<RowCol> sortRList = new ArrayList<RowCol>();
-		List<RowCol> sortCList = new ArrayList<RowCol>();
-		Map<String, Integer> rMap = new HashMap<String, Integer>();
-		Map<String, Integer> cMap = new HashMap<String, Integer>();
-		mrowColDao.getRowList(sortRList, excelId, sheetId);
-		for (int i = 0; i < sortRList.size(); i++) {
-			RowCol rc = sortRList.get(i);
-			rMap.put(rc.getAlias(), i);
-		}
-		mrowColDao.getColList(sortCList, excelId, sheetId);
-		for (int i = 0; i < sortCList.size(); i++) {
-			RowCol rc = sortCList.get(i);
-			cMap.put(rc.getAlias(), i);
-		}
-
-		List<String> colList = new ArrayList<String>();
-		List<String> rowList = new ArrayList<String>();
-		List<String> wholeRowList = new ArrayList<String>();
-		List<String> wholeColList = new ArrayList<String>();
-		for (Coordinate cd : coordinates) {
-			int startRow = cd.getStartRow();
-			int endRow = cd.getEndRow();
-			int startCol = cd.getStartCol();
-			int endCol = cd.getEndCol();
-			if ((endCol > -1) && (endRow > -1)) {
-				for (int i = startRow; i < endRow + 1; i++) {
-					rowList.add(sortRList.get(i).getAlias());
-				}
-				for (int i = startCol; i < endCol + 1; i++) {
-					colList.add(sortCList.get(i).getAlias());
-				}
-			}
-
-			if ((endCol == -1) && (endRow > -1)) {
-				for (int i = startRow; i < endRow + 1; i++) {
-					wholeRowList.add(sortRList.get(i).getAlias());
-				}
-			}
-
-			if ((endRow == -1) && (endCol > -1)) {
-				for (int i = startCol; i < endCol + 1; i++) {
-					wholeColList.add(sortCList.get(i).getAlias());
-				}
-			}
-		}
-
-		List<Object> tempList = new ArrayList<Object>();// 用于存储新new的关系对象及MCell对象
-		List<String> cellIdList = new ArrayList<String>();// 用于存储需要修改单元格的id
-		if (rowList.size() > 0 && colList.size() > 0) {
-			List<MRowColCell> list1 = mcellDao.getMRowColCellList(excelId,
-					sheetId, rowList, colList);
-			Map<String, MRowColCell> relationMap = new HashMap<String, MRowColCell>();
-			for (MRowColCell mrcc : list1) {
-				String row = mrcc.getRow();
-				String col = mrcc.getCol();
-				relationMap.put(row + "_" + col, mrcc);
-			}
-			for (Coordinate c : coordinates) {
-				int startRow = c.getStartRow();
-				int endRow = c.getEndRow();
-				int startCol = c.getStartCol();
-				int endCol = c.getEndCol();
-				if (endRow > -1 && endCol > -1) {
-					for (int i = startRow; i < endRow + 1; i++) {
-						String row = sortRList.get(i).getAlias();
-						for (int j = startCol; j < endCol + 1; j++) {
-							String col = sortCList.get(j).getAlias();
-							MRowColCell mr = relationMap.get(row + "_" + col);
-							if (null == mr) {
-								mr = new MRowColCell();
-								mr.setCellId(row + "_" + col);
-								mr.setRow(row);
-								mr.setCol(col);
-								mr.setSheetId(sheetId);
-								tempList.add(mr);
-								MCell mc = new MCell(row + "_" + col, sheetId);
-								Field f = mc.getContent().getClass()
-										.getDeclaredField(property);
-								f.setAccessible(true);
-								f.set(mc.getContent(), content);
-								tempList.add(mc);
-							} else {
-								cellIdList.add(mr.getCellId());
-							}
-
-						}
-					}
-				}
-			}
-		}
-
-		if (wholeRowList.size() > 0) {
-
-			List<MRowColCell> list2 = mcellDao.getMRowColCellList(excelId,
-					sheetId, wholeRowList, "row");
-			Map<String, String> relationMap = new HashMap<String, String>();
-			List<String> idList = new ArrayList<String>();
-			for (MRowColCell mrcc : list2) {
-				String row = mrcc.getRow();
-				String col = mrcc.getCol();
-				relationMap.put(row + "_" + col, mrcc.getCellId());
-			}
-			// 获取所有的列样式对象
-			List<MCol> mcolList = mcolDao.getMColList(excelId, sheetId);
-			// 用存贮选中的行
-			Map<String, String> wholeRowMap = new HashMap<String, String>();
-			for (String row : wholeRowList) {
-				wholeRowMap.put(row, row);
-				for (MCol mc : mcolList) {
-					String key = row + "_" + mc.getAlias();
-					String cellId = relationMap.get(key);
-					if (null == cellId) {
-						if (null != mc.getProps().getContent().getFamily()) {
-							MRowColCell mr = new MRowColCell();
-							mr.setCellId(key);
-							mr.setRow(row);
-							mr.setCol(mc.getAlias());
-							mr.setSheetId(sheetId);
-							tempList.add(mr);// 关系表
-							MCell mcell = new MCell(key, sheetId);
-							Field f = mcell.getContent().getClass()
-									.getDeclaredField(property);
-							f.setAccessible(true);
-							f.set(mcell.getContent(), content);
-							tempList.add(mcell);// 单元格对象
-						}
-					} else {
-						idList.add(cellId);
-					}
-				}
-			}
-			// 找出整列操作中符合条件的合并单元格
-			List<MCell> mcellList = mcellDao.getMCellList(excelId, sheetId,
-					idList);
-			List<ConverCell> oneCellList = getOneCellList(mcellList, rMap, cMap,
-					sortRList, sortCList);
-			for (ConverCell oc : oneCellList) {
-				List<String> rows = oc.getOccupy().getRow();
-				for (String row : rows) {
-					String wholeRow = wholeRowMap.get(row);
-					if (null == wholeRow) {
-						idList.remove(oc.getId()); // 剔除不符合条件的合并单元格
-					}
-				}
-			}
-			cellIdList.addAll(idList);
-			// 更新列对象
-			mrowDao.updateContent(property, content, wholeRowList, excelId,
-					sheetId);
-		}
-
-		if (wholeColList.size() > 0) {
-
-			List<MRowColCell> list3 = mcellDao.getMRowColCellList(excelId,
-					sheetId, wholeColList, "col");
-			Map<String, String> relationMap = new HashMap<String, String>();
-			List<String> idList = new ArrayList<String>();
-			for (MRowColCell mrcc : list3) {
-				String row = mrcc.getRow();
-				String col = mrcc.getCol();
-				relationMap.put(row + "_" + col, mrcc.getCellId());
-			}
-			// 获取所有的行样式对象
-			List<MRow> mrowList = mrowDao.getMRowList(excelId, sheetId);
-			// 存储选中列
-			Map<String, String> wholeColMap = new HashMap<String, String>();
-			for (String col : wholeColList) {
-				wholeColMap.put(col, col);
-				for (MRow mr : mrowList) {
-					String key = mr.getAlias() + "_" + col;
-					String cellId = relationMap.get(key);
-					if (null == cellId) {
-						if (null != mr.getProps().getContent().getFamily()) {
-							MRowColCell mrcc = new MRowColCell();
-							mrcc.setCellId(key);
-							mrcc.setRow(mr.getAlias());
-							mrcc.setCol(col);
-							mrcc.setSheetId(sheetId);
-							tempList.add(mrcc);// 关系表
-							MCell mcell = new MCell(key, sheetId);
-							Field f = mcell.getContent().getClass()
-									.getDeclaredField(property);
-							f.setAccessible(true);
-							f.set(mcell.getContent(), content);
-
-							tempList.add(mcell);// 单元格对象
-						}
-					} else {
-						idList.add(cellId);
-					}
-				}
-			}
-			// 找出整列操作中部分条件的合并单元格
-			List<MCell> mcellList = mcellDao.getMCellList(excelId, sheetId,
-					idList);
-			List<ConverCell> oneCellList = getOneCellList(mcellList, rMap, cMap,
-					sortRList, sortCList);
-			for (ConverCell oc : oneCellList) {
-				List<String> cols = oc.getOccupy().getCol();
-				for (String col : cols) {
-					String wholeRow = wholeColMap.get(col);
-					if (null == wholeRow) {
-						idList.remove(oc.getId()); // 剔除不符合条件的合并单元格
-					}
-				}
-			}
-			cellIdList.addAll(idList);
-
-			// 更新列对象
-			mcolDao.updateContent(property, content, wholeColList, excelId,
-					sheetId);
-		}
-		// 更新MCell对象属性
-		mcellDao.updateContent(property, content, cellIdList, excelId, sheetId);
-		baseDao.insert(excelId, tempList);// 存储新创建的关系表及MCell对象
-		msheetDao.updateStep(excelId, sheetId, step);
-
-	}
-
-	private List<ConverCell> getOneCellList(List<MCell> cellList,
-			Map<String, Integer> rMap, Map<String, Integer> cMap,
-			List<RowCol> sortRList, List<RowCol> sortCList) {
-		List<ConverCell> list = new ArrayList<>();
-		for (MCell mc : cellList) {
-
-			if (mc.getRowspan() == 1 && mc.getColspan() == 1) {
-
-			} else {
-				ConverCell ce = new ConverCell();
-				ce.setId(mc.getId());
-				String[] ids = mc.getId().split("_");
-				Occupy oc = ce.getOccupy();
-				for (int i = 0; i < mc.getRowspan(); i++) {
-					int index = rMap.get(ids[0]);
-					oc.getRow().add(sortRList.get(index).getAlias());
-					index++;
-				}
-				for (int i = 0; i < mc.getColspan(); i++) {
-					int index = cMap.get(ids[1]);
-					oc.getCol().add(sortCList.get(index).getAlias());
-					index++;
-				}
-				list.add(ce);
-			}
-
-		}
-		return list;
-	}
-
 	@Override
 	public void updateBorder(Cell cell, int step, String excelId) {
 		String sheetId = excelId + 0;
@@ -861,58 +631,58 @@ public class MCellServiceImpl implements MCellService {
 				case "outer":
 					cellIdList.clear();
 					for (String row : rowList) {
-						 String col = colList.get(0);
-						 String key = row + "_" + col;
-						 String cellId = relationMap.get(key);
-						  if (null == cellId) {
+						String col = colList.get(0);
+						String key = row + "_" + col;
+						String cellId = relationMap.get(key);
+						if (null == cellId) {
 							creatMCell(sheetId, row, col, tempList, "left",
-										line);
-						  }else{
-								cellIdList.add(cellId);
-						  }
+									line);
+						} else {
+							cellIdList.add(cellId);
 						}
+					}
 					mcellDao.updateBorder("left", line, cellIdList, excelId,
 							sheetId);
 					cellIdList.clear();
 					for (String col : colList) {
-						 String row = rowList.get(0);
-						 String key = row + "_" + col;
-						 String cellId = relationMap.get(key);
-						  if (null == cellId) {
+						String row = rowList.get(0);
+						String key = row + "_" + col;
+						String cellId = relationMap.get(key);
+						if (null == cellId) {
 							creatMCell(sheetId, row, col, tempList, "top",
-										line);
-						  }else{
-								cellIdList.add(cellId);
-						  }
+									line);
+						} else {
+							cellIdList.add(cellId);
 						}
+					}
 					mcellDao.updateBorder("top", line, cellIdList, excelId,
 							sheetId);
 					cellIdList.clear();
 					for (String row : rowList) {
-						 String col = colList.get(colList.size()-1);
-						 String key = row + "_" + col;
-						 String cellId = relationMap.get(key);
-						  if (null == cellId) {
+						String col = colList.get(colList.size() - 1);
+						String key = row + "_" + col;
+						String cellId = relationMap.get(key);
+						if (null == cellId) {
 							creatMCell(sheetId, row, col, tempList, "right",
-										line);
-						  }else{
-								cellIdList.add(cellId);
-						  }
+									line);
+						} else {
+							cellIdList.add(cellId);
 						}
+					}
 					mcellDao.updateBorder("right", line, cellIdList, excelId,
 							sheetId);
 					cellIdList.clear();
 					for (String col : colList) {
-						 String row = rowList.get(rowList.size()-1);
-						 String key = row + "_" + col;
-						 String cellId = relationMap.get(key);
-						  if (null == cellId) {
+						String row = rowList.get(rowList.size() - 1);
+						String key = row + "_" + col;
+						String cellId = relationMap.get(key);
+						if (null == cellId) {
 							creatMCell(sheetId, row, col, tempList, "bottom",
-										line);
-						  }else{
-								cellIdList.add(cellId);
-						  }
+									line);
+						} else {
+							cellIdList.add(cellId);
 						}
+					}
 					mcellDao.updateBorder("bottom", line, cellIdList, excelId,
 							sheetId);
 					break;
@@ -923,311 +693,405 @@ public class MCellServiceImpl implements MCellService {
 		}
 
 		if (wholeRowList.size() > 0) {
-          for(List<String> rowList:wholeRowList){
-            	switch (type) {
+			for (List<String> rowList : wholeRowList) {
+				switch (type) {
 				case "top":
 					String row = rowList.get(0);
-					List<MRowColCell> relationList = mcellDao.getMRowColCellList(excelId, sheetId, row, "row");
+					List<MRowColCell> relationList = mcellDao
+							.getMRowColCellList(excelId, sheetId, row, "row");
 					List<String> cellIdList = new ArrayList<String>();
-					for(MRowColCell mrcc:relationList){
+					for (MRowColCell mrcc : relationList) {
 						cellIdList.add(mrcc.getCellId());
 					}
-					List<MCell> mcellList = mcellDao.getMCellList(excelId, sheetId, cellIdList);
-					cellIdList.clear();//清空存储符合条件的单元格
-					for(MCell mc:mcellList){
-						if(mc.getRowspan() == 1){
+					List<MCell> mcellList = mcellDao.getMCellList(excelId,
+							sheetId, cellIdList);
+					cellIdList.clear();// 清空存储符合条件的单元格
+					for (MCell mc : mcellList) {
+						if (mc.getRowspan() == 1) {
 							cellIdList.add(mc.getId());
-						}else{
+						} else {
 							String[] ids = mc.getId().split("_");
-							if((row.equals(ids[0]))&&(mc.getRowspan()<rowList.size()+1)){
+							if ((row.equals(ids[0]))
+									&& (mc.getRowspan() < rowList.size() + 1)) {
 								cellIdList.add(mc.getId());
 							}
 						}
 					}
-					mcellDao.updateBorder("top", line, cellIdList, excelId, sheetId);
+					mcellDao.updateBorder("top", line, cellIdList, excelId,
+							sheetId);
 					mrowDao.updateBorder("top", line, row, excelId, sheetId);
 					break;
 				case "bottom":
-					String bottomRow = rowList.get(rowList.size()-1);
-					List<MRowColCell> bottomRelationList = mcellDao.getMRowColCellList(excelId, sheetId, bottomRow, "row");
+					String bottomRow = rowList.get(rowList.size() - 1);
+					List<MRowColCell> bottomRelationList = mcellDao
+							.getMRowColCellList(excelId, sheetId, bottomRow,
+									"row");
 					List<String> bottomCellIdList = new ArrayList<String>();
-					for(MRowColCell mrcc:bottomRelationList){
+					for (MRowColCell mrcc : bottomRelationList) {
 						bottomCellIdList.add(mrcc.getCellId());
 					}
-					List<MCell> bottomMcellList = mcellDao.getMCellList(excelId, sheetId, bottomCellIdList);
-					bottomCellIdList.clear();//清空存储符合条件的单元格
-					for(MCell mc:bottomMcellList){
-						if(mc.getRowspan() == 1){
+					List<MCell> bottomMcellList = mcellDao.getMCellList(excelId,
+							sheetId, bottomCellIdList);
+					bottomCellIdList.clear();// 清空存储符合条件的单元格
+					for (MCell mc : bottomMcellList) {
+						if (mc.getRowspan() == 1) {
 							bottomCellIdList.add(mc.getId());
-						}else{
+						} else {
 							String[] ids = mc.getId().split("_");
 							int index = rMap.get(ids[0]);
-							String row1 = sortRList.get(index+mc.getRowspan()-1).getAlias();
-							if((bottomRow.equals(row1))&&(mc.getRowspan()<rowList.size()+1)){
+							String row1 = sortRList
+									.get(index + mc.getRowspan() - 1)
+									.getAlias();
+							if ((bottomRow.equals(row1))
+									&& (mc.getRowspan() < rowList.size() + 1)) {
 								bottomCellIdList.add(mc.getId());
 							}
 						}
 					}
-					mcellDao.updateBorder("bottom", line, bottomCellIdList, excelId, sheetId);
-					mrowDao.updateBorder("bottom", line, bottomRow, excelId, sheetId);
+					mcellDao.updateBorder("bottom", line, bottomCellIdList,
+							excelId, sheetId);
+					mrowDao.updateBorder("bottom", line, bottomRow, excelId,
+							sheetId);
 					break;
 				case "none":
-					List<MRowColCell> noneRelationList = mcellDao.getMRowColCellList(excelId, sheetId, rowList, "row");
+					List<MRowColCell> noneRelationList = mcellDao
+							.getMRowColCellList(excelId, sheetId, rowList,
+									"row");
 					List<String> noneCellIdList = new ArrayList<String>();
-					for(MRowColCell mrcc:noneRelationList){
+					for (MRowColCell mrcc : noneRelationList) {
 						noneCellIdList.add(mrcc.getCellId());
 					}
-					List<MCell> noneMcellList = mcellDao.getMCellList(excelId, sheetId, noneCellIdList);
-					noneCellIdList.clear();//清空存储符合条件的单元格
-					for(MCell mc:noneMcellList){
-						if(mc.getRowspan() == 1){
+					List<MCell> noneMcellList = mcellDao.getMCellList(excelId,
+							sheetId, noneCellIdList);
+					noneCellIdList.clear();// 清空存储符合条件的单元格
+					for (MCell mc : noneMcellList) {
+						if (mc.getRowspan() == 1) {
 							noneCellIdList.add(mc.getId());
-						}else{
+						} else {
 							String[] ids = mc.getId().split("_");
 							int begin = rMap.get(ids[0]);
-							int end  = begin+mc.getRowspan()-1;
+							int end = begin + mc.getRowspan() - 1;
 							int rowBegin = rMap.get(rowList.get(0));
-							int rowEnd = rMap.get(rowList.get(rowList.size()-1));
-							
-							if((begin>=rowBegin)&&(end<=rowEnd)){
+							int rowEnd = rMap
+									.get(rowList.get(rowList.size() - 1));
+
+							if ((begin >= rowBegin) && (end <= rowEnd)) {
 								noneCellIdList.add(mc.getId());
 							}
 						}
 					}
-					mcellDao.updateBorder("none", line, noneCellIdList, excelId, sheetId);
-					mrowDao.updateBorder("none", line, rowList, excelId, sheetId);
+					mcellDao.updateBorder("none", line, noneCellIdList, excelId,
+							sheetId);
+					mrowDao.updateBorder("none", line, rowList, excelId,
+							sheetId);
 					break;
 				case "all":
-					List<MRowColCell> allRelationList = mcellDao.getMRowColCellList(excelId, sheetId, rowList, "row");
+					List<MRowColCell> allRelationList = mcellDao
+							.getMRowColCellList(excelId, sheetId, rowList,
+									"row");
 					List<String> allCellIdList = new ArrayList<String>();
-					for(MRowColCell mrcc:allRelationList){
+					for (MRowColCell mrcc : allRelationList) {
 						allCellIdList.add(mrcc.getCellId());
 					}
-					List<MCell> allMcellList = mcellDao.getMCellList(excelId, sheetId, allCellIdList);
-					allCellIdList.clear();//清空存储符合条件的单元格
-					for(MCell mc:allMcellList){
-						if(mc.getRowspan() == 1){
+					List<MCell> allMcellList = mcellDao.getMCellList(excelId,
+							sheetId, allCellIdList);
+					allCellIdList.clear();// 清空存储符合条件的单元格
+					for (MCell mc : allMcellList) {
+						if (mc.getRowspan() == 1) {
 							allCellIdList.add(mc.getId());
-						}else{
+						} else {
 							String[] ids = mc.getId().split("_");
 							int begin = rMap.get(ids[0]);
-							int end  = begin+mc.getRowspan()-1;
+							int end = begin + mc.getRowspan() - 1;
 							int rowBegin = rMap.get(rowList.get(0));
-							int rowEnd = rMap.get(rowList.get(rowList.size()-1));
-							
-							if((begin>=rowBegin)&&(end<=rowEnd)){
+							int rowEnd = rMap
+									.get(rowList.get(rowList.size() - 1));
+
+							if ((begin >= rowBegin) && (end <= rowEnd)) {
 								allCellIdList.add(mc.getId());
 							}
 						}
 					}
-					mcellDao.updateBorder("all", line, allCellIdList, excelId, sheetId);
-					mrowDao.updateBorder("all", line, rowList, excelId, sheetId);
+					mcellDao.updateBorder("all", line, allCellIdList, excelId,
+							sheetId);
+					mrowDao.updateBorder("all", line, rowList, excelId,
+							sheetId);
 					break;
 				case "outer":
 					String outerRow = rowList.get(0);
-					List<MRowColCell> outerRelationList = mcellDao.getMRowColCellList(excelId, sheetId, outerRow, "row");
+					List<MRowColCell> outerRelationList = mcellDao
+							.getMRowColCellList(excelId, sheetId, outerRow,
+									"row");
 					List<String> outerCellIdList = new ArrayList<String>();
-					for(MRowColCell mrcc:outerRelationList){
+					for (MRowColCell mrcc : outerRelationList) {
 						outerCellIdList.add(mrcc.getCellId());
 					}
-					List<MCell> ourerMcellList = mcellDao.getMCellList(excelId, sheetId, outerCellIdList);
-					outerCellIdList.clear();//清空存储符合条件的单元格
-					for(MCell mc:ourerMcellList){
-						if(mc.getRowspan() == 1){
+					List<MCell> ourerMcellList = mcellDao.getMCellList(excelId,
+							sheetId, outerCellIdList);
+					outerCellIdList.clear();// 清空存储符合条件的单元格
+					for (MCell mc : ourerMcellList) {
+						if (mc.getRowspan() == 1) {
 							outerCellIdList.add(mc.getId());
-						}else{
+						} else {
 							String[] ids = mc.getId().split("_");
-							if((outerRow.equals(ids[0]))&&(mc.getRowspan()<rowList.size()+1)){
+							if ((outerRow.equals(ids[0]))
+									&& (mc.getRowspan() < rowList.size() + 1)) {
 								outerCellIdList.add(mc.getId());
 							}
 						}
 					}
-					mcellDao.updateBorder("top", line, outerCellIdList, excelId, sheetId);
-					mrowDao.updateBorder("top", line, outerRow, excelId, sheetId);
-					
-					String outerRow1 = rowList.get(rowList.size()-1);
-					List<MRowColCell> outerRelationList1 = mcellDao.getMRowColCellList(excelId, sheetId, outerRow1, "row");
+					mcellDao.updateBorder("top", line, outerCellIdList, excelId,
+							sheetId);
+					mrowDao.updateBorder("top", line, outerRow, excelId,
+							sheetId);
+
+					String outerRow1 = rowList.get(rowList.size() - 1);
+					List<MRowColCell> outerRelationList1 = mcellDao
+							.getMRowColCellList(excelId, sheetId, outerRow1,
+									"row");
 					List<String> outerCellIdList1 = new ArrayList<String>();
-					for(MRowColCell mrcc:outerRelationList1){
+					for (MRowColCell mrcc : outerRelationList1) {
 						outerCellIdList1.add(mrcc.getCellId());
 					}
-					List<MCell> outerMcellList1 = mcellDao.getMCellList(excelId, sheetId, outerCellIdList1);
-					outerCellIdList1.clear();//清空存储符合条件的单元格
-					for(MCell mc:outerMcellList1){
-						if(mc.getRowspan() == 1){
+					List<MCell> outerMcellList1 = mcellDao.getMCellList(excelId,
+							sheetId, outerCellIdList1);
+					outerCellIdList1.clear();// 清空存储符合条件的单元格
+					for (MCell mc : outerMcellList1) {
+						if (mc.getRowspan() == 1) {
 							outerCellIdList1.add(mc.getId());
-						}else{
+						} else {
 							String[] ids = mc.getId().split("_");
 							int index = rMap.get(ids[0]);
-							String row1 = sortRList.get(index+mc.getRowspan()-1).getAlias();
-							if((outerRow1.equals(row1))&&(mc.getRowspan()<rowList.size()+1)){
+							String row1 = sortRList
+									.get(index + mc.getRowspan() - 1)
+									.getAlias();
+							if ((outerRow1.equals(row1))
+									&& (mc.getRowspan() < rowList.size() + 1)) {
 								outerCellIdList1.add(mc.getId());
 							}
 						}
 					}
-					mcellDao.updateBorder("bottom", line, outerCellIdList1, excelId, sheetId);
-					mrowDao.updateBorder("bottom", line, outerRow1, excelId, sheetId);
+					mcellDao.updateBorder("bottom", line, outerCellIdList1,
+							excelId, sheetId);
+					mrowDao.updateBorder("bottom", line, outerRow1, excelId,
+							sheetId);
 					break;
 				default:
 					break;
-				} 
-         }
+				}
+			}
 		}
 
 		if (wholeColList.size() > 0) {
-		  for(List<String> colList:wholeColList){
-            	switch (type) {
+			for (List<String> colList : wholeColList) {
+				switch (type) {
 				case "left":
 					String col = colList.get(0);
-					List<MRowColCell> relationList = mcellDao.getMRowColCellList(excelId, sheetId, col, "col");
+					List<MRowColCell> relationList = mcellDao
+							.getMRowColCellList(excelId, sheetId, col, "col");
 					List<String> cellIdList = new ArrayList<String>();
-					for(MRowColCell mrcc:relationList){
+					for (MRowColCell mrcc : relationList) {
 						cellIdList.add(mrcc.getCellId());
 					}
-					List<MCell> mcellList = mcellDao.getMCellList(excelId, sheetId, cellIdList);
-					cellIdList.clear();//清空存储符合条件的单元格
-					for(MCell mc:mcellList){
-						if(mc.getColspan() == 1){
+					List<MCell> mcellList = mcellDao.getMCellList(excelId,
+							sheetId, cellIdList);
+					cellIdList.clear();// 清空存储符合条件的单元格
+					for (MCell mc : mcellList) {
+						if (mc.getColspan() == 1) {
 							cellIdList.add(mc.getId());
-						}else{
+						} else {
 							String[] ids = mc.getId().split("_");
-							if((col.equals(ids[1]))&&(mc.getColspan()<colList.size()+1)){
+							if ((col.equals(ids[1]))
+									&& (mc.getColspan() < colList.size() + 1)) {
 								cellIdList.add(mc.getId());
 							}
 						}
 					}
-					mcellDao.updateBorder("left", line, cellIdList, excelId, sheetId);
+					mcellDao.updateBorder("left", line, cellIdList, excelId,
+							sheetId);
 					mcolDao.updateBorder("left", line, col, excelId, sheetId);
 					break;
 				case "right":
-					String rightCol = colList.get(colList.size()-1);
-					List<MRowColCell> rightRelationList = mcellDao.getMRowColCellList(excelId, sheetId, rightCol, "col");
+					String rightCol = colList.get(colList.size() - 1);
+					List<MRowColCell> rightRelationList = mcellDao
+							.getMRowColCellList(excelId, sheetId, rightCol,
+									"col");
 					List<String> rightCellIdList = new ArrayList<String>();
-					for(MRowColCell mrcc:rightRelationList){
+					for (MRowColCell mrcc : rightRelationList) {
 						rightCellIdList.add(mrcc.getCellId());
 					}
-					List<MCell> rightMcellList = mcellDao.getMCellList(excelId, sheetId, rightCellIdList);
-					rightCellIdList.clear();//清空存储符合条件的单元格
-					for(MCell mc:rightMcellList){
-						if(mc.getRowspan() == 1){
+					List<MCell> rightMcellList = mcellDao.getMCellList(excelId,
+							sheetId, rightCellIdList);
+					rightCellIdList.clear();// 清空存储符合条件的单元格
+					for (MCell mc : rightMcellList) {
+						if (mc.getRowspan() == 1) {
 							rightCellIdList.add(mc.getId());
-						}else{
+						} else {
 							String[] ids = mc.getId().split("_");
 							int index = rMap.get(ids[1]);
-							String col1 = sortCList.get(index+mc.getColspan()-1).getAlias();
-							if((rightCol.equals(col1))&&(mc.getColspan()<colList.size()+1)){
+							String col1 = sortCList
+									.get(index + mc.getColspan() - 1)
+									.getAlias();
+							if ((rightCol.equals(col1))
+									&& (mc.getColspan() < colList.size() + 1)) {
 								rightCellIdList.add(mc.getId());
 							}
 						}
 					}
-					mcellDao.updateBorder("right", line, rightCellIdList, excelId, sheetId);
-					mcolDao.updateBorder("right", line, rightCol, excelId, sheetId);
+					mcellDao.updateBorder("right", line, rightCellIdList,
+							excelId, sheetId);
+					mcolDao.updateBorder("right", line, rightCol, excelId,
+							sheetId);
 					break;
 				case "none":
-					List<MRowColCell> noneRelationList = mcellDao.getMRowColCellList(excelId, sheetId, colList, "col");
+					List<MRowColCell> noneRelationList = mcellDao
+							.getMRowColCellList(excelId, sheetId, colList,
+									"col");
 					List<String> noneCellIdList = new ArrayList<String>();
-					for(MRowColCell mrcc:noneRelationList){
+					for (MRowColCell mrcc : noneRelationList) {
 						noneCellIdList.add(mrcc.getCellId());
 					}
-					List<MCell> noneMcellList = mcellDao.getMCellList(excelId, sheetId, noneCellIdList);
-					noneCellIdList.clear();//清空存储符合条件的单元格
-					for(MCell mc:noneMcellList){
-						if(mc.getColspan() == 1){
+					List<MCell> noneMcellList = mcellDao.getMCellList(excelId,
+							sheetId, noneCellIdList);
+					noneCellIdList.clear();// 清空存储符合条件的单元格
+					for (MCell mc : noneMcellList) {
+						if (mc.getColspan() == 1) {
 							noneCellIdList.add(mc.getId());
-						}else{
+						} else {
 							String[] ids = mc.getId().split("_");
 							int begin = cMap.get(ids[1]);
-							int end  = begin+mc.getColspan()-1;
+							int end = begin + mc.getColspan() - 1;
 							int colBegin = cMap.get(colList.get(0));
-							int colEnd = cMap.get(colList.get(colList.size()-1));
-							
-							if((begin>=colBegin)&&(end<=colEnd)){
+							int colEnd = cMap
+									.get(colList.get(colList.size() - 1));
+
+							if ((begin >= colBegin) && (end <= colEnd)) {
 								noneCellIdList.add(mc.getId());
 							}
 						}
 					}
-					mcellDao.updateBorder("none", line, noneCellIdList, excelId, sheetId);
-					mcolDao.updateBorder("none", line, colList, excelId, sheetId);
+					mcellDao.updateBorder("none", line, noneCellIdList, excelId,
+							sheetId);
+					mcolDao.updateBorder("none", line, colList, excelId,
+							sheetId);
 					break;
 				case "all":
-					List<MRowColCell> allRelationList = mcellDao.getMRowColCellList(excelId, sheetId, colList, "col");
+					List<MRowColCell> allRelationList = mcellDao
+							.getMRowColCellList(excelId, sheetId, colList,
+									"col");
 					List<String> allCellIdList = new ArrayList<String>();
-					for(MRowColCell mrcc:allRelationList){
+					for (MRowColCell mrcc : allRelationList) {
 						allCellIdList.add(mrcc.getCellId());
 					}
-					List<MCell> allMcellList = mcellDao.getMCellList(excelId, sheetId, allCellIdList);
-					allCellIdList.clear();//清空存储符合条件的单元格
-					for(MCell mc:allMcellList){
-						if(mc.getColspan() == 1){
+					List<MCell> allMcellList = mcellDao.getMCellList(excelId,
+							sheetId, allCellIdList);
+					allCellIdList.clear();// 清空存储符合条件的单元格
+					for (MCell mc : allMcellList) {
+						if (mc.getColspan() == 1) {
 							allCellIdList.add(mc.getId());
-						}else{
+						} else {
 							String[] ids = mc.getId().split("_");
 							int begin = cMap.get(ids[1]);
-							int end  = begin+mc.getColspan()-1;
+							int end = begin + mc.getColspan() - 1;
 							int rowBegin = cMap.get(colList.get(0));
-							int rowEnd = cMap.get(colList.get(colList.size()-1));
-							
-							if((begin>=rowBegin)&&(end<=rowEnd)){
+							int rowEnd = cMap
+									.get(colList.get(colList.size() - 1));
+
+							if ((begin >= rowBegin) && (end <= rowEnd)) {
 								allCellIdList.add(mc.getId());
 							}
 						}
 					}
-					mcellDao.updateBorder("all", line, allCellIdList, excelId, sheetId);
-					mcolDao.updateBorder("all", line, colList, excelId, sheetId);
+					mcellDao.updateBorder("all", line, allCellIdList, excelId,
+							sheetId);
+					mcolDao.updateBorder("all", line, colList, excelId,
+							sheetId);
 					break;
 				case "outer":
 					String outerCol = colList.get(0);
-					List<MRowColCell> outerRelationList = mcellDao.getMRowColCellList(excelId, sheetId, outerCol, "col");
+					List<MRowColCell> outerRelationList = mcellDao
+							.getMRowColCellList(excelId, sheetId, outerCol,
+									"col");
 					List<String> outerCellIdList = new ArrayList<String>();
-					for(MRowColCell mrcc:outerRelationList){
+					for (MRowColCell mrcc : outerRelationList) {
 						outerCellIdList.add(mrcc.getCellId());
 					}
-					List<MCell> ourerMcellList = mcellDao.getMCellList(excelId, sheetId, outerCellIdList);
-					outerCellIdList.clear();//清空存储符合条件的单元格
-					for(MCell mc:ourerMcellList){
-						if(mc.getColspan() == 1){
+					List<MCell> ourerMcellList = mcellDao.getMCellList(excelId,
+							sheetId, outerCellIdList);
+					outerCellIdList.clear();// 清空存储符合条件的单元格
+					for (MCell mc : ourerMcellList) {
+						if (mc.getColspan() == 1) {
 							outerCellIdList.add(mc.getId());
-						}else{
+						} else {
 							String[] ids = mc.getId().split("_");
-							if((outerCol.equals(ids[1]))&&(mc.getRowspan()<colList.size()+1)){
+							if ((outerCol.equals(ids[1]))
+									&& (mc.getRowspan() < colList.size() + 1)) {
 								outerCellIdList.add(mc.getId());
 							}
 						}
 					}
-					mcellDao.updateBorder("left", line, outerCellIdList, excelId, sheetId);
-					mcolDao.updateBorder("left", line, outerCol, excelId, sheetId);
-					
-					String outerCol1 = colList.get(colList.size()-1);
-					List<MRowColCell> outerRelationList1 = mcellDao.getMRowColCellList(excelId, sheetId, outerCol1, "col");
+					mcellDao.updateBorder("left", line, outerCellIdList,
+							excelId, sheetId);
+					mcolDao.updateBorder("left", line, outerCol, excelId,
+							sheetId);
+
+					String outerCol1 = colList.get(colList.size() - 1);
+					List<MRowColCell> outerRelationList1 = mcellDao
+							.getMRowColCellList(excelId, sheetId, outerCol1,
+									"col");
 					List<String> outerCellIdList1 = new ArrayList<String>();
-					for(MRowColCell mrcc:outerRelationList1){
+					for (MRowColCell mrcc : outerRelationList1) {
 						outerCellIdList1.add(mrcc.getCellId());
 					}
-					List<MCell> outerMcellList1 = mcellDao.getMCellList(excelId, sheetId, outerCellIdList1);
-					outerCellIdList1.clear();//清空存储符合条件的单元格
-					for(MCell mc:outerMcellList1){
-						if(mc.getColspan() == 1){
+					List<MCell> outerMcellList1 = mcellDao.getMCellList(excelId,
+							sheetId, outerCellIdList1);
+					outerCellIdList1.clear();// 清空存储符合条件的单元格
+					for (MCell mc : outerMcellList1) {
+						if (mc.getColspan() == 1) {
 							outerCellIdList1.add(mc.getId());
-						}else{
+						} else {
 							String[] ids = mc.getId().split("_");
 							int index = cMap.get(ids[1]);
-							String col1 = sortCList.get(index+mc.getColspan()-1).getAlias();
-							if((outerCol1.equals(col1))&&(mc.getRowspan()<colList.size()+1)){
+							String col1 = sortCList
+									.get(index + mc.getColspan() - 1)
+									.getAlias();
+							if ((outerCol1.equals(col1))
+									&& (mc.getRowspan() < colList.size() + 1)) {
 								outerCellIdList1.add(mc.getId());
 							}
 						}
 					}
-					mcellDao.updateBorder("right", line, outerCellIdList1, excelId, sheetId);
-					mrowDao.updateBorder("right", line, outerCol1, excelId, sheetId);
+					mcellDao.updateBorder("right", line, outerCellIdList1,
+							excelId, sheetId);
+					mrowDao.updateBorder("right", line, outerCol1, excelId,
+							sheetId);
 					break;
 				default:
 					break;
-				} 
-          }
-		}	
+				}
+			}
+		}
 		// 更新MCell对象属性
 		baseDao.insert(excelId, tempList);// 存储新创建的关系表及MCell对象
 		msheetDao.updateStep(excelId, sheetId, step);
+
+	}
+
+	@Override
+	public void updateFormat(CellFormate cellFormate, int step,
+			String excelId) {
+		String sheetId = excelId + 0;
+		List<Coordinate> coordinates = cellFormate.getCoordinate();
+		String value1 = cellFormate.getFormat();
+		String value2 = cellFormate.getExpress();
+
+		try {
+			updateContent(coordinates, "type", value1, "express", value2, null,
+					step, excelId, sheetId);
+		} catch (NoSuchFieldException | SecurityException
+				| IllegalArgumentException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
 
 	}
 
@@ -1264,6 +1128,399 @@ public class MCellServiceImpl implements MCellService {
 			}
 		}
 		tempList.add(mc);
+	}
+
+	private void updateContent(List<Coordinate> coordinates, String property1,
+			Object value1, String property2, Object value2,
+			List<RowHeight> effect, int step, String excelId, String sheetId)
+					throws NoSuchFieldException, SecurityException,
+					IllegalArgumentException, IllegalAccessException {
+
+		List<RowCol> sortRList = new ArrayList<RowCol>();
+		List<RowCol> sortCList = new ArrayList<RowCol>();
+		Map<String, Integer> rMap = new HashMap<String, Integer>();
+		Map<String, Integer> cMap = new HashMap<String, Integer>();
+		mrowColDao.getRowList(sortRList, excelId, sheetId);
+		for (int i = 0; i < sortRList.size(); i++) {
+			RowCol rc = sortRList.get(i);
+			rMap.put(rc.getAlias(), i);
+		}
+		mrowColDao.getColList(sortCList, excelId, sheetId);
+		for (int i = 0; i < sortCList.size(); i++) {
+			RowCol rc = sortCList.get(i);
+			cMap.put(rc.getAlias(), i);
+		}
+
+		List<String> colList = new ArrayList<String>();
+		List<String> rowList = new ArrayList<String>();
+		List<List<String>> wholeRowList = new ArrayList<List<String>>();
+		List<List<String>> wholeColList = new ArrayList<List<String>>();
+		for (Coordinate cd : coordinates) {
+			int startRow = cd.getStartRow();
+			int endRow = cd.getEndRow();
+			int startCol = cd.getStartCol();
+			int endCol = cd.getEndCol();
+			if ((endCol > -1) && (endRow > -1)) {
+				for (int i = startRow; i < endRow + 1; i++) {
+					rowList.add(sortRList.get(i).getAlias());
+				}
+				for (int i = startCol; i < endCol + 1; i++) {
+					colList.add(sortCList.get(i).getAlias());
+				}
+			}
+
+			if ((endCol == -1) && (endRow > -1)) {
+				List<String> row = new ArrayList<String>();
+				for (int i = startRow; i < endRow + 1; i++) {
+					row.add(sortRList.get(i).getAlias());
+				}
+				wholeRowList.add(row);
+			}
+
+			if ((endRow == -1) && (endCol > -1)) {
+				List<String> col = new ArrayList<String>();
+				for (int i = startCol; i < endCol + 1; i++) {
+					col.add(sortCList.get(i).getAlias());
+				}
+				wholeColList.add(col);
+			}
+		}
+
+		List<Object> tempList = new ArrayList<Object>();// 用于存储新new的关系对象及MCell对象
+		List<String> cellIdList = new ArrayList<String>();// 用于存储需要修改单元格的id
+		if (rowList.size() > 0 && colList.size() > 0) {
+			List<MRowColCell> list1 = mcellDao.getMRowColCellList(excelId,
+					sheetId, rowList, colList);
+			Map<String, String> relationMap = new HashMap<String, String>();
+			for (MRowColCell mrcc : list1) {
+				String row = mrcc.getRow();
+				String col = mrcc.getCol();
+				relationMap.put(row + "_" + col, mrcc.getCellId());
+			}
+			for (Coordinate c : coordinates) {
+				int startRow = c.getStartRow();
+				int endRow = c.getEndRow();
+				int startCol = c.getStartCol();
+				int endCol = c.getEndCol();
+				if (endRow > -1 && endCol > -1) {
+					for (int i = startRow; i < endRow + 1; i++) {
+						String row = sortRList.get(i).getAlias();
+						for (int j = startCol; j < endCol + 1; j++) {
+							String col = sortCList.get(j).getAlias();
+							String cellId = relationMap.get(row + "_" + col);
+							if (null == cellId) {
+								MRowColCell mr = new MRowColCell();
+								mr.setCellId(row + "_" + col);
+								mr.setRow(row);
+								mr.setCol(col);
+								mr.setSheetId(sheetId);
+								tempList.add(mr);
+								MCell mc = new MCell(row + "_" + col, sheetId);
+								if ("type".equals(property1)
+										&& "express".equals(property2)) {
+									Field f = mc.getContent().getClass()
+											.getDeclaredField(property1);
+									f.setAccessible(true);
+									f.set(mc.getContent(), value1);
+									Field f2 = mc.getContent().getClass()
+											.getDeclaredField(property2);
+									f2.setAccessible(true);
+									f2.set(mc.getContent(), value2);
+								} else {
+									Field f = mc.getContent().getClass()
+											.getDeclaredField(property1);
+									f.setAccessible(true);
+									f.set(mc.getContent(), value1);
+								}
+								tempList.add(mc);
+							} else {
+								// 当时设置单元格数字格式时，需要修改displayTexts值
+								if ("type".equals(property1)) {
+									MCell mc = mcellDao.getMCell(excelId,
+											sheetId, cellId);
+									Content content = mc.getContent();
+									content.setType(value1.toString());
+									content.setExpress(value2.toString());
+									CellFormateUtil.setShowText(content);
+									baseDao.update(excelId, mc);
+								} else {
+									cellIdList.add(cellId);
+								}
+							}
+
+						}
+					}
+				}
+			}
+		}
+
+		if (wholeRowList.size() > 0) {
+			for (List<String> rows : wholeRowList) {
+				List<MRowColCell> list2 = mcellDao.getMRowColCellList(excelId,
+						sheetId, rows, "row");
+				Map<String, String> relationMap = new HashMap<String, String>();
+				List<String> idList = new ArrayList<String>();
+				for (MRowColCell mrcc : list2) {
+					String row = mrcc.getRow();
+					String col = mrcc.getCol();
+					relationMap.put(row + "_" + col, mrcc.getCellId());
+				}
+				// 获取所有的列样式对象
+				List<MCol> mcolList = mcolDao.getMColList(excelId, sheetId);
+				// 用存贮选中的行
+				//Map<String, String> wholeRowMap = new HashMap<String, String>();
+				for (String row : rows) {
+					// wholeRowMap.put(row, row);
+					for (MCol mc : mcolList) {
+						String key = row + "_" + mc.getAlias();
+						String cellId = relationMap.get(key);
+						if (null == cellId) {
+							Content con = mc.getProps().getContent();
+							Field fCol = con.getClass()
+									.getDeclaredField(property1);
+							fCol.setAccessible(true);
+							Object value = fCol.get(con);
+							if (null != value) {
+								MRowColCell mr = new MRowColCell();
+								mr.setCellId(key);
+								mr.setRow(row);
+								mr.setCol(mc.getAlias());
+								mr.setSheetId(sheetId);
+								tempList.add(mr);// 关系表
+								MCell mcell = new MCell(key, sheetId);
+								if ("type".equals(property1)
+										&& "express".equals(property2)) {
+									Field f = mcell.getContent().getClass()
+											.getDeclaredField(property1);
+									f.setAccessible(true);
+									f.set(mcell.getContent(), value1);
+									Field f2 = mcell.getContent().getClass()
+											.getDeclaredField(property2);
+									f2.setAccessible(true);
+									f2.set(mcell.getContent(), value2);
+								} else {
+									Field f = mcell.getContent().getClass()
+											.getDeclaredField(property1);
+									f.setAccessible(true);
+									f.set(mcell.getContent(), value1);
+								}
+								tempList.add(mcell);
+							}
+						} else {
+							idList.add(cellId);
+						}
+					}
+				}
+				// 找出整列操作中符合条件的合并单元格
+				List<MCell> mcellList = mcellDao.getMCellList(excelId, sheetId,
+						idList);
+		        //getOneCellList(mcellList, rMap, cMap, sortRList, sortCList);
+				int rowEnd = rMap.get(rows.get(rows.size()-1));
+				int rowBegin = rMap.get(rows.get(0));
+				for (MCell mc : mcellList) {
+					String id = mc.getId();
+					String[] ids = id.split("_");
+					int rowIndex = rMap.get(ids[0]);
+					if((rowIndex>=rowBegin)&&(rowIndex+mc.getRowspan()<=rowEnd+1)){
+						if("type".equals(property1)){
+							// 当时设置单元格数字格式时，需要修改displayTexts值
+							Content content = mc.getContent();
+							content.setType(value1.toString());
+							content.setExpress(value2.toString());
+							CellFormateUtil.setShowText(content);
+							baseDao.update(excelId, mc);
+							idList.remove(mc.getId());//type和express已更新，不需重复更新
+						}
+					}else{
+						idList.remove(mc.getId()); // 剔除不符合条件的合并单元格
+					}
+				
+				}
+				cellIdList.addAll(idList);
+				// 更新列对象
+				mrowDao.updateContent(property1, value1, property2, value2,
+						rows, excelId, sheetId);
+			}
+		}
+
+		if (wholeColList.size() > 0) {
+			for (List<String> cols : wholeColList) {
+				List<MRowColCell> list3 = mcellDao.getMRowColCellList(excelId,
+						sheetId, cols, "col");
+				Map<String, String> relationMap = new HashMap<String, String>();
+				List<String> idList = new ArrayList<String>();
+				for (MRowColCell mrcc : list3) {
+					String row = mrcc.getRow();
+					String col = mrcc.getCol();
+					relationMap.put(row + "_" + col, mrcc.getCellId());
+				}
+				// 获取所有的行样式对象
+				List<MRow> mrowList = mrowDao.getMRowList(excelId, sheetId);
+				// 存储选中列
+				//Map<String, String> wholeColMap = new HashMap<String, String>();
+				for (String col : cols) {
+					//wholeColMap.put(col, col);
+					for (MRow mr : mrowList) {
+						String key = mr.getAlias() + "_" + col;
+						String cellId = relationMap.get(key);
+						if (null == cellId) {
+							Content con = mr.getProps().getContent();
+							Field fRow = con.getClass()
+									.getDeclaredField(property1);
+							fRow.setAccessible(true);
+							Object value = fRow.get(con);
+							if (null != value) {
+								MRowColCell mrcc = new MRowColCell();
+								mrcc.setCellId(key);
+								mrcc.setRow(mr.getAlias());
+								mrcc.setCol(col);
+								mrcc.setSheetId(sheetId);
+								tempList.add(mrcc);// 关系表
+								MCell mcell = new MCell(key, sheetId);
+								if ("type".equals(property1)
+										&& "express".equals(property2)) {
+									Field f = mcell.getContent().getClass()
+											.getDeclaredField(property1);
+									f.setAccessible(true);
+									f.set(mcell.getContent(), value1);
+									Field f2 = mcell.getContent().getClass()
+											.getDeclaredField(property2);
+									f2.setAccessible(true);
+									f2.set(mcell.getContent(), value2);
+								} else {
+									Field f = mcell.getContent().getClass()
+											.getDeclaredField(property1);
+									f.setAccessible(true);
+									f.set(mcell.getContent(), value1);
+								}
+								tempList.add(mcell);
+							}
+						} else {
+							idList.add(cellId);
+						}
+					}
+				}
+				// 找出整列操作中部分条件的合并单元格
+				List<MCell> mcellList = mcellDao.getMCellList(excelId, sheetId,
+						idList);
+				int colEnd = cMap.get(cols.get(cols.size()-1));
+				int colBegin = cMap.get(cols.get(0));
+				for (MCell mc : mcellList) {
+					String id = mc.getId();
+					String[] ids = id.split("_");
+					int colIndex = rMap.get(ids[1]);
+					if((colIndex>=colBegin)&&(colIndex+mc.getColspan() <= colEnd+1)){
+						if("type".equals(property1)){
+							// 当时设置单元格数字格式时，需要修改displayTexts值
+							Content content = mc.getContent();
+							content.setType(value1.toString());
+							content.setExpress(value2.toString());
+							CellFormateUtil.setShowText(content);
+							baseDao.update(excelId, mc);
+							idList.remove(mc.getId());//type和express已更新，不需重复更新
+						}
+					}else{
+						idList.remove(mc.getId()); // 剔除不符合条件的合并单元格
+					}
+				
+				}
+				
+				cellIdList.addAll(idList);
+				// 更新列对象
+				mcolDao.updateContent(property1, value1, property2, value2,
+						cols, excelId, sheetId);
+			}
+		}
+		// 更新MCell对象属性
+		mcellDao.updateContent(property1, value1, property2, value2, cellIdList,
+				excelId, sheetId);
+		baseDao.insert(excelId, tempList);// 存储新创建的关系表及MCell对象
+
+		// 更新自动换行时，对行高的影响
+		if (null != effect) {
+			for (RowHeight rh : effect) {
+				String row = sortRList.get(rh.getRow()).getAlias();
+				mrowDao.updateRowHeight(excelId, sheetId, row, rh.getOffset());
+			}
+		}
+
+		msheetDao.updateStep(excelId, sheetId, step);
+
+	}
+
+	private void getOneCellList(List<MCell> cellList, Map<String, Integer> rMap,
+			Map<String, Integer> cMap, List<RowCol> sortRList,
+			List<RowCol> sortCList) {
+		for (MCell mc : cellList) {
+
+			if (mc.getRowspan() == 1 && mc.getColspan() == 1) {
+
+			} else {
+				String[] ids = mc.getId().split("_");
+				Occupy oc = mc.getOccupy();
+				int rwoIndex = rMap.get(ids[0]);
+				for (int i = 0; i < mc.getRowspan(); i++) {
+
+					oc.getRow().add(sortRList.get(rwoIndex).getAlias());
+					rwoIndex++;
+				}
+				int colIndex = cMap.get(ids[1]);
+				for (int i = 0; i < mc.getColspan(); i++) {
+
+					oc.getCol().add(sortCList.get(colIndex).getAlias());
+					colIndex++;
+				}
+			}
+
+		}
+	}
+
+	private void setMCellProperty(MCell mcell, Content content, Border border,
+			CustomProp customProp) {
+		try {
+			Class<? extends Content> c = content.getClass();
+			Content mc = mcell.getContent();
+			Field[] cFields = c.getDeclaredFields();
+			for (Field f : cFields) {
+				f.setAccessible(true);
+				Object value = f.get(content);
+				if (null != value) {
+					Field mf = mc.getClass().getDeclaredField(f.getName());
+					mf.setAccessible(true);
+					mf.set(mc, value);
+				}
+			}
+
+			Class<? extends Border> b = border.getClass();
+			Border mb = mcell.getBorder();
+			Field[] bFields = b.getDeclaredFields();
+			for (Field f : bFields) {
+				f.setAccessible(true);
+				Object value = f.get(border);
+				if (null != value) {
+					Field bf = mb.getClass().getDeclaredField(f.getName());
+					bf.setAccessible(true);
+					bf.set(mb, value);
+				}
+			}
+
+			Class<? extends CustomProp> p = customProp.getClass();
+			CustomProp mp = mcell.getCustomProp();
+			Field[] pFields = p.getDeclaredFields();
+			for (Field f : pFields) {
+				f.setAccessible(true);
+				Object value = f.get(customProp);
+				if (null != value) {
+					Field pf = mp.getClass().getDeclaredField(f.getName());
+					pf.setAccessible(true);
+					pf.set(mp, value);
+				}
+			}
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+		}
 	}
 
 	/*

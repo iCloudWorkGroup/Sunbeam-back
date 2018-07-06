@@ -69,18 +69,21 @@ public interface MRowDao {
 
 	/**
 	 * 根据行别名数据集，修改对应的content属性
-	 * 
-	 * @param property
-	 * @param content
+	 * @param property1
+	 * @param value1
+	 * @param property2
+	 * @param value2
 	 * @param aliasList
 	 * @param excelId
 	 * @param sheetId
 	 */
-	void updateContent(String property, Object content, List<String> aliasList,
-			String excelId, String sheetId);
-	
+	void updateContent(String property1, Object value1, String property2,
+			Object value2, List<String> aliasList, String excelId,
+			String sheetId);
+
 	/**
 	 * 更新边框属性
+	 * 
 	 * @param property
 	 * @param value
 	 * @param aliasList
@@ -89,14 +92,16 @@ public interface MRowDao {
 	 */
 	void updateBorder(String property, Object value, List<String> aliasList,
 			String excelId, String sheetId);
-    /**
-     * 根据row别名，更新边框属性
-     * @param property
-     * @param value
-     * @param alias
-     * @param excelId
-     * @param sheetId
-     */
+
+	/**
+	 * 根据row别名，更新边框属性
+	 * 
+	 * @param property
+	 * @param value
+	 * @param alias
+	 * @param excelId
+	 * @param sheetId
+	 */
 	void updateBorder(String property, Object value, String alias,
 			String excelId, String sheetId);
 }

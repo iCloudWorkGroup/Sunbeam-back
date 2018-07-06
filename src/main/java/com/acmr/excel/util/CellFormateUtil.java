@@ -9,6 +9,14 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFDataFormat;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import com.acmr.excel.model.complete.Content;
 import com.acmr.excel.model.complete.Format;
 import com.acmr.excel.model.mongo.MCell;
@@ -481,6 +489,73 @@ public class CellFormateUtil {
 
 		}
 	}
+
+	public static void setShowText(Content content) {
+		XSSFWorkbook wb = new XSSFWorkbook();
+		XSSFSheet sheet = wb.createSheet(); 
+		XSSFRow  row = sheet.createRow(0);
+		XSSFCell cell = row.createCell(0);
+	    String type = content.getType();
+		switch (type) {
+		case "routine":
+		case "text":
+		case "date ":
+			cell.setCellValue(content.getTexts());
+			break;
+		case "number":
+		case "currency":
+		case "percent":
+            cell.setCellValue(Integer.getInteger(content.getTexts()));
+			break;
+		default:
+			break;
+		}
+		XSSFCellStyle style = cell.getCellStyle();
+		XSSFDataFormat format= wb.createDataFormat();
+		style.setDataFormat(format.getFormat(content.getExpress()));
+		cell.setCellStyle(style);
+		DataFormatter f = new DataFormatter();
+		String text = f.formatCellValue(cell);
+        content.setDisplayTexts(text);
+	}
+	
+	public static void cellTypeToMcellType(CELLTYPE type,Content content) {
+		
+	}
+	
+	
+	public static void mcellTypeToCellType(Content content) {
+		XSSFWorkbook wb = new XSSFWorkbook();
+		XSSFSheet sheet = wb.createSheet(); 
+		XSSFRow  row = sheet.createRow(0);
+		XSSFCell cell = row.createCell(0);
+	    String type = content.getType();
+		switch (type) {
+		case "routine":
+		case "text":
+		case "date ":
+			cell.setCellValue(content.getTexts());
+			break;
+		case "number":
+		case "currency":
+		case "percent":
+            cell.setCellValue(Integer.getInteger(content.getTexts()));
+			break;
+		default:
+			break;
+		}
+		XSSFCellStyle style = cell.getCellStyle();
+		XSSFDataFormat format= wb.createDataFormat();
+		style.setDataFormat(format.getFormat(content.getExpress()));
+		cell.setCellStyle(style);
+		DataFormatter f = new DataFormatter();
+		String text = f.formatCellValue(cell);
+        content.setDisplayTexts(text);
+	}
+	
+	
+	
+	
 
 	public static void setShowText(ExcelCell excelCell, Content content) {
 		if (CELLTYPE.BLANK == excelCell.getType()) {

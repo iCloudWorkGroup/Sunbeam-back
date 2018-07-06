@@ -5,6 +5,7 @@ import java.io.Serializable;
 import com.acmr.excel.model.complete.Border;
 import com.acmr.excel.model.complete.Content;
 import com.acmr.excel.model.complete.CustomProp;
+import com.acmr.excel.model.complete.Occupy;
 
 public class MCell implements Serializable {
 	/* id */
@@ -25,6 +26,8 @@ public class MCell implements Serializable {
 	private Integer row;
 	/* 用于复制操作，相对于起始行的距离 */
 	private Integer col;
+	
+	private Occupy occupy = new Occupy();
 
 	public String getId() {
 		return id;
@@ -117,6 +120,14 @@ public class MCell implements Serializable {
 		this.content = mc.getContent().clone();
 		this.border = mc.getBorder();
 		this.customProp = mc.getCustomProp();
+	}
+
+	public Occupy getOccupy() {
+		return occupy;
+	}
+
+	public void setOccupy(Occupy occupy) {
+		this.occupy = occupy;
 	}
 
 }

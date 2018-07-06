@@ -227,7 +227,7 @@ public class MSheetServiceImpl implements MSheetService {
 		// 存入拆分之后的单元格及关系表
 		baseDao.insert(excelId, tempList);
 		// 清除非合并单元格的显示内容
-		mcellDao.updateContent("displayTexts", null, unspanCellIdList, excelId,
+		mcellDao.updateContent("displayTexts", null,null,null, unspanCellIdList, excelId,
 				sheetId);
 
 		// 将数据赋值给目标区

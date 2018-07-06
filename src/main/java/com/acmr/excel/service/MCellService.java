@@ -2,6 +2,7 @@ package com.acmr.excel.service;
 
 import com.acmr.excel.model.Cell;
 import com.acmr.excel.model.CellContent;
+import com.acmr.excel.model.CellFormate;
 
 public interface MCellService {
 
@@ -120,5 +121,13 @@ public interface MCellService {
 	 * @param excelId
 	 */
 	void updateBorder(Cell cell,int step,String excelId);
+	
+	/**
+	 * 设置单元格样式
+	 * @param cellFormate
+	 * @param step
+	 * @param excelId
+	 */
+	void updateFormat(CellFormate cellFormate,int step,String excelId);
 
 }

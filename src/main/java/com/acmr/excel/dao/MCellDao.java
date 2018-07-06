@@ -148,14 +148,16 @@ public interface MCellDao {
 
 	/**
 	 * 根据cell id集合，更新MCell对象中，content中内容
-	 * 
-	 * @param property
-	 * @param content
+	 * @param property1
+	 * @param value1
+	 * @param property2
+	 * @param value2
 	 * @param idList
 	 * @param excelId
 	 * @param sheetId
 	 */
-	void updateContent(String property, Object content, List<String> idList,
+	void updateContent(String property1, Object value1, String property2,
+			Object value2, List<String> idList,
 			String excelId, String sheetId);
 
 	/**

@@ -16,6 +16,8 @@ public class Cell implements Serializable {
 	private String isBold;
 	private Boolean italic;
 	private Boolean auto;
+	private List<RowHeight> effect;
+
 
 	/**
 	 * 行索引
@@ -233,6 +235,14 @@ public class Cell implements Serializable {
 
 	public void setLine(int line) {
 		this.line = line;
+	}
+
+	public List<RowHeight> getEffect() {
+		return effect;
+	}
+
+	public void setEffect(List<RowHeight> effect) {
+		this.effect = effect;
 	}
 
 }

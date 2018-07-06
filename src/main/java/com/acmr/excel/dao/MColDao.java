@@ -70,15 +70,17 @@ public interface MColDao {
 
 	/**
 	 * 根据列别名list，更新列content
-	 * 
-	 * @param property
-	 * @param content
+	 * @param property1
+	 * @param value1
+	 * @param property2
+	 * @param value2
 	 * @param aliasList
 	 * @param excelId
 	 * @param sheetId
 	 */
-	void updateContent(String property, Object content, List<String> aliasList,
-			String excelId, String sheetId);
+	void updateContent(String property1, Object value1, String property2,
+			Object value2, List<String> aliasList, String excelId,
+			String sheetId);
 	
 	/**
 	 * 更新边框属性

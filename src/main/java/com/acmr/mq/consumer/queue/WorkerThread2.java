@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 
 import com.acmr.excel.model.Cell;
 import com.acmr.excel.model.CellContent;
+import com.acmr.excel.model.CellFormate;
 import com.acmr.excel.model.ColOperate;
 import com.acmr.excel.model.ColWidth;
 import com.acmr.excel.model.Frozen;
@@ -113,12 +114,10 @@ public class WorkerThread2 implements Runnable {
 			cell = (Cell) model.getObject();
 			mcellService.updateBgColor(cell, step, excelId);
 			break;
-		// case OperatorConstant.textDataformat:
-		// CellFormate cellFormate = (CellFormate) model.getObject();
-		// handleExcelService.setCellFormate(cellFormate,
-		// excelBook,versionHistory,step);
-		// storeService.set(excelId+"_history",versionHistory);
-		// break;
+		case OperatorConstant.textDataformat:
+		    CellFormate cellFormate = (CellFormate) model.getObject();
+	        mcellService.updateFormat(cellFormate, step, excelId);
+		 break;
 		//
 		// case OperatorConstant.commentset:
 		// Comment comment = (Comment) model.getObject();

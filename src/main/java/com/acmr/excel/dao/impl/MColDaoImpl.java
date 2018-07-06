@@ -86,13 +86,19 @@ public class MColDaoImpl implements MColDao {
 	}
 
 	@Override
-	public void updateContent(String property, Object content,
-			List<String> aliasList, String excelId, String sheetId) {
+	public void updateContent(String property1, Object value1, String property2,
+			Object value2, List<String> aliasList, String excelId,
+			String sheetId) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("alias").in(aliasList).and("_class")
 				.is(MCol.class.getName()).and("sheetId").is(sheetId));
 		Update update = new Update();
-		update.set("props.content." + property, content);
+		if(null!=property2){
+			update.set("props.content." + property1, value1);
+			update.set("props.content." + property2, value2);
+		}else{
+			update.set("props.content." + property1, value1);
+		}
 		mongoTemplate.updateMulti(query, update, MCol.class, excelId);
 
 	}

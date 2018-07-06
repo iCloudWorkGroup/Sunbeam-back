@@ -153,17 +153,20 @@ public class MCellDaoImpl implements MCellDao {
 	}
 
 	@Override
-	public void updateContent(String property, Object content,
-			List<String> idList, String excelId, String sheetId) {
+	public void updateContent(String property1, Object value1, String property2,
+			Object value2, List<String> idList,String excelId, String sheetId){
 		Query query = new Query();
 		query.addCriteria(
 				Criteria.where("_id").in(idList).and("sheetId").is(sheetId));
 		Update update = new Update();
-		if ("displayTexts".equals(property)) {
-			update.set("content.displayTexts", null);
-			update.set("content.texts", null);
-		} else {
-			update.set("content." + property, content);
+		if (("displayTexts".equals(property1))) {
+			update.set("content.displayTexts", value1);
+			update.set("content.texts", value1);
+		}else if("type".equals(property2)){
+			update.set("content." + property1, value1);
+			update.set("content." + property2, value2);
+		}else{
+			update.set("content." + property1, value1);
 		}
 
 		mongoTemplate.updateMulti(query, update, MCell.class, excelId);
