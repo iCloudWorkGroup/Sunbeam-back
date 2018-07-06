@@ -903,12 +903,18 @@ public class MBookServiceImpl implements MBookService {
 		MSheet msheet = msheetDao.getMSheet(excelId, sheetId);
 		int maxRow = msheet.getMaxrow();
 		int maxCol = msheet.getMaxcol();
-
-		RowCol rowTop = sortRList.get(sortRList.size() - 1);
-		if (rowEnd > rowTop.getTop() + rowTop.getLength()) {
-			int length = rowEnd - rowTop.getTop() - rowTop.getLength();
+		int rowHeight;
+        if(sortRList.size()==0){
+        	rowHeight = 0;
+        }else{
+        	RowCol rowTop = sortRList.get(sortRList.size() - 1);
+        	rowHeight = rowTop.getTop() + rowTop.getLength();
+        }
+		
+		if (rowEnd > rowHeight) {
+			int length = rowEnd - rowHeight;
 			int rowNum = (length / 20) + 1;
-            int top = rowTop.getTop()+rowTop.getLength()+1;
+            int top = rowHeight+1;
 			// 增加新的行
 			for (int i = 0; i < rowNum; i++) {
 				maxRow = maxRow + 1;
@@ -918,8 +924,12 @@ public class MBookServiceImpl implements MBookService {
 				rowCol.setAlias(row);
 				rowCol.setLength(19);
 				if (i == 0) {
-					rowCol.setPreAlias(
-							sortRList.get(sortRList.size() - 1).getAlias());
+					if(rowHeight == 0){
+						rowCol.setPreAlias(null);
+					}else{
+						rowCol.setPreAlias(
+								sortRList.get(sortRList.size() - 1).getAlias());
+					}
 					
 				} else {
 					rowCol.setPreAlias((maxRow - 1) + "");
@@ -939,11 +949,18 @@ public class MBookServiceImpl implements MBookService {
 				
 			}
 		}
-		RowCol colTop = sortCList.get(sortCList.size() - 1);
-		if (rowEnd > rowTop.getTop() + rowTop.getLength()) {
-			int length = colEnd - colTop.getTop() - colTop.getLength();
+		int colWeight;
+		if(sortCList.size()==0){
+			colWeight =0;
+		}else{
+			RowCol colTop = sortCList.get(sortCList.size() - 1);
+			colWeight = colTop.getTop()+colTop.getLength();
+		}
+		
+		if (rowEnd > colWeight) {
+			int length = colEnd - colWeight;
 			int colNum = (length / 72) + 1;
-			int left = colTop.getTop()+colTop.getLength()+1;
+			int left = colWeight+1;
 			// 增加新的列
 			for (int i = 0; i < colNum; i++) {
 				maxCol = maxCol + 1;
@@ -953,8 +970,12 @@ public class MBookServiceImpl implements MBookService {
 				rowCol.setAlias(col);
 				rowCol.setLength(71);
 				if (i == 0) {
-					rowCol.setPreAlias(
-							sortCList.get(sortCList.size() - 1).getAlias());
+					if(colWeight == 0){
+						rowCol.setPreAlias(null);
+					}else{
+						rowCol.setPreAlias(
+								sortCList.get(sortCList.size() - 1).getAlias());
+					}
 				} else {
 					rowCol.setPreAlias((maxCol - 1) + "");
 				}
