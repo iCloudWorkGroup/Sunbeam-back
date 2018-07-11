@@ -17,6 +17,9 @@ public class Cell implements Serializable {
 	private Boolean italic;
 	private Boolean auto;
 	private List<RowHeight> effect;
+	/*下划线  0 无下划线  1 有下滑线*/
+	private int underline;
+	
 
 
 	/**
@@ -243,6 +246,14 @@ public class Cell implements Serializable {
 
 	public void setEffect(List<RowHeight> effect) {
 		this.effect = effect;
+	}
+
+	public int getUnderline() {
+		return underline;
+	}
+
+	public void setUnderline(int underline) {
+		this.underline = underline;
 	}
 
 }

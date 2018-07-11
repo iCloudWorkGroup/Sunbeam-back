@@ -117,7 +117,11 @@ public class WorkerThread2 implements Runnable {
 		case OperatorConstant.textDataformat:
 		    CellFormate cellFormate = (CellFormate) model.getObject();
 	        mcellService.updateFormat(cellFormate, step, excelId);
-		 break;
+		    break;
+		case OperatorConstant.underline:
+			cell = (Cell) model.getObject();
+			mcellService.updateFontUnderline(cell, step, excelId);
+			break;
 		//
 		// case OperatorConstant.commentset:
 		// Comment comment = (Comment) model.getObject();

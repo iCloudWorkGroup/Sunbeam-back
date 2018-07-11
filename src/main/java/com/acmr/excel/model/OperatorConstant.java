@@ -12,6 +12,7 @@ public class OperatorConstant {
 	public static final int fillbgcolor = 7;
 	public static final int textDataformat = 8;
 	public static final int commentset = 9;
+	public static final int underline = 37;
 
 	public static final int colorset = 27;
 	public static final int batchcolorset = 30;
@@ -42,6 +43,7 @@ public class OperatorConstant {
 	public static final int addColLine = 33;
 	public static final int colhideCancel = 29;
 	public static final int rowhideCancel = 32;
+	
 	public static final int expand = 36;
 
 	// 回退

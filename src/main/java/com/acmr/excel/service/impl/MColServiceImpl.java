@@ -91,7 +91,9 @@ public class MColServiceImpl implements MColService {
 		}
 
 		msheetDao.updateMaxCol(msheet.getMaxcol() + 1, excelId, sheetId);
-
+		
+		
+		
 		String col = sortClList.get(colOperate.getCol()).getAlias();
 		List<MRowColCell> relationList = mcellDao.getMRowColCellList(excelId,
 				sheetId, col, "col");
@@ -129,6 +131,7 @@ public class MColServiceImpl implements MColService {
 			baseDao.insert(excelId, insertList);
 		}
 		msheetDao.updateStep(excelId, sheetId, step);
+		
 
 		/*
 		 * Map<String,MCell> cellMap = new HashMap<String,MCell>(); for(MCell
@@ -170,6 +173,48 @@ public class MColServiceImpl implements MColService {
 		 * rcc.setRow(Integer.parseInt(rc.getAlias())); tempList.add(rcc); } } }
 		 * }
 		 */
+	}
+	
+	private void insertColEffectMCell(String excelId,String sheetId,List<RowCol> sortClList,String col,
+			Map<String, Integer> rowMap,List<RowCol> sortRcList,String alias,Integer step){
+		//String col = sortClList.get(colOperate.getCol()).getAlias();
+		List<MRowColCell> relationList = mcellDao.getMRowColCellList(excelId,
+				sheetId, col, "col");
+		List<String> cellIdList = new ArrayList<>();
+
+		for (MRowColCell rcc : relationList) {
+			cellIdList.add(rcc.getCellId());
+		}
+		List<MCell> mcellList = mcellDao.getMCellList(excelId, sheetId,
+				cellIdList);
+
+		List<Object> insertList = new ArrayList<Object>();// 存需要插入的对象
+
+		for (MCell mc : mcellList) {
+			String[] ids = mc.getId().split("_");
+			if ((mc.getColspan() > 1) && (!ids[1].equals(col))) {
+				mc.setColspan(mc.getColspan() + 1);
+				baseDao.update(excelId, mc);
+				String row = ids[0];
+				Integer index = rowMap.get(row);
+				for (int i = 0; i < mc.getRowspan(); i++) {
+					MRowColCell mrcc = new MRowColCell();
+					row = sortRcList.get(index).getAlias();
+					index++;
+					mrcc.setCellId(mc.getId());
+					mrcc.setRow(row);
+					mrcc.setCol(alias);
+					mrcc.setSheetId(sheetId);
+					insertList.add(mrcc);
+				}
+			}
+
+		}
+		if (insertList.size() > 0) {
+			baseDao.insert(excelId, insertList);
+		}
+		msheetDao.updateStep(excelId, sheetId, step);
+		
 	}
 
 	@Override

@@ -272,6 +272,23 @@ public class MCellServiceImpl implements MCellService {
 		}
 
 	}
+	
+	@Override
+	public void updateFontUnderline(Cell cell, int step, String excelId) {
+		String sheetId = excelId + 0;
+		List<Coordinate> coordinates = cell.getCoordinate();
+		int underline = cell.getUnderline();
+
+		try {
+			updateContent(coordinates, "underline", underline, null, null, null,
+					step, excelId, sheetId);
+		} catch (NoSuchFieldException | SecurityException
+				| IllegalArgumentException | IllegalAccessException e) {
+
+			e.printStackTrace();
+		}
+		
+	}
 
 	@Override
 	public void mergeCell(Cell cell, int step, String excelId) {
@@ -1526,6 +1543,7 @@ public class MCellServiceImpl implements MCellService {
 			e.printStackTrace();
 		}
 	}
+	
 
 	/*
 	 * public void OperationCellByCord(ArrayList<Object> al){ //查找关系表

@@ -95,6 +95,14 @@ public interface MCellService {
 	 * @param excelId
 	 */
 	void updateAlignvertical(Cell cell, int step, String excelId);
+	
+	/**
+	 * 更新字体下滑线状况
+	 * @param cell
+	 * @param step
+	 * @param excelId
+	 */
+	void updateFontUnderline(Cell cell,int step,String excelId);
 
 	/**
 	 * 合并单元格

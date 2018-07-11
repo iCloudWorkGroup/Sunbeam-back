@@ -177,6 +177,19 @@ public class CellController extends BaseController {
 		Cell cell = getJsonDataParameter(req, Cell.class);
 		this.assembleData(req, resp, cell, OperatorConstant.fillbgcolor);
 	}
+	
+	/**
+	 * 设置单元格下划线
+	 * 
+	 * @throws IOException
+	 */
+	@RequestMapping("/font-underline")
+	public void font_underline(HttpServletRequest req, HttpServletResponse resp)
+			throws Exception {
+		// 接收参数，定义返回
+		Cell cell = getJsonDataParameter(req, Cell.class);
+		this.assembleData(req, resp, cell, OperatorConstant.underline);
+	}
 
 	/**
 	 * 编辑单元格中数据内容

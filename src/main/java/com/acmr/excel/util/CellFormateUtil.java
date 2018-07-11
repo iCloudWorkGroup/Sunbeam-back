@@ -505,7 +505,11 @@ public class CellFormateUtil {
 		case "number":
 		case "currency":
 		case "percent":
-            cell.setCellValue(Integer.getInteger(content.getTexts()));
+			try {
+				cell.setCellValue(Double.valueOf(content.getTexts()));
+			} catch (Exception e) {
+				cell.setCellValue(content.getTexts());
+			}
 			break;
 		default:
 			break;
@@ -516,11 +520,21 @@ public class CellFormateUtil {
 		cell.setCellStyle(style);
 		DataFormatter f = new DataFormatter();
 		String text = f.formatCellValue(cell);
-        content.setDisplayTexts(text);
+		if("".equals(text)||null==text){
+			content.setDisplayTexts(content.getTexts());
+		}else{
+          content.setDisplayTexts(text);
+		}
 	}
 	
-	public static void cellTypeToMcellType(CELLTYPE type,Content content) {
-		
+	public static void cellTypeToMcellType(CELLTYPE type,String dataFormate ,Content content) {
+		switch(type){
+		case BLANK:
+			content.setType("");
+			
+		default:
+			break;
+		}
 	}
 	
 	
