@@ -49,8 +49,8 @@ public class WorkerThread2 implements Runnable {
 			int memStep = msheetService.getStep(key, key + 0);
 			if (memStep + 1 == step) {
 				System.out.println(step + "开始执行");
-				logger.info("**********begin excelId : " + model.getExcelId()
-						+ " === step : " + step + "== reqPath : "
+				logger.info("begin excelId:" + model.getExcelId()
+						+ ";step:" + step + ";reqPath:"
 						+ model.getReqPath());
 				handleMessage(model);
 				return;
@@ -248,8 +248,8 @@ public class WorkerThread2 implements Runnable {
 		// System.out.println(JSON.toJSONString(versionHistory));
 		// storeService.set(excelId,excelBook);
 		System.out.println(step + "结束执行");
-		logger.info("**********end excelId : " + excelId + " === step : " + step
-				+ "== reqPath : " + reqPath);
+		logger.info("end excelId:" + excelId + ";step:" + step
+				+ ";reqPath:" + reqPath);
 		// mongodbServiceImpl.update(excelId, step, "step");
 	}
 

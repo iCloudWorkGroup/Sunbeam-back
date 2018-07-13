@@ -20,9 +20,9 @@
 		<repository>
 			<id>nexus-releases</id>
 			<name>Nexus Release Repository</name>
-			<url>http://excel-inc.acmr.com.cn:20064/nexus/content/repositories/releases/</url>
+		    <url>http://excel-inc.acmr.com.cn:20064/nexus/content/repositories/releases/</url>
 			<!-- 内网地址 -->
-			<!--<url>http://192.168.1.228:8080/nexus/content/repositories/releases/</url> -->
+		<!--	<url>http://192.168.1.228:8080/nexus/content/repositories/releases/</url> -->
 			<releases>
 				<enabled>true</enabled>
 			</releases>
@@ -141,6 +141,11 @@
 			<groupId>jstl</groupId>
 			<artifactId>jstl</artifactId>
 			<version>1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
 		</dependency>
 		<dependency>
 			<groupId>taglibs</groupId>

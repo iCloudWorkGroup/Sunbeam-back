@@ -46,11 +46,8 @@ public class QueueReceiver implements MessageListener {
 				Model model = (Model) objectMessage.getObject();
 				String excelId = model.getExcelId();
 				int step = model.getStep();
-				logger.info("**********receive message excelId : " + excelId
-						+ " === step : " + step + "== reqPath : "
-						+ model.getReqPath());
+				logger.info("excelId:" + excelId+ ";step:" + step + ";reqPath:"+ model.getReqPath());
 				ExecutorService executor = Executors.newFixedThreadPool(1);
-
 				Runnable worker = new WorkerThread2(step, excelId, model,
 						mcellService, mrowService, mcolService, msheetService);
 				executor.execute(worker);
