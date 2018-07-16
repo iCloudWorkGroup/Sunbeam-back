@@ -21,8 +21,15 @@ public class Distribute {
     		Object o = target.getObject();
     		Class<?> c = o.getClass();
     		try {
-				Method method = c.getDeclaredMethod(target.getMethod(), Map.class);
+    			int type = target.getType();
+    			if(type ==0){
+    				Method method = c.getDeclaredMethod(target.getMethod());
+					   method.invoke(o);
+    			}else{
+    				Method method = c.getDeclaredMethod(target.getMethod(), Map.class);
 					   method.invoke(o, map);
+    			}
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

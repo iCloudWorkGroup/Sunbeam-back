@@ -2,27 +2,45 @@ package com.acmr.excel.distribute;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.mysql.fabric.xmlrpc.base.Array;
+
+
+
 public class Test {
-   public void speak(Map map){
+
+   private static Logger log = LoggerFactory.getLogger(Test.class);
+	
+   public void delCol(Map transMap){
 	   System.out.println("aaa");
-	   map.put("aa", "你好");
+	   transMap.put("aa", "你好");
    }
    
-   public void say(Map map){
-	   System.out.println(map.get("aa"));
-	   map.clear();
-	   map.put("bb", "One 你好");
+   public void delCell(String name,Map reviceMap){
+	  
+	   reviceMap.clear();
+	   reviceMap.put("bb", "One 你好");
    }
-   
+   public void insertCell(){
+	   System.out.println("insert cell");
+   }
+   public void undo(){
+	   
+   }
+
    public static void main(String[] args) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+	  log.info("开始");
 	  Test test = new Test();
-	  Target target = new Target(test,"speak");
-	  Target target1 = new Target(test,"say");
-	  Target target2 = new Target(Class.forName(One.class.getName()).newInstance(),"say");
+	  Target target = new Target(test,"insertCell",0);
+	  Target target1 = new Target(test,"delCol",1);
+	  Target target2 = new Target(test,"delCell",1);
 	  Distribute dis = new Distribute();
 	  dis.add(target);
 	  dis.add(target1);
 	  dis.add(target2);
 	  dis.exec();
+	  log.info("完成");
 }
 }
