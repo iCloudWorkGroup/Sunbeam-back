@@ -19,6 +19,8 @@ public class Cell implements Serializable {
 	private List<RowHeight> effect;
 	/*下划线  0 无下划线  1 有下滑线*/
 	private int underline;
+	//单元格锁定
+	private boolean lock;
 	
 
 
@@ -70,6 +72,8 @@ public class Cell implements Serializable {
 	 * "format" : "num: 数字类型,time：时间,text：文本"
 	 */
 	private String format;
+	
+	private String comment;
 	
 
 	public int getSheetId() {
@@ -254,6 +258,22 @@ public class Cell implements Serializable {
 
 	public void setUnderline(int underline) {
 		this.underline = underline;
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	public boolean isLock() {
+		return lock;
+	}
+
+	public void setLock(boolean lock) {
+		this.lock = lock;
 	}
 
 }

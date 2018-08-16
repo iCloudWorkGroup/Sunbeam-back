@@ -1,5 +1,6 @@
 package com.acmr.excel.dao.impl;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,7 @@ import com.acmr.excel.model.mongo.MRowColList;
 import com.mongodb.BasicDBObject;
 
 @Repository("mrowColDao")
-public class MRowColDaoImpl implements MRowColDao {
+public class MRowColDaoImpl implements MRowColDao,Serializable {
 
 	@Resource
 	private MongoTemplate mongoTemplate;
@@ -135,6 +136,16 @@ public class MRowColDaoImpl implements MRowColDao {
 
 		return rowCol.getTop() + tempHeight + 1;
 	}
+	
+	@Override
+	public MRowColList getMRowColList(String id, String excelId, String sheetId) {
+		MRowColList colList = mongoTemplate
+				.findOne(
+						new Query(Criteria.where("_id").is(id)
+								.and("sheetId").is(sheetId)),
+						MRowColList.class, excelId);
+		return colList;
+	}
 
 	@Override
 	public void updateRowCol(String excelId, String sheetId, String id,
@@ -183,6 +194,14 @@ public class MRowColDaoImpl implements MRowColDao {
 		update.set("rcList.$.length", length);
 		mongoTemplate.updateFirst(query, update, excelId);
 
+	}
+
+	@Override
+	public void delRowColList(String excelId, String sheetId, String id) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("_id").is(id).and("sheetId").is(sheetId));
+		mongoTemplate.remove(query, MRowColList.class, excelId);
+		
 	}
 
 }

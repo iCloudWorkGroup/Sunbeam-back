@@ -1,9 +1,10 @@
 package com.acmr.excel.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RowColList {
+public class RowColList implements Serializable{
 	private String id;
 	private List<RowCol> rcList = new ArrayList<RowCol>();
 

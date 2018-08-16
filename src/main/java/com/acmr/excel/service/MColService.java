@@ -16,6 +16,8 @@ public interface MColService {
 	 */
 	void insertCol(ColOperate colOperate, String excelId, Integer step);
 	
+	void insertColDis(ColOperate colOperate, String excelId, Integer step);
+	
 	/**
 	 * 批量增加列
 	 * @param num

@@ -1,5 +1,6 @@
 package com.acmr.excel.dao.impl;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -17,7 +18,7 @@ import com.acmr.excel.model.mongo.MExcelColumn;
 import com.acmr.excel.model.mongo.MRow;
 
 @Repository("mcolDao")
-public class MColDaoImpl implements MColDao {
+public class MColDaoImpl implements MColDao,Serializable {
 
 	@Resource
 	private MongoTemplate mongoTemplate;
@@ -42,7 +43,7 @@ public class MColDaoImpl implements MColDao {
 	}
 
 	@Override
-	public void delExcelCol(String excelId, String sheetId, String alias) {
+	public void delMCol(String excelId, String sheetId, String alias) {
 
 		mongoTemplate.remove(
 				new Query(Criteria.where("alias").is(alias).and("_class")
@@ -50,9 +51,19 @@ public class MColDaoImpl implements MColDao {
 				MCol.class, excelId);
 
 	}
+	
+	@Override
+	public void delMColList(String excelId, String sheetId,
+			List<String> aliasList) {
+		mongoTemplate.remove(
+				new Query(Criteria.where("alias").in(aliasList).and("_class")
+						.is(MCol.class.getName()).and("sheetId").is(sheetId)),
+				MCol.class, excelId);
+		
+	}
 
 	public void updateColHiddenStatus(String excelId, String sheetId,
-			String alias, boolean status) {
+			String alias, Boolean status) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("alias").is(alias).and("_class")
 				.is(MCol.class.getName()).and("sheetId").is(sheetId));
@@ -104,7 +115,7 @@ public class MColDaoImpl implements MColDao {
 	}
 	
 	@Override
-	public void updateBorder(String property, Object value, List<String> aliasList,
+	public void updateBorderList(String property, Object value, List<String> aliasList,
 			String excelId, String sheetId) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("alias").in(aliasList).and("_class")
@@ -150,5 +161,6 @@ public class MColDaoImpl implements MColDao {
 		mongoTemplate.updateMulti(query, update, MCol.class, excelId);
 		
 	}
+
 
 }

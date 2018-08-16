@@ -1,11 +1,12 @@
 package com.acmr.excel.model.mongo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.acmr.excel.model.RowCol;
 
-public class MRowColList {
+public class MRowColList implements Serializable{
 	/* id用于区分是行或类 ，rList或cList */
 	private String id;
 	private String sheetId;

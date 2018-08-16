@@ -1,8 +1,10 @@
 package com.acmr.excel.model;
 
+import java.io.Serializable;
+
 import com.acmr.excel.model.complete.Occupy;
 
-public class ConverCell {
+public class ConverCell implements Serializable{
 	private String id;
 	private Occupy occupy = new Occupy();
 

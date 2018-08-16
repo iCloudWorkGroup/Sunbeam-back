@@ -1,5 +1,6 @@
 package com.acmr.excel.model;
 
+import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -8,7 +9,7 @@ import java.util.Date;
 
 import org.springframework.jdbc.core.RowMapper;
 
-public class OnlineExcel implements RowMapper<OnlineExcel> {
+public class OnlineExcel implements RowMapper<OnlineExcel>, Serializable {
 	private long id;
 	private String excelId;
 	private String excelObject;

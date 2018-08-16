@@ -1,6 +1,5 @@
 package com.acmr.excel.distribute;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +13,10 @@ public class Distribute {
     
     public void add(Target target){
     	container.add(target);
+    }
+    
+    public void addParam(String key,Object value){
+    	map.put(key, value);
     }
     
     public void exec(){

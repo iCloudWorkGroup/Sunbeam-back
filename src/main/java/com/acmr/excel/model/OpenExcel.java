@@ -1,9 +1,10 @@
 package com.acmr.excel.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OpenExcel {
+public class OpenExcel implements Serializable {
 	private String excelId;
 	private int top;
 	private int bottom;

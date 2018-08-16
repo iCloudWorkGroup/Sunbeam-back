@@ -1,6 +1,8 @@
 package com.acmr.excel.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -16,8 +18,13 @@ import com.acmr.excel.model.OperatorConstant;
 import com.acmr.excel.model.OuterPaste;
 import com.acmr.excel.model.RowOrColExpand;
 import com.acmr.excel.model.complete.CompleteExcel;
+import com.acmr.excel.model.complete.Glx;
+import com.acmr.excel.model.complete.Gly;
+import com.acmr.excel.model.complete.OneCell;
 import com.acmr.excel.model.complete.SheetElement;
+import com.acmr.excel.model.complete.Validate;
 import com.acmr.excel.model.copy.Copy;
+import com.acmr.excel.model.mongo.MSheet;
 import com.acmr.excel.service.MBookService;
 import com.acmr.excel.service.MSheetService;
 import com.acmr.excel.util.AnsycDataReturn;
@@ -138,7 +145,7 @@ public class SheetController extends BaseController {
 			return;
 		}
 		Copy copy = getJsonDataParameter(req, Copy.class);
-		boolean isAblePasteResult = msheetService.isCutCopy(copy, excelId);
+		boolean isAblePasteResult = msheetService.isCopy(copy, excelId);
 		AnsycDataReturn ansycDataReturn = new AnsycDataReturn();
 		if(isAblePasteResult){
 			this.assembleData(req, resp, copy, OperatorConstant.copy);
@@ -163,7 +170,7 @@ public class SheetController extends BaseController {
 		}
 		Copy copy = getJsonDataParameter(req, Copy.class);
 		
-		boolean isAblePasteResult = msheetService.isCutCopy(copy, excelId);
+		boolean isAblePasteResult = msheetService.isCut(copy, excelId);
 		AnsycDataReturn ansycDataReturn = new AnsycDataReturn();
 		if(isAblePasteResult){
 			this.assembleData(req, resp, copy, OperatorConstant.cut);
@@ -219,8 +226,27 @@ public class SheetController extends BaseController {
 		int colEnd = openExcel.getRight() == 0 ? 2000 : openExcel.getRight() ;
 		
 		CompleteExcel excel =  mbookService.reload(excelId, sheetId, rowBegin, rowEnd, colBegin, colEnd,1);
-		SheetElement sheet = new SheetElement(excel.getSheets().get(0));
-		
+		SheetElement sheet = null;
+		if(excel.getSheets().size()>0){
+		   sheet = new SheetElement(excel.getSheets().get(0));
+		   sheet.setFrozen(null);
+		   sheet.setProtect(null);
+		   sheet.setSort(null);
+		}else{
+			sheet = new SheetElement();
+			sheet.setFrozen(null);
+			sheet.setProtect(null);
+			sheet.setSort(null);
+			/*List<OneCell> cells = new ArrayList<OneCell>();
+			List<Gly> gridLineRow = new ArrayList<Gly>();
+			List<Glx> gridLineCol = new ArrayList<Glx>();
+			List<Validate> validate = new ArrayList<Validate>();
+			sheet.setCells(cells);
+			sheet.setGridLineRow(gridLineRow);
+			sheet.setGridLineCol(gridLineCol);
+			sheet.setValidate(validate);*/
+			
+		}
 		long b2 = System.currentTimeMillis();
 		System.out.println("openexcel=====================" + (b2 - b1));
 
@@ -234,6 +260,20 @@ public class SheetController extends BaseController {
 	public void addRowOrCol(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		RowOrColExpand expand = getJsonDataParameter(req, RowOrColExpand.class);
 		this.assembleData(req, resp,expand,OperatorConstant.expand);
+	}
+	
+	/**
+	 * sheet保护
+	 * @param req
+	 * @param resp
+	 * @throws IOException
+	 */
+	@RequestMapping("/protect")
+	public void protect(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		String excelId = req.getHeader("X-Book-Id");
+		MSheet msheet = getJsonDataParameter(req, MSheet.class);
+		msheetService.updateProtect(excelId, msheet);
+		
 	}
 	
 }

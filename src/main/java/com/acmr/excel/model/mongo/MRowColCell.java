@@ -1,6 +1,8 @@
 package com.acmr.excel.model.mongo;
 
-public class MRowColCell {
+import java.io.Serializable;
+
+public class MRowColCell implements Serializable{
 	/* 行id */
 	private String row;
 	/* 列id */

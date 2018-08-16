@@ -102,7 +102,7 @@ public class MCell implements Serializable {
 	}
 
 	public MCell() {
-
+          
 	}
 
 	public MCell(String id, String sheetId) {
@@ -111,6 +111,7 @@ public class MCell implements Serializable {
 		this.rowspan = 1;
 		this.sheetId = sheetId;
 		this.getContent().setAlignCol("middle");
+		this.getContent().setLocked(true);
 		// this.getContent().setAlignRow("center");
 
 	}

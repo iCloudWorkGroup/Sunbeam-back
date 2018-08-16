@@ -1,6 +1,8 @@
 package com.acmr.excel.model;
 
-public class Position {
+import java.io.Serializable;
+
+public class Position implements Serializable{
 	private String excelId;
 	private int sheetId;
 	private int bottom;

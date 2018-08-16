@@ -3,6 +3,7 @@ package com.acmr.excel.dao;
 import java.util.List;
 
 import com.acmr.excel.model.RowCol;
+import com.acmr.excel.model.mongo.MRowColList;
 
 public interface MRowColDao {
 
@@ -23,6 +24,14 @@ public interface MRowColDao {
 	 * @param excelId
 	 */
 	void getColList(List<RowCol> sortClList, String excelId, String sheetId);
+	
+	/**
+	 * 获取简化的行或列对象
+	 * @param id  cList或rList
+	 * @param excelId
+	 * @param sheetId
+	 */
+	MRowColList getMRowColList(String id,String excelId,String sheetId);
 
 	/**
 	 * 根据条件修改行或列前一个行或列的别名
@@ -78,4 +87,12 @@ public interface MRowColDao {
 	 */
 	void updateRowColLength(String excelId, String sheetId, String id,
 			String alias, Integer length);
+	
+	/**
+	 * 删除行或列的简化列表
+	 * @param excelId
+	 * @param sheetId
+	 * @param id
+	 */
+	void delRowColList(String excelId,String sheetId,String id);
 }

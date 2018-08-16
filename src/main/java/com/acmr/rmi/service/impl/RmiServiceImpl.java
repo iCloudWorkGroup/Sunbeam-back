@@ -2,61 +2,40 @@ package com.acmr.rmi.service.impl;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.concurrent.ExecutionException;
 
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Component;
+
+import com.acmr.excel.service.MBookService;
 import com.acmr.rmi.service.RmiService;
 
 import acmr.excel.pojo.ExcelBook;
-import net.spy.memcached.MemcachedClient;
-import net.spy.memcached.internal.OperationFuture;
+
 
 public class RmiServiceImpl extends UnicastRemoteObject implements RmiService {
-	private MemcachedClient memCachedClient;
 	
-	public RmiServiceImpl(MemcachedClient memCachedClient) throws RemoteException {
-		this.memCachedClient = memCachedClient;
-	} 
-	
+	private MBookService mbookService;
+	 
+	protected RmiServiceImpl(MBookService mbookService) throws RemoteException {
+		this.mbookService = mbookService;
+	}
+
 	
 
 	@Override
 	public boolean saveExcelBook(String excelId, ExcelBook excelBook) throws RemoteException {
-		//MemcachedClient memcachedClient = MemcacheFactory.CACHESOURCE.getMemcacheClient();
-		OperationFuture<Boolean> excelResult = memCachedClient.set(excelId, 60 * 60 * 24 * 1, excelBook);
-		OperationFuture<Boolean> opeResult = memCachedClient.set(excelId+"_ope", 60 * 60 * 24 * 1, 0);
-		try {
-			if(excelResult.get() && opeResult.get()){
-				return true;
-			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			e.printStackTrace();
-		}
-		return false;
+		
+		boolean result =  mbookService.saveExcelBook(excelBook, excelId);
+	    return result;
 	}
 
 	@Override
 	public ExcelBook getExcelBook(String excelId, int step) throws RemoteException {
-		//MemcachedClient	memcachedClient = MemcacheFactory.CACHESOURCE.getMemcacheClient();
-		ExcelBook excelBook = null;
-		int curStep = (int) memCachedClient.get(excelId + "_ope");
-		if (curStep == step) {
-			excelBook = (ExcelBook) memCachedClient.get(excelId);
-		} else {
-			for (int i = 0; i < 100; i++) {
-				int st = (int) memCachedClient.get(excelId + "_ope");
-				if (step == st) {
-					excelBook = (ExcelBook) memCachedClient.get(excelId);
-				} else {
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}
+		
+		ExcelBook excelBook = mbookService.reloadExcelBook(excelId,step);
+		
+		
 		return excelBook;
 	}
 	

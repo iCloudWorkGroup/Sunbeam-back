@@ -30,7 +30,7 @@ public class OperatorConstant {
 	public static final int colshide = 28;
 	public static final int rowsheight = 20;
 	public static final int rowshide = 31;
-
+	
 	// pasteAction
 	public static final int paste = 21;
 	public static final int copy = 22;
@@ -50,5 +50,7 @@ public class OperatorConstant {
 	public static final int undo = 34;
 	// 前进
 	public static final int redo = 35;
+	//单元格锁定
+	public static final int cellLock =38; 
 
 }

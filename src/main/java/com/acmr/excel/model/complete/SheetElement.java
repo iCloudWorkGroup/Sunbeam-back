@@ -19,7 +19,7 @@ public class SheetElement implements Serializable {
 	private List<Gly> gridLineRow = new ArrayList<Gly>();
 	private List<Glx> gridLineCol = new ArrayList<Glx>();
 	private Integer sort = 0;
-	private boolean protect = false;
+	private Boolean protect = false;
 	private List<Validate> validate = new ArrayList<Validate>();
 	private Frozen frozen = new Frozen();
 
@@ -111,11 +111,11 @@ public class SheetElement implements Serializable {
 		this.sort = sort;
 	}
 
-	public boolean isProtect() {
+	public Boolean getProtect() {
 		return protect;
 	}
 
-	public void setProtect(boolean protect) {
+	public void setProtect(Boolean protect) {
 		this.protect = protect;
 	}
 

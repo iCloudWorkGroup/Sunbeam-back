@@ -46,6 +46,8 @@ import com.acmr.excel.util.CellFormateUtil;
 import com.acmr.excel.util.ExcelUtil;
 
 import acmr.excel.ExcelHelper;
+import acmr.excel.pojo.Constants.CELLTYPE;
+import acmr.util.ListHashMap;
 import acmr.excel.pojo.ExcelBook;
 import acmr.excel.pojo.ExcelCell;
 import acmr.excel.pojo.ExcelCellStyle;
@@ -117,7 +119,7 @@ public class MBookServiceImpl implements MBookService {
 		cList.setSheetId(sheetId);
 		getMCol(cols, mcols, cList, sheetId);
 		// mongoTemplate.insert(mcols, excelId);
-		baseDao.insert(excelId, mcols);// 存列表样式
+		baseDao.insertList(excelId, mcols);// 存列表样式
 		baseDao.insert(excelId, cList);// 向数据库存贮简化的列信息
 
 		List<ExcelRow> rows = excelSheet.getRows();
@@ -129,14 +131,14 @@ public class MBookServiceImpl implements MBookService {
 		getMRow(rows, mrows, rList, tempList, sheetId);
 		baseDao.insert(excelId, rList);// 向数据库存贮行信息
 		// mongoTemplate.insert(mrows,excelId);
-		baseDao.insert(excelId, mrows);// 存储行样式
+		baseDao.insertList(excelId, mrows);// 存储行样式
 
 		List<Sheet> sheets = book.getNativeSheet();// 找出合并的单元格
 		getMergeCell(sheets, tempList, sheetId);
 
 		long start = System.currentTimeMillis();
 		// mongoTemplate.insert(tempList, excelId);
-		baseDao.insert(excelId, tempList);
+		baseDao.insertList(excelId, tempList);
 		long end = System.currentTimeMillis() - start;
 		System.out.println("存储时间为:" + end);
 
@@ -670,7 +672,7 @@ public class MBookServiceImpl implements MBookService {
 
 		content.setUnderline((int) font.getUnderline());
 		content.setWordWrap(style.isWraptext());
-		content.setType(excelCell.getType().name());
+		content.setType(CellFormateUtil.TypeToMtype(excelCell.getType()));
 		content.setExpress(style.getDataformat());
 		ExcelColor color = style.getFgcolor();
 		if (color != null) {
@@ -754,20 +756,20 @@ public class MBookServiceImpl implements MBookService {
 
 	@Override
 	public CompleteExcel reload(String excelId, String sheetId,
-			Integer rowBegin, Integer rowEnd, Integer colBegin,
-			Integer colEnd,int type ) {
-		
+			Integer rowBegin, Integer rowEnd, Integer colBegin, Integer colEnd,
+			int type) {
+
 		// 将步骤重置为0
-		if(type == 0){
-		 msheetDao.updateStep(excelId, sheetId, 0);
+		if (type == 0) {
+			msheetDao.updateStep(excelId, sheetId, 0);
 		}
 		CompleteExcel excel = new CompleteExcel();
 		List<RowCol> sortRList = new ArrayList<RowCol>();
 		List<RowCol> sortCList = new ArrayList<RowCol>();
 		mrowColDao.getRowList(sortRList, excelId, sheetId);
 		mrowColDao.getColList(sortCList, excelId, sheetId);
-		if(type == 0){
-			addRowOrCol(excelId,sheetId,sortRList,sortCList,rowEnd,colEnd);
+		if (type == 0) {
+			addRowOrCol(excelId, sheetId, sortRList, sortCList, rowEnd, colEnd);
 		}
 
 		Map<String, Integer> rMap = new HashMap<String, Integer>();
@@ -778,10 +780,13 @@ public class MBookServiceImpl implements MBookService {
 		for (int i = 0; i < sortCList.size(); i++) {
 			cMap.put(sortCList.get(i).getAlias(), i);
 		}
-		int rowBeginIndex = getIndexByPixel(sortRList, rowBegin);
+		int rowBeginIndex = getIndexByPixelBegin(sortRList, rowBegin);
 		int rowEndIndex = getIndexByPixel(sortRList, rowEnd);
-		int colBeginIndex = getIndexByPixel(sortCList, colBegin);
+		int colBeginIndex = getIndexByPixelBegin(sortCList, colBegin);
 		int colEndIndex = getIndexByPixel(sortCList, colEnd);
+		if(rowBeginIndex == -1||colBeginIndex == -1){
+			return excel;
+		}
 		int top;
 		int left;
 		if (rowBeginIndex == 0) {
@@ -897,6 +902,575 @@ public class MBookServiceImpl implements MBookService {
 
 	}
 
+	@Override
+	public ExcelBook reloadExcelBook(String excelId, Integer step) {
+		String sheetId = excelId + 0;
+		while (true) {
+			MSheet msheet = msheetDao.getMSheet(excelId, sheetId);
+			int memStep = msheet.getStep();
+			if (memStep == step) {
+				
+				ExcelBook book = getExcelBook(excelId,sheetId);
+
+				return book;
+			} else {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				continue;
+			}
+		}
+	}
+
+	private ExcelBook getExcelBook(String excelId, String sheetId) {
+
+		ExcelBook book = new ExcelBook();
+		ListHashMap<ExcelSheet> sheets = book.getSheets();
+		ExcelSheet sheet = new ExcelSheet();
+		sheets.add(sheet);
+		ListHashMap<ExcelColumn> cols = (ListHashMap<ExcelColumn>) sheet.getCols();
+		ListHashMap<ExcelRow> rows = (ListHashMap<ExcelRow>) sheet.getRows();
+		
+		List<RowCol> sortRList = new ArrayList<RowCol>();
+		List<RowCol> sortCList = new ArrayList<RowCol>();
+		mrowColDao.getRowList(sortRList, excelId, sheetId);
+		mrowColDao.getColList(sortCList, excelId, sheetId);
+
+		List<String> rowList = new ArrayList<String>();
+		List<String> colList = new ArrayList<String>();
+
+		Map<String, Integer> rMap = new HashMap<String, Integer>();
+		for (int i = 0; i < sortRList.size(); i++) {
+			rMap.put(sortRList.get(i).getAlias(), i);
+			rowList.add(sortRList.get(i).getAlias());
+		}
+		Map<String, Integer> cMap = new HashMap<String, Integer>();
+		for (int i = 0; i < sortCList.size(); i++) {
+			cMap.put(sortCList.get(i).getAlias(), i);
+			colList.add(sortCList.get(i).getAlias());
+		}
+
+		// 行样式
+		List<MRow> rList = mrowDao.getMRowList(excelId, sheetId, rowList);
+		Map<String, MRow> rowMap = new HashMap<String, MRow>();
+		for (MRow mr : rList) {
+			rowMap.put(mr.getAlias(), mr);
+		}
+
+		// 列样式
+		List<MCol> cList = mcolDao.getMColList(excelId, sheetId, colList);
+		Map<String, MCol> colMap = new HashMap<String, MCol>();
+		for (MCol mc : cList) {
+			colMap.put(mc.getAlias(), mc);
+		}
+
+		// 关系表
+		List<MRowColCell> relationList = mrowColCellDao
+				.getMRowColCellList(excelId, sheetId, rowList, colList);
+		List<String> cellIdList = new ArrayList<String>();
+		Map<String,String> relationMap = new HashMap<String,String>();
+		for (MRowColCell mrcc : relationList) {
+			cellIdList.add(mrcc.getCellId());
+			relationMap.put(mrcc.getRow()+"_"+mrcc.getCol(), mrcc.getCellId());
+		}
+		List<MCell> cellList = mcellDao.getMCellList(excelId, sheetId,
+				cellIdList);
+		Map<String, MCell> cellMap = new HashMap<String, MCell>();
+		for(MCell mc:cellList){
+			cellMap.put(mc.getId(), mc);
+		}
+		
+		for(int i=0;i<rowList.size();i++){
+			String rowId = rowList.get(i);
+			MRow mrow = rowMap.get(rowId);
+			ExcelRow row = getExcelRow(mrow);
+			rows.add(row);
+			
+			List<ExcelCell> cells = row.getCells();
+			
+			
+			for(int j=0;j<colList.size();j++){
+				String colId = colList.get(j);
+				if(i == 0){
+					MCol mcol = colMap.get(colId);
+					ExcelColumn col = getExcelCol(mcol);
+					cols.add(col);
+				}
+				
+				String id = rowId+"_"+colId;
+				String cellId = relationMap.get(id);
+				if(null == cellId){
+					cells.add(null);
+				}else{
+					MCell mc = cellMap.get(cellId);
+					ExcelCell cell = getExcelCell(mc);
+					cells.add(cell);
+				}
+				
+			}
+		}
+
+		MSheet msheet = msheetDao.getMSheet(excelId, sheetId);
+		if(null == msheet.getSheetName()){
+			sheet.setName("Sheet1");
+		}else{
+			sheet.setName(msheet.getSheetName());
+		}
+		ExcelSheetFreeze freeze = new ExcelSheetFreeze();
+		if (null != msheet.getFreeze()&&msheet.getFreeze()) {
+			freeze.setFreeze(msheet.getFreeze());
+			int firstRow = rMap.get(msheet.getRowAlias());
+			freeze.setFirstrow(firstRow);
+			int firstCol = cMap.get(msheet.getColAlias());
+			freeze.setFirstcol(firstCol);
+			int viewRow = rMap.get(msheet.getViewRowAlias());
+			int viewCol = cMap.get(msheet.getViewColAlias());
+			freeze.setRow(firstRow-viewRow);
+			freeze.setCol(firstCol-viewCol);
+			
+		} else {
+		    freeze.setFreeze(false);
+		}
+		sheet.setFreeze(freeze);
+		sheet.setMaxcol(colList.size());
+		sheet.setMaxrow(rowList.size());
+		if(null != msheet.getProtect()){
+			sheet.setProtect(msheet.getProtect());
+			sheet.setPassword(msheet.getPasswd());
+		}else{
+			sheet.setProtect(false);
+		}
+
+		return book;
+
+	}
+
+	private ExcelCell getExcelCell(MCell mcell) {
+		ExcelCell cell = new ExcelCell();
+
+		Content content = mcell.getContent();
+		Border border = mcell.getBorder();
+		CustomProp cp = mcell.getCustomProp();
+
+		cell.setRowspan(mcell.getRowspan());
+		cell.setColspan(mcell.getColspan());
+		cell.setText(content.getDisplayTexts());
+		cell.setValue(content.getTexts());
+		if (null == content.getType()) {
+			cell.setType(CELLTYPE.BLANK);
+		} else {
+			cell.setType(CellFormateUtil.MTypeToType(content.getType()));
+		}
+
+		cell.setMemo(cp.getComment());
+
+		ExcelCellStyle style = new ExcelCellStyle();
+		if(null == content.getAlignRow()){
+			style.setAlign((short) 1);
+		}else {
+			switch (content.getAlignRow()) {
+			case "left":
+				
+				break;
+			case "center":
+				style.setAlign((short) 2);
+				break;
+			case "right":
+				style.setAlign((short) 3);
+				break;
+			default:
+				style.setAlign((short) 2);
+				break;
+			}
+		}
+		
+		if(null == content.getAlignCol()){
+			style.setValign((short) 0);
+		}else{
+			switch (content.getAlignCol()) {
+			case "top":
+				style.setValign((short) 0);
+				break;
+			case "middle":
+				style.setValign((short) 1);
+				break;
+			case "bottom":
+				style.setValign((short) 2);
+				break;
+			default:
+				style.setValign((short) 1);
+				break;
+			}
+		}
+		Excelborder topborder = new Excelborder();
+		// ExcelColor topColor = ExcelUtil.getColor(border.getTop());
+		if (null == border.getTop()) {
+			topborder.setSort((short) 0);
+		} else {
+			topborder.setSort(border.getTop().shortValue());
+		}
+		style.setTopborder(topborder);
+		Excelborder leftborder = new Excelborder();
+		if (null == border.getLeft()) {
+			leftborder.setSort((short) 0);
+		} else {
+			leftborder.setSort(border.getLeft().shortValue());
+		}
+		style.setLeftborder(leftborder);
+		Excelborder rightborder = new Excelborder();
+		if (null == border.getRight()) {
+			rightborder.setSort((short) 0);
+		} else {
+			rightborder.setSort(border.getRight().shortValue());
+		}
+		style.setRightborder(rightborder);
+		Excelborder bottomborder = new Excelborder();
+		if (null == border.getBottom()) {
+			bottomborder.setSort((short) 0);
+		} else {
+			bottomborder.setSort(border.getBottom().shortValue());
+		}
+		style.setBottomborder(bottomborder);
+
+		ExcelFont font = new ExcelFont();
+		font.setFontname(content.getFamily());
+		if (null == content.getSize()) {
+			font.setSize((short) 220);
+		} else {
+			font.setSize((short) (Short.parseShort(content.getSize()) * 20));
+		}
+
+		if (null != content.getWeight() && content.getWeight()) {
+			font.setBoldweight((short) 700);
+		} else {
+			font.setBoldweight((short) 400);
+		}
+		if (null == content.getColor()) {
+			ExcelColor fontColor = new ExcelColor();
+			font.setColor(fontColor);
+		} else {
+			ExcelColor fontColor = ExcelUtil.getColor(content.getColor());
+			font.setColor(fontColor);
+		}
+		if (null == content.getUnderline()) {
+			font.setUnderline((byte) 0);
+		} else {
+			font.setUnderline(content.getUnderline().byteValue());
+		}
+		if (null == content.getItalic()) {
+			font.setItalic(false);
+		} else {
+			font.setItalic(content.getItalic());
+		}
+		style.setFont(font);
+		if (null == content.getBackground()) {
+			ExcelColor fgcolor = new ExcelColor(0, 0, 0);
+			style.setFgcolor(fgcolor);
+		} else {
+			ExcelColor fgcolor = ExcelUtil.getColor(content.getBackground());
+			style.setFgcolor(fgcolor);
+		}
+
+		style.setDataformat(content.getExpress());
+		if (null == content.getWordWrap()) {
+			style.setWraptext(false);
+		} else {
+			style.setWraptext(content.getWordWrap());
+		}
+		if (null == content.getLocked()) {
+			style.setLocked(true);
+		} else {
+			style.setLocked(content.getLocked());
+		}
+
+		cell.setCellstyle(style);
+
+		return cell;
+	}
+
+	private ExcelRow getExcelRow(MRow mrow) {
+		ExcelRow row = new ExcelRow();
+
+		Content content = mrow.getProps().getContent();
+		Border border = mrow.getProps().getBorder();
+		CustomProp cp = mrow.getProps().getCustomProp();
+
+		row.setHeight(mrow.getHeight());
+		//col.setCode(mcol.getAlias());
+		if(null == mrow.getHidden()){
+			row.setRowhidden(false);
+		}else{
+			row.setRowhidden(mrow.getHidden());
+		}
+
+		ExcelCellStyle style = new ExcelCellStyle();
+		if(null == content.getAlignRow()){
+			style.setAlign((short) 1);
+		}else {
+			switch (content.getAlignRow()) {
+			case "left":
+				
+				break;
+			case "center":
+				style.setAlign((short) 2);
+				break;
+			case "right":
+				style.setAlign((short) 3);
+				break;
+			default:
+				style.setAlign((short) 2);
+				break;
+			}
+		}
+		
+		if(null == content.getAlignCol()){
+			style.setValign((short) 0);
+		}else{
+			switch (content.getAlignCol()) {
+			case "top":
+				style.setValign((short) 0);
+				break;
+			case "middle":
+				style.setValign((short) 1);
+				break;
+			case "bottom":
+				style.setValign((short) 2);
+				break;
+			default:
+				style.setValign((short) 1);
+				break;
+			}
+		}
+
+		
+		Excelborder topborder = new Excelborder();
+		// ExcelColor topColor = ExcelUtil.getColor(border.getTop());
+		if (null == border.getTop()) {
+			topborder.setSort((short) 0);
+		} else {
+			topborder.setSort(border.getTop().shortValue());
+		}
+		style.setTopborder(topborder);
+		Excelborder leftborder = new Excelborder();
+		if (null == border.getLeft()) {
+			leftborder.setSort((short) 0);
+		} else {
+			leftborder.setSort(border.getLeft().shortValue());
+		}
+		style.setLeftborder(leftborder);
+		Excelborder rightborder = new Excelborder();
+		if (null == border.getRight()) {
+			rightborder.setSort((short) 0);
+		} else {
+			rightborder.setSort(border.getRight().shortValue());
+		}
+		style.setRightborder(rightborder);
+		Excelborder bottomborder = new Excelborder();
+		if (null == border.getBottom()) {
+			bottomborder.setSort((short) 0);
+		} else {
+			bottomborder.setSort(border.getBottom().shortValue());
+		}
+		style.setBottomborder(bottomborder);
+
+		ExcelFont font = new ExcelFont();
+		font.setFontname(content.getFamily());
+		if (null == content.getSize()) {
+			font.setSize((short) 200);
+		} else {
+			font.setSize((short) (Short.parseShort(content.getSize()) * 20));
+		}
+
+		if (null != content.getWeight() && content.getWeight()) {
+			font.setBoldweight((short) 700);
+		} else {
+			font.setBoldweight((short) 400);
+		}
+		if (null == content.getColor()) {
+			ExcelColor fontColor = new ExcelColor();
+			font.setColor(fontColor);
+		} else {
+			ExcelColor fontColor = ExcelUtil.getColor(content.getColor());
+			font.setColor(fontColor);
+		}
+		if (null == content.getUnderline()) {
+			font.setUnderline((byte) 0);
+		} else {
+			font.setUnderline(content.getUnderline().byteValue());
+		}
+		if (null == content.getItalic()) {
+			font.setItalic(false);
+		} else {
+			font.setItalic(content.getItalic());
+		}
+		style.setFont(font);
+		if (null == content.getBackground()) {
+			ExcelColor fgcolor = new ExcelColor(0, 0, 0);
+			style.setFgcolor(fgcolor);
+		} else {
+			ExcelColor fgcolor = ExcelUtil.getColor(content.getBackground());
+			style.setFgcolor(fgcolor);
+		}
+
+		style.setDataformat(content.getExpress());
+		if (null == content.getWordWrap()) {
+			style.setWraptext(false);
+		} else {
+			style.setWraptext(content.getWordWrap());
+		}
+		if (null == content.getLocked()) {
+			style.setLocked(true);
+		} else {
+			style.setLocked(content.getLocked());
+		}
+
+		row.setCellstyle(style);
+
+		return row;
+	}
+
+	private ExcelColumn getExcelCol(MCol mcol) {
+		ExcelColumn col = new ExcelColumn();
+
+		Content content = mcol.getProps().getContent();
+		Border border = mcol.getProps().getBorder();
+		CustomProp cp = mcol.getProps().getCustomProp();
+
+		col.setWidth(mcol.getWidth());
+		//col.setCode(mcol.getAlias());
+		if(null == mcol.getHidden()){
+			col.setColumnhidden(false);
+		}else{
+			col.setColumnhidden(mcol.getHidden());
+		}
+		
+		ExcelCellStyle style = new ExcelCellStyle();
+		if(null == content.getAlignRow()){
+			style.setAlign((short) 1);
+		}else {
+			switch (content.getAlignRow()) {
+			case "left":
+				
+				break;
+			case "center":
+				style.setAlign((short) 2);
+				break;
+			case "right":
+				style.setAlign((short) 3);
+				break;
+			default:
+				style.setAlign((short) 2);
+				break;
+			}
+		}
+		
+		if(null == content.getAlignCol()){
+			style.setValign((short) 0);
+		}else{
+			switch (content.getAlignCol()) {
+			case "top":
+				style.setValign((short) 0);
+				break;
+			case "middle":
+				style.setValign((short) 1);
+				break;
+			case "bottom":
+				style.setValign((short) 2);
+				break;
+			default:
+				style.setValign((short) 1);
+				break;
+			}
+		}
+		Excelborder topborder = new Excelborder();
+		// ExcelColor topColor = ExcelUtil.getColor(border.getTop());
+		if (null == border.getTop()) {
+			topborder.setSort((short) 0);
+		} else {
+			topborder.setSort(border.getTop().shortValue());
+		}
+		style.setTopborder(topborder);
+		Excelborder leftborder = new Excelborder();
+		if (null == border.getLeft()) {
+			leftborder.setSort((short) 0);
+		} else {
+			leftborder.setSort(border.getLeft().shortValue());
+		}
+		style.setLeftborder(leftborder);
+		Excelborder rightborder = new Excelborder();
+		if (null == border.getRight()) {
+			rightborder.setSort((short) 0);
+		} else {
+			rightborder.setSort(border.getRight().shortValue());
+		}
+		style.setRightborder(rightborder);
+		Excelborder bottomborder = new Excelborder();
+		if (null == border.getBottom()) {
+			bottomborder.setSort((short) 0);
+		} else {
+			bottomborder.setSort(border.getBottom().shortValue());
+		}
+		style.setBottomborder(bottomborder);
+
+		ExcelFont font = new ExcelFont();
+		font.setFontname(content.getFamily());
+		if (null == content.getSize()) {
+			font.setSize((short) 220);
+		} else {
+			font.setSize((short) (Short.parseShort(content.getSize()) * 20));
+		}
+
+		if (null != content.getWeight() && content.getWeight()) {
+			font.setBoldweight((short) 700);
+		} else {
+			font.setBoldweight((short) 400);
+		}
+		if (null == content.getColor()) {
+			ExcelColor fontColor = new ExcelColor();
+			font.setColor(fontColor);
+		} else {
+			ExcelColor fontColor = ExcelUtil.getColor(content.getColor());
+			font.setColor(fontColor);
+		}
+		if (null == content.getUnderline()) {
+			font.setUnderline((byte) 0);
+		} else {
+			font.setUnderline(content.getUnderline().byteValue());
+		}
+		if (null == content.getItalic()) {
+			font.setItalic(false);
+		} else {
+			font.setItalic(content.getItalic());
+		}
+		style.setFont(font);
+		if (null == content.getBackground()) {
+			ExcelColor fgcolor = new ExcelColor(0, 0, 0);
+			style.setFgcolor(fgcolor);
+		} else {
+			ExcelColor fgcolor = ExcelUtil.getColor(content.getBackground());
+			style.setFgcolor(fgcolor);
+		}
+
+		style.setDataformat(content.getExpress());
+		if (null == content.getWordWrap()) {
+			style.setWraptext(false);
+		} else {
+			style.setWraptext(content.getWordWrap());
+		}
+		if (null == content.getLocked()) {
+			style.setLocked(true);
+		} else {
+			style.setLocked(content.getLocked());
+		}
+
+		col.setCellstyle(style);
+
+		return col;
+	}
+	
+
 	private void addRowOrCol(String excelId, String sheetId,
 			List<RowCol> sortRList, List<RowCol> sortCList, int rowEnd,
 			int colEnd) {
@@ -904,17 +1478,17 @@ public class MBookServiceImpl implements MBookService {
 		int maxRow = msheet.getMaxrow();
 		int maxCol = msheet.getMaxcol();
 		int rowHeight;
-        if(sortRList.size()==0){
-        	rowHeight = 0;
-        }else{
-        	RowCol rowTop = sortRList.get(sortRList.size() - 1);
-        	rowHeight = rowTop.getTop() + rowTop.getLength();
-        }
-		
+		if (sortRList.size() == 0) {
+			rowHeight = 0;
+		} else {
+			RowCol rowTop = sortRList.get(sortRList.size() - 1);
+			rowHeight = rowTop.getTop() + rowTop.getLength();
+		}
+
 		if (rowEnd > rowHeight) {
 			int length = rowEnd - rowHeight;
 			int rowNum = (length / 20) + 1;
-            int top = rowHeight+1;
+			int top = rowHeight + 1;
 			// 增加新的行
 			for (int i = 0; i < rowNum; i++) {
 				maxRow = maxRow + 1;
@@ -924,13 +1498,13 @@ public class MBookServiceImpl implements MBookService {
 				rowCol.setAlias(row);
 				rowCol.setLength(19);
 				if (i == 0) {
-					if(rowHeight == 0){
+					if (rowHeight == 0) {
 						rowCol.setPreAlias(null);
-					}else{
+					} else {
 						rowCol.setPreAlias(
 								sortRList.get(sortRList.size() - 1).getAlias());
 					}
-					
+
 				} else {
 					rowCol.setPreAlias((maxRow - 1) + "");
 				}
@@ -938,29 +1512,29 @@ public class MBookServiceImpl implements MBookService {
 				mrowColDao.insertRowCol(excelId, sheetId, rowCol, "rList");
 				// 存入行样式
 				baseDao.insert(excelId, mrow);
-				
-				if(i == 0){
+
+				if (i == 0) {
 					rowCol.setTop(top);
-				}else{
-					top = top +19+1;
+				} else {
+					top = top + 19 + 1;
 					rowCol.setTop(top);
 				}
 				sortRList.add(rowCol);
-				
+
 			}
 		}
 		int colWeight;
-		if(sortCList.size()==0){
-			colWeight =0;
-		}else{
+		if (sortCList.size() == 0) {
+			colWeight = 0;
+		} else {
 			RowCol colTop = sortCList.get(sortCList.size() - 1);
-			colWeight = colTop.getTop()+colTop.getLength();
+			colWeight = colTop.getTop() + colTop.getLength();
 		}
-		
+
 		if (colEnd > colWeight) {
 			int length = colEnd - colWeight;
 			int colNum = (length / 72) + 1;
-			int left = colWeight+1;
+			int left = colWeight + 1;
 			// 增加新的列
 			for (int i = 0; i < colNum; i++) {
 				maxCol = maxCol + 1;
@@ -970,9 +1544,9 @@ public class MBookServiceImpl implements MBookService {
 				rowCol.setAlias(col);
 				rowCol.setLength(71);
 				if (i == 0) {
-					if(colWeight == 0){
+					if (colWeight == 0) {
 						rowCol.setPreAlias(null);
-					}else{
+					} else {
 						rowCol.setPreAlias(
 								sortCList.get(sortCList.size() - 1).getAlias());
 					}
@@ -983,16 +1557,16 @@ public class MBookServiceImpl implements MBookService {
 				mrowColDao.insertRowCol(excelId, sheetId, rowCol, "cList");
 				// 存入列样式
 				baseDao.insert(excelId, mcol);
-				if(i == 0){
+				if (i == 0) {
 					rowCol.setTop(left);
-				}else{
-					left = left +71+1;
+				} else {
+					left = left + 71 + 1;
 					rowCol.setTop(left);
 				}
 				sortCList.add(rowCol);
-				
+
 			}
-			
+
 			msheet.setMaxcol(maxCol);
 			msheet.setMaxrow(maxRow);
 			baseDao.update(excelId, msheet);// 更新最大行，最大列
@@ -1012,6 +1586,26 @@ public class MBookServiceImpl implements MBookService {
 			endPixel = 0;
 		} else if (maxTop < pixel) {
 			endPixel = maxTop;
+		} else {
+			endPixel = pixel;
+		}
+		int end = BinarySearch.binarySearch(sortRclist, endPixel);
+		return end;
+	}
+	
+	private int getIndexByPixelBegin(List<RowCol> sortRclist, int pixel) {
+		if (sortRclist.size() == 0) {
+			return 0;
+		}
+
+		RowCol rowColTop = sortRclist.get(sortRclist.size() - 1);
+		int maxTop = rowColTop.getTop() + rowColTop.getLength();
+
+		int endPixel = 0;
+		if (pixel == 0) {
+			endPixel = 0;
+		} else if (maxTop < pixel) {
+			return -1;
 		} else {
 			endPixel = pixel;
 		}
@@ -1046,7 +1640,7 @@ public class MBookServiceImpl implements MBookService {
 
 	@Override
 	public List<String> getExcels() {
-		
+
 		return msheetDao.getTableList();
 	}
 

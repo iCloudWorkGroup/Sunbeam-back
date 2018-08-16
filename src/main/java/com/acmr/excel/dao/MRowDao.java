@@ -35,6 +35,14 @@ public interface MRowDao {
 	 * @param alias
 	 */
 	void delMRow(String excelId, String sheetId, String alias);
+	
+	/**
+	 * 根据行别名列表，删除行样式
+	 * @param excelId
+	 * @param sheetId
+	 * @param aliasList
+	 */
+	void delMRowList(String excelId, String sheetId, List<String> aliasList);
 
 	/**
 	 * 根据别名，修改行隐藏属性
@@ -45,7 +53,7 @@ public interface MRowDao {
 	 * @param status
 	 */
 	void updateRowHidden(String excelId, String sheetId, String alias,
-			boolean status);
+			Boolean status);
 
 	/**
 	 * 根据别名，返回一个行样式
@@ -90,7 +98,7 @@ public interface MRowDao {
 	 * @param excelId
 	 * @param sheetId
 	 */
-	void updateBorder(String property, Object value, List<String> aliasList,
+	void updateBorderList(String property, Object value, List<String> aliasList,
 			String excelId, String sheetId);
 
 	/**

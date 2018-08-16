@@ -1,6 +1,8 @@
 package com.acmr.excel.model;
 
-public class RowCol {
+import java.io.Serializable;
+
+public class RowCol implements Serializable {
 	private String alias;
 	private Integer length;
 	private Integer top;

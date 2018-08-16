@@ -15,17 +15,22 @@
 	http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
 	
 	<bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
-     
+    
+    <aop:aspectj-autoproxy/> 
 	<!-- 配置扫描路径 -->
-	<context:component-scan base-package="com.acmr">
+	<context:component-scan base-package="com.acmr" >
 		<!-- 只扫描Service，也可以添加Repostory，但是要把Controller排除在外，Controller由spring-mvc.xml去加载 -->
 		<!-- <context:include-filter type="annotation" expression="org.springframework.stereotype.Service" /> -->
 		<!-- <context:include-filter type="annotation" expression="org.springframework.stereotype.Repository" /> -->
 		<!-- <context:include-filter type="annotation" expression="org.springframework.stereotype.Component" /> -->
 		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+		
 	</context:component-scan>
+	
+	
 	<!-- 读入配置属性文件 -->
-	<context:property-placeholder location="classpath:properties/param.properties" />
+	<context:property-placeholder location="classpath:properties/param.properties,classpath:properties/redis.properties" />
+	    
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close" lazy-init="false">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
 		<property name="url" value="jdbc:mysql://192.168.1.250:3306/mysql?useUnicode=true&amp;characterEncoding=UTF-8" />
@@ -64,7 +69,8 @@
 	<bean class="org.springframework.jdbc.core.JdbcTemplate" id="jdbcTemplate">
 		<property name="dataSource" ref="dataSource"></property>
 	</bean>
-	<!--<import resource="classpath:config/applicationContext-spy-memcache.xml" />-->
+
 	<import resource="classpath:config/mongodb.xml" />
-	
+	<import resource="classpath:config/redis.xml" />
+	 
 </beans>

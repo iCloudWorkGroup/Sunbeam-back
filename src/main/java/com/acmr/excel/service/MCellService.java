@@ -137,5 +137,21 @@ public interface MCellService {
 	 * @param excelId
 	 */
 	void updateFormat(CellFormate cellFormate,int step,String excelId);
+	
+	/**
+	 * 设置批注
+	 * @param cellFormate
+	 * @param step
+	 * @param excelId
+	 */
+	void updateComment(Cell cell,int step,String excelId);
+	
+	/**
+	 * 设置锁定状态
+	 * @param cell
+	 * @param step
+	 * @param excelId
+	 */
+	void updateLock(Cell cell,int step,String excelId);
 
 }

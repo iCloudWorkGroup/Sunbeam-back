@@ -34,7 +34,15 @@ public interface MColDao {
 	 * @param sheetId
 	 * @param alias
 	 */
-	void delExcelCol(String excelId, String sheetId, String alias);
+	void delMCol(String excelId, String sheetId, String alias);
+	
+	/**
+	 * 根据列别名列表，删除列样式
+	 * @param excelId
+	 * @param sheetId
+	 * @param aliasList
+	 */
+	void delMColList(String excelId, String sheetId, List<String> aliasList);
 
 	/**
 	 * 根据列样式中的别名值，修改列样式的隐藏属性
@@ -45,7 +53,7 @@ public interface MColDao {
 	 * @param status
 	 */
 	void updateColHiddenStatus(String excelId, String sheetId, String alias,
-			boolean status);
+			Boolean status);
 
 	/**
 	 * 根据列别名，返回一个列样式对象
@@ -90,7 +98,7 @@ public interface MColDao {
 	 * @param excelId
 	 * @param sheetId
 	 */
-	void updateBorder(String property, Object value, List<String> aliasList,
+	void updateBorderList(String property, Object value, List<String> aliasList,
 			String excelId, String sheetId);
     /**
      * 根据col别名，更新边框属性

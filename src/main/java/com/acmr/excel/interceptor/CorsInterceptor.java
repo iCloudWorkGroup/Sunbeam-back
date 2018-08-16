@@ -6,6 +6,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -45,12 +46,11 @@ public class CorsInterceptor implements HandlerInterceptor {
 
 			} else {
 				paramHttpServletResponse.setHeader(
-						"Access-Control-Allow-Origin", "http://localhost:8080");
+						"Access-Control-Allow-Origin", "*");
 			}
 		}
 //		String reqUri = paramHttpServletRequest.getRequestURI();
-		
-		
+		 
         return true;
 	}
 

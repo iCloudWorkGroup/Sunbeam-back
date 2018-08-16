@@ -1,6 +1,8 @@
 package com.acmr.excel.model;
 
-public class RowColCell {
+import java.io.Serializable;
+
+public class RowColCell implements Serializable{
 	// 行
 	private Integer row;
 	// 列

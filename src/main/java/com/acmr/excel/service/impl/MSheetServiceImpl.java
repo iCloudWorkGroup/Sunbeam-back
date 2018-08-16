@@ -9,8 +9,13 @@ import javax.annotation.Resource;
 
 import org.springframework.stereotype.Service;
 
+import com.acmr.excel.aop.Execute;
+import com.acmr.excel.aop.HistoryAop;
 import com.acmr.excel.dao.MCellDao;
+import com.acmr.excel.dao.MColDao;
+import com.acmr.excel.dao.MRowColCellDao;
 import com.acmr.excel.dao.MRowColDao;
+import com.acmr.excel.dao.MRowDao;
 import com.acmr.excel.dao.MSheetDao;
 import com.acmr.excel.dao.base.BaseDao;
 import com.acmr.excel.model.Frozen;
@@ -18,13 +23,25 @@ import com.acmr.excel.model.OuterPaste;
 import com.acmr.excel.model.OuterPasteData;
 import com.acmr.excel.model.Paste;
 import com.acmr.excel.model.RowCol;
+import com.acmr.excel.model.SheetParam;
 import com.acmr.excel.model.copy.Copy;
+import com.acmr.excel.model.history.Before;
+import com.acmr.excel.model.history.History;
+import com.acmr.excel.model.history.HistoryCache;
+import com.acmr.excel.model.history.MCellBefore;
+import com.acmr.excel.model.history.MColBefore;
+import com.acmr.excel.model.history.MRowBefore;
+import com.acmr.excel.model.history.MRowColCellBefore;
+import com.acmr.excel.model.history.Param;
+import com.acmr.excel.model.history.Record;
 import com.acmr.excel.model.mongo.MCell;
 import com.acmr.excel.model.mongo.MCol;
 import com.acmr.excel.model.mongo.MRow;
 import com.acmr.excel.model.mongo.MRowColCell;
+import com.acmr.excel.model.mongo.MRowColList;
 import com.acmr.excel.model.mongo.MSheet;
 import com.acmr.excel.service.MSheetService;
+import com.acmr.redis.Redis;
 
 @Service("msheetService")
 public class MSheetServiceImpl implements MSheetService {
@@ -36,14 +53,29 @@ public class MSheetServiceImpl implements MSheetService {
 	private MSheetDao msheetDao;
 	@Resource
 	private MCellDao mcellDao;
+	@Resource
+	private MRowColCellDao mrowColCellDao;
+	@Resource
+	private MColDao mcolDao;
+	@Resource
+	private MRowDao mrowDao;
+	@Resource
+	private Redis redis;
+	// 用于记录上一步操作
+	private String flag = "";
 
 	@Override
 	public void frozen(Frozen frozen, String excelId, Integer step) {
 		String sheetId = excelId + 0;
-		String oprRow = frozen.getOprRow();
-		String oprCol = frozen.getOprCol();
-		String viewRow = frozen.getViewRow();
-		String viewCol = frozen.getViewCol();
+		List<RowCol> sortRList = new ArrayList<RowCol>();
+		List<RowCol> sortCList = new ArrayList<RowCol>();
+		mrowColDao.getRowList(sortRList, excelId, sheetId);
+		mrowColDao.getColList(sortCList, excelId, sheetId);
+
+		String oprRow = sortRList.get(frozen.getOprRow()).getAlias();
+		String oprCol = sortCList.get(frozen.getOprCol()).getAlias();
+		String viewRow = sortRList.get(frozen.getViewRow()).getAlias();
+		String viewCol = sortCList.get(frozen.getViewCol()).getAlias();
 		MSheet msheet = new MSheet();
 		msheet.setFreeze(true);
 		msheet.setRowAlias(oprRow);
@@ -170,7 +202,7 @@ public class MSheetServiceImpl implements MSheetService {
 		baseDao.update(excelId, msheet);// 更新最大行，最大列
 
 		// 拆分目标区的合并单元格
-		List<MRowColCell> relation = mcellDao.getMRowColCellList(excelId,
+		List<MRowColCell> relation = mrowColCellDao.getMRowColCellList(excelId,
 				sheetId, rowList, colList);
 		List<String> cellIdList = new ArrayList<String>();
 		for (MRowColCell mrcc : relation) {
@@ -222,13 +254,13 @@ public class MSheetServiceImpl implements MSheetService {
 			}
 		}
 		// 删除合并单元格的MCell和关系表
-		mcellDao.delMRowColCellList(excelId, sheetId, cellIdList);
+		mrowColCellDao.delMRowColCellList1(excelId, sheetId, cellIdList);
 		mcellDao.delMCell(excelId, sheetId, cellIdList);
 		// 存入拆分之后的单元格及关系表
-		baseDao.insert(excelId, tempList);
+		baseDao.insertList(excelId, tempList);
 		// 清除非合并单元格的显示内容
-		mcellDao.updateContent("displayTexts", null,null,null, unspanCellIdList, excelId,
-				sheetId);
+		mcellDao.updateContent("displayTexts", null, null, null,
+				unspanCellIdList, excelId, sheetId);
 
 		// 将数据赋值给目标区
 		tempList.clear();// 清空，用于存贮新MCell和关系表
@@ -257,7 +289,7 @@ public class MSheetServiceImpl implements MSheetService {
 				baseDao.update(excelId, mc);
 			}
 		}
-		baseDao.insert(excelId, tempList);
+		baseDao.insertList(excelId, tempList);
 		msheetDao.updateStep(excelId, sheetId, step);
 
 	}
@@ -272,22 +304,25 @@ public class MSheetServiceImpl implements MSheetService {
 
 	public boolean isAblePaste(OuterPaste outerPaste, String excelId) {
 		String sheetId = excelId + 0;
-		List<RowCol> sortRList = new ArrayList<RowCol>();
-		List<RowCol> sortCList = new ArrayList<RowCol>();
-		mrowColDao.getRowList(sortRList, excelId, sheetId);
-		mrowColDao.getColList(sortCList, excelId, sheetId);
+		/*
+		 * List<RowCol> sortRList = new ArrayList<RowCol>(); List<RowCol>
+		 * sortCList = new ArrayList<RowCol>(); mrowColDao.getRowList(sortRList,
+		 * excelId, sheetId); mrowColDao.getColList(sortCList, excelId,
+		 * sheetId);
+		 */
 		int oprRow = outerPaste.getOprRow();
 		int oprCol = outerPaste.getOprCol();
 		Paste paste = pastDataAnalysis(outerPaste.getContent());
 		int rowLen = paste.getRowLen() - 1;
 		int colLen = paste.getColLen() - 1;
+		MSheet msheet = msheetDao.getMSheet(excelId, sheetId);
 		boolean canPaste = isPaste(excelId, sheetId, oprRow, oprCol, rowLen,
-				colLen);
+				colLen, msheet);
 		return canPaste;
 	}
 
 	@Override
-	public boolean isCutCopy(Copy copy, String excelId) {
+	public boolean isCopy(Copy copy, String excelId) {
 
 		int startRowIndex = copy.getOrignal().getStartRow();
 		int endRowIndex = copy.getOrignal().getEndRow();
@@ -298,14 +333,152 @@ public class MSheetServiceImpl implements MSheetService {
 		int targetStartRowIndex = copy.getTarget().getOprRow();
 		int targetStartColIndex = copy.getTarget().getOprCol();
 		String sheetId = excelId + 0;
+		MSheet msheet = msheetDao.getMSheet(excelId, sheetId);
 		boolean canPaste = isPaste(excelId, sheetId, targetStartRowIndex,
-				targetStartColIndex, rowRange, colRange);
+				targetStartColIndex, rowRange, colRange, msheet);
 		return canPaste;
+	}
+
+	public boolean isCut(Copy copy, String excelId) {
+
+		int startRowIndex = copy.getOrignal().getStartRow();
+		int endRowIndex = copy.getOrignal().getEndRow();
+		int startColIndex = copy.getOrignal().getStartCol();
+		int endColIndex = copy.getOrignal().getEndCol();
+		int rowRange = endRowIndex - startRowIndex;
+		int colRange = endColIndex - startColIndex;
+		int targetStartRowIndex = copy.getTarget().getOprRow();
+		int targetStartColIndex = copy.getTarget().getOprCol();
+		String sheetId = excelId + 0;
+		MSheet msheet = msheetDao.getMSheet(excelId, sheetId);
+
+		List<RowCol> sortRList = new ArrayList<RowCol>();
+		List<RowCol> sortCList = new ArrayList<RowCol>();
+		mrowColDao.getRowList(sortRList, excelId, sheetId);
+		mrowColDao.getColList(sortCList, excelId, sheetId);
+		List<String> rowId = new ArrayList<String>();
+		for (int i = startRowIndex; i < endRowIndex + 1; i++) {
+			rowId.add(sortRList.get(i).getAlias());
+		}
+		List<String> colId = new ArrayList<String>();
+		for (int i = startColIndex; i < endColIndex + 1; i++) {
+			colId.add(sortCList.get(i).getAlias());
+		}
+		List<MRowColCell> relation = mrowColCellDao.getMRowColCellList(excelId,
+				sheetId, rowId, colId);
+		List<String> cellIdList = new ArrayList<String>();
+		for (MRowColCell mrcc : relation) {
+			cellIdList.add(mrcc.getCellId());
+		}
+		List<MCell> mcellList = mcellDao.getMCellList(excelId, sheetId,
+				cellIdList);
+		if((null!=msheet.getPasswd())&&(msheet.getProtect())){
+			for(MCell mc:mcellList){
+				if((null == mc.getContent().getLocked())
+						|| (mc.getContent().getLocked())){
+					return false;
+				}
+			}
+		}
+
+		boolean canPaste = isCutTo(sortRList,sortCList,excelId, sheetId, targetStartRowIndex,
+				targetStartColIndex, rowRange, colRange,msheet);
+		return canPaste;
+	}
+	
+	private boolean isCutTo(List<RowCol> sortRList,List<RowCol> sortCList,String excelId, String sheetId,
+			int targetStartRowIndex, int targetStartColIndex, int rowRange,
+			int colRange, MSheet msheet) {
+		boolean canPaste = true;
+		
+		Map<String, Integer> rowMap = new HashMap<String, Integer>();
+		Map<String, Integer> colMap = new HashMap<String, Integer>();
+		
+		for (int i = 0; i < sortRList.size(); i++) {
+			rowMap.put(sortRList.get(i).getAlias(), i);
+		}
+		
+		for (int i = 0; i < sortCList.size(); i++) {
+			colMap.put(sortCList.get(i).getAlias(), i);
+		}
+
+		List<String> rowList = new ArrayList<String>();
+		List<String> colList = new ArrayList<String>();
+		// 起始位置，超出行
+		if (targetStartRowIndex > sortRList.size() - 1) {
+			canPaste = false;
+			return canPaste;
+		}
+
+		if (sortRList.size() < targetStartRowIndex + rowRange + 1) {
+			for (int i = targetStartRowIndex; i < sortRList.size(); i++) {
+				rowList.add(sortRList.get(i).getAlias());
+			}
+		} else {
+			for (int i = targetStartRowIndex; i < targetStartRowIndex + rowRange
+					+ 1; i++) {
+				rowList.add(sortRList.get(i).getAlias());
+			}
+		}
+		// 起始位置，超出列
+		if (targetStartColIndex > sortCList.size() - 1) {
+			canPaste = false;
+			return canPaste;
+		}
+
+		if (sortCList.size() < targetStartColIndex + colRange + 1) {
+			for (int i = targetStartColIndex; i < sortCList.size(); i++) {
+				colList.add(sortCList.get(i).getAlias());
+			}
+		} else {
+			for (int i = targetStartColIndex; i < targetStartColIndex + colRange
+					+ 1; i++) {
+				colList.add(sortCList.get(i).getAlias());
+			}
+		}
+
+		List<MRowColCell> relation = mrowColCellDao.getMRowColCellList(excelId,
+				sheetId, rowList, colList);
+		List<String> cellIdList = new ArrayList<String>();
+		for (MRowColCell mrcc : relation) {
+			cellIdList.add(mrcc.getCellId());
+		}
+		List<MCell> mcellList = mcellDao.getMCellList(excelId, sheetId,
+				cellIdList);
+
+		for (MCell mc : mcellList) {
+
+			if (mc.getColspan() > 1 || mc.getRowspan() > 1) {
+				String[] ids = mc.getId().split("_");
+				int rowIndex = rowMap.get(ids[0]);
+				int colIndex = colMap.get(ids[1]);
+				if (rowIndex + mc.getRowspan() > targetStartRowIndex + rowRange
+						+ 1) {
+					canPaste = false;
+					break;
+				}
+				if (colIndex + mc.getColspan() > targetStartColIndex + colRange
+						+ 1) {
+					canPaste = false;
+					break;
+				}
+			}
+
+			if ((null!=msheet.getPasswd())&&(msheet.getProtect())) {
+				if ((null == mc.getContent().getLocked())
+						|| (mc.getContent().getLocked())) {
+					canPaste = false;
+					break;
+				}
+			}
+		}
+		return canPaste;
+
 	}
 
 	private boolean isPaste(String excelId, String sheetId,
 			int targetStartRowIndex, int targetStartColIndex, int rowRange,
-			int colRange) {
+			int colRange, MSheet msheet) {
 		boolean canPaste = true;
 		List<RowCol> sortRList = new ArrayList<RowCol>();
 		List<RowCol> sortCList = new ArrayList<RowCol>();
@@ -355,7 +528,7 @@ public class MSheetServiceImpl implements MSheetService {
 			}
 		}
 
-		List<MRowColCell> relation = mcellDao.getMRowColCellList(excelId,
+		List<MRowColCell> relation = mrowColCellDao.getMRowColCellList(excelId,
 				sheetId, rowList, colList);
 		List<String> cellIdList = new ArrayList<String>();
 		for (MRowColCell mrcc : relation) {
@@ -382,12 +555,13 @@ public class MSheetServiceImpl implements MSheetService {
 				}
 			}
 
-			if ((null != mc.getContent().getLocked())
-					&& (mc.getContent().getLocked())) {
-				canPaste = false;
-				break;
+			if ((null!=msheet.getPasswd())&&(msheet.getProtect())) {
+				if ((null == mc.getContent().getLocked())
+						|| (mc.getContent().getLocked())) {
+					canPaste = false;
+					break;
+				}
 			}
-
 		}
 		return canPaste;
 
@@ -445,8 +619,8 @@ public class MSheetServiceImpl implements MSheetService {
 		for (int i = startColIndex; i < endColIndex + 1; i++) {
 			colList.add(sortCList.get(i).getAlias());
 		}
-		List<MRowColCell> relationList = mcellDao.getMRowColCellList(excelId,
-				sheetId, rowList, colList);
+		List<MRowColCell> relationList = mrowColCellDao
+				.getMRowColCellList(excelId, sheetId, rowList, colList);
 		List<String> cellIdList = new ArrayList<String>();
 		for (MRowColCell mrcc : relationList) {
 			cellIdList.add(mrcc.getCellId());
@@ -464,7 +638,8 @@ public class MSheetServiceImpl implements MSheetService {
 
 		if (type == 1) {
 			// 清空复制区
-			mcellDao.delMRowColCellList(excelId, sheetId, rowList, colList);
+			mrowColCellDao.delMRowColCellList(excelId, sheetId, rowList,
+					colList);
 			mcellDao.delMCell(excelId, sheetId, cellIdList);
 		}
 
@@ -547,15 +722,15 @@ public class MSheetServiceImpl implements MSheetService {
 		msheet.setMaxcol(maxCol);
 		msheet.setMaxrow(maxRow);
 		baseDao.update(excelId, msheet);// 更新最大行，最大列
-		relationList = mcellDao.getMRowColCellList(excelId, sheetId, rowList,
-				colList);
+		relationList = mrowColCellDao.getMRowColCellList(excelId, sheetId,
+				rowList, colList);
 		for (MRowColCell mrcc : relationList) {
 			cellIdList.add(mrcc.getCellId());
 		}
 		// 删除目标区域的MCell对象
 		mcellDao.delMCell(excelId, sheetId, cellIdList);
 		// 删除目标区域关系对象
-		mcellDao.delMRowColCellList(excelId, sheetId, rowList, colList);
+		mrowColCellDao.delMRowColCellList(excelId, sheetId, rowList, colList);
 		// 在目标区写入复制数据
 		List<Object> tempList = new ArrayList<Object>();
 		for (MCell mc : mcellList) {
@@ -580,7 +755,7 @@ public class MSheetServiceImpl implements MSheetService {
 				}
 			}
 		}
-		baseDao.insert(excelId, tempList);
+		baseDao.insertList(excelId, tempList);
 		// 更新步骤
 		msheetDao.updateStep(excelId, sheetId, step);
 
@@ -609,9 +784,142 @@ public class MSheetServiceImpl implements MSheetService {
 	}
 
 	@Override
-	public void delRow(String excelId, String sheetId) {
-		// TODO Auto-generated method stub
-		
+	public void redo(String excelId) {
+		HistoryCache cache = (HistoryCache) redis.get(excelId);
+		if (null == cache) {
+			return;
+		}
+		List<History> list = cache.getList();
+		int index = cache.getIndex();
+		flag = cache.getFlag();
+
+		if ("redo".equals(flag)) {
+			if (index == list.size()) {
+				return;
+			}
+			index++;
+			cache.setIndex(index);
+		}
+
+		History history = list.get(index - 1);
+		Record record = history.getRecord();
+		Before before = history.getBefore();
+		if (record.getSure() == 1) {
+			List<Param> params = record.getParam();
+			for (Param param : params) {
+				if ("MCellDaoImpl".equals(param.getTarget())) {
+					Execute.exec(mcellDao, param.getName(),
+							param.getArguments());
+				} else if ("MColDaoImpl".equals(param.getTarget())) {
+					Execute.exec(mcolDao, param.getName(),
+							param.getArguments());
+				} else if ("MRowColCellDaoImpl".equals(param.getTarget())) {
+					Execute.exec(mrowColCellDao, param.getName(),
+							param.getArguments());
+				} else if ("MRowColDaoImpl".equals(param.getTarget())) {
+					Execute.exec(mrowColDao, param.getName(),
+							param.getArguments());
+				} else if ("MRowDaoImpl".equals(param.getTarget())) {
+					Execute.exec(mrowDao, param.getName(),
+							param.getArguments());
+				} else if ("BaseDao".equals(param.getTarget())) {
+					Execute.exec(baseDao, param.getName(),
+							param.getArguments());
+				}
+			}
+			record.setSure(2);
+			before.setSure(1);
+		}
+		cache.setFlag("redo");
+		redis.set(excelId, cache);
+
+	}
+
+	@Override
+	public void undo(String excelId) {
+		HistoryCache cache = (HistoryCache) redis.get(excelId);
+		if (null == cache) {
+			return;
+		}
+
+		List<History> list = cache.getList();
+		int index = cache.getIndex();
+		flag = cache.getFlag();
+
+		if ("undo".equals(flag)) {
+			if (index == 1) {
+				return;
+			}
+			index--;
+			cache.setIndex(index);
+		}
+
+		History history = list.get(index - 1);
+
+		String bookId = history.getExcelId();
+		String sheetId = bookId + 0;
+
+		Before before = history.getBefore();
+		Record record = history.getRecord();
+
+		if (before.getSure() == 1) {
+			List<Object> delList = before.getDelList();
+			for (Object o : delList) {
+				baseDao.del(bookId, o);
+			}
+
+			List<MRowColList> rowList = before.getRowList();
+			if (rowList.size() > 0) {
+				MRowColList mrcl = rowList.get(0);
+				mrowColDao.delRowColList(excelId, sheetId, mrcl.getId());
+				baseDao.insert(bookId, rowList.get(0));
+			}
+			List<MRowColList> colList = before.getColList();
+			if (colList.size() > 0) {
+				MRowColList mrcl = colList.get(0);
+				mrowColDao.delRowColList(excelId, sheetId, mrcl.getId());
+				baseDao.insert(bookId, colList.get(0));
+			}
+
+			MColBefore mcol = before.getMcol();
+			mcolDao.delMColList(excelId, sheetId, mcol.getIdList());
+
+			baseDao.insertList(excelId, mcol.getMcolList());
+
+			MRowBefore mrow = before.getMrow();
+			mrowDao.delMRowList(excelId, sheetId, mrow.getIdList());
+			baseDao.insertList(excelId, mrow.getMrowList());
+
+			MCellBefore mcell = before.getMcell();
+			mcellDao.delMCell(excelId, sheetId, mcell.getIdList());
+			baseDao.insertList(excelId, mcell.getMcellList());
+
+			MRowColCellBefore mrowColCell = before.getMrowColCell();
+			mrowColCellDao.delMRowColCellList1(excelId, sheetId,
+					mrowColCell.getIdList());
+			baseDao.insertList(excelId, mrowColCell.getMrowColCellList());
+
+			before.setSure(2);
+			record.setSure(1);
+		}
+		cache.setFlag("undo");
+		redis.set(excelId, cache);
+
+	}
+
+	@Override
+	public void updateProtect(String excelId, MSheet msheet) {
+		String sheetId = excelId + 0;
+		if (msheet.getProtect()) {
+			msheetDao.updateMSheetByObject(excelId, sheetId, msheet);
+		} else {
+			MSheet ms = msheetDao.getMSheet(excelId, sheetId);
+			if (null == ms.getPasswd()
+					|| msheet.getPasswd().equals(ms.getPasswd())) {
+				msheetDao.updateMSheetByObject(excelId, sheetId, msheet);
+			}
+		}
+
 	}
 
 }

@@ -68,5 +68,17 @@ public interface MSheetDao {
 	 */
 	void updateMSheetProperty(String excelId,String sheetId,String proterty,Object value);
 	
+	/**
+	 * 获取所有的表（数据集）
+	 * @return
+	 */
 	List<String> getTableList();
+	
+	/**
+	 * 根据传过来的msheet对象更新对应的属性
+	 * @param excelId
+	 * @param sheetId
+	 * @param msheet
+	 */
+	void updateMSheetByObject(String excelId,String sheetId,MSheet msheet);
 }

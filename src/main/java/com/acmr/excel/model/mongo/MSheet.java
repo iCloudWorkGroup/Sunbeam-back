@@ -27,6 +27,8 @@ public class MSheet implements Serializable {
 	private Integer sort;
 	/* 是否锁定 */
 	private Boolean protect;
+	
+	private String  passwd;
 
 	public String getId() {
 		return id;
@@ -124,4 +126,12 @@ public class MSheet implements Serializable {
 		this.protect = protect;
 	}
 
+	public String getPasswd() {
+		return passwd;
+	}
+
+	public void setPasswd(String passwd) {
+		this.passwd = passwd;
+	}
+	
 }

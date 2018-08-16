@@ -32,9 +32,7 @@ import com.acmr.excel.dao.base.BaseDao;
 import com.acmr.excel.model.Constant;
 import com.acmr.excel.model.Position;
 import com.acmr.excel.model.complete.CompleteExcel;
-import com.acmr.excel.model.history.VersionHistory;
 import com.acmr.excel.service.MBookService;
-import com.acmr.excel.service.MSheetService;
 import com.acmr.excel.util.ExcelUtil;
 import com.acmr.excel.util.FileUtil;
 import com.acmr.excel.util.JsonReturn;
@@ -98,7 +96,7 @@ public class ExcelController extends BaseController {
 	 * 初始化excel页面
 	 */
 	@RequestMapping(value="/main/{sbmId}")
-	public ModelAndView main(@PathVariable String sbmId) {
+	public ModelAndView main(HttpServletRequest req, HttpServletResponse resp,@PathVariable String sbmId) {
 		//handleExcelService.createNewExcel(excelId,mongodbServiceImpl);
 		//VersionHistory versionHistory = new VersionHistory();
 		//storeService.set(excelId+"_history", versionHistory);
@@ -214,9 +212,9 @@ public class ExcelController extends BaseController {
 	}
 
 	@RequestMapping(value="/reopen/{excelId}",method=RequestMethod.GET)
-	public ModelAndView reopen(@PathVariable String excelId) {
+	public ModelAndView reopen(HttpServletRequest req, HttpServletResponse resp,@PathVariable String excelId) {
 		//String excelId = req.getParameter("excelId");
-		VersionHistory versionHistory = new VersionHistory();
+		/*VersionHistory versionHistory = new VersionHistory();*/
 		//storeService.set(excelId+"_history",  versionHistory);
 		return new ModelAndView("/index").addObject("excelId", excelId).addObject("sheetId", "1")
 				.addObject("build", false).addObject("frontName",Constant.frontName);

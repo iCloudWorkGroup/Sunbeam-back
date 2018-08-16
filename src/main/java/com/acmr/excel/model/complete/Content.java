@@ -15,11 +15,11 @@ public class Content implements Serializable, Cloneable {
 	private String size;
 	private String texts;
 	private Integer underline;
-	private Boolean wordWrap;
+	private Boolean wordWrap;//自动换行
 	private String type;
 	private String express;
 	private String background;
-	private Boolean locked;
+	private Boolean locked ;
 
 	public String getSize() {
 		return size;

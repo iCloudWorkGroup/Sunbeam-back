@@ -11,9 +11,12 @@ import org.springframework.stereotype.Service;
 
 import com.acmr.excel.dao.MCellDao;
 import com.acmr.excel.dao.MColDao;
+import com.acmr.excel.dao.MRowColCellDao;
 import com.acmr.excel.dao.MRowColDao;
 import com.acmr.excel.dao.MSheetDao;
 import com.acmr.excel.dao.base.BaseDao;
+import com.acmr.excel.distribute.Distribute;
+import com.acmr.excel.distribute.Target;
 import com.acmr.excel.model.ColOperate;
 import com.acmr.excel.model.ColWidth;
 import com.acmr.excel.model.RowCol;
@@ -38,6 +41,8 @@ public class MColServiceImpl implements MColService {
 	private MSheetDao msheetDao;
 	@Resource
 	private MColDao mcolDao;
+	@Resource
+	private MRowColCellDao mrowColCellDao;
 
 	@Override
 	public void insertCol(ColOperate colOperate, String excelId, Integer step) {
@@ -91,12 +96,10 @@ public class MColServiceImpl implements MColService {
 		}
 
 		msheetDao.updateMaxCol(msheet.getMaxcol() + 1, excelId, sheetId);
-		
-		
-		
+
 		String col = sortClList.get(colOperate.getCol()).getAlias();
-		List<MRowColCell> relationList = mcellDao.getMRowColCellList(excelId,
-				sheetId, col, "col");
+		List<MRowColCell> relationList = mrowColCellDao
+				.getMRowColCellList(excelId, sheetId, col, "col");
 		List<String> cellIdList = new ArrayList<>();
 
 		for (MRowColCell rcc : relationList) {
@@ -128,11 +131,9 @@ public class MColServiceImpl implements MColService {
 
 		}
 		if (insertList.size() > 0) {
-			baseDao.insert(excelId, insertList);
+			baseDao.insertList(excelId, insertList);
 		}
 		msheetDao.updateStep(excelId, sheetId, step);
-		
-
 		/*
 		 * Map<String,MCell> cellMap = new HashMap<String,MCell>(); for(MCell
 		 * mec:mcellList){ cellMap.put(mec.getId(), mec); }
@@ -174,12 +175,115 @@ public class MColServiceImpl implements MColService {
 		 * }
 		 */
 	}
-	
-	private void insertColEffectMCell(String excelId,String sheetId,List<RowCol> sortClList,String col,
-			Map<String, Integer> rowMap,List<RowCol> sortRcList,String alias,Integer step){
-		//String col = sortClList.get(colOperate.getCol()).getAlias();
-		List<MRowColCell> relationList = mcellDao.getMRowColCellList(excelId,
-				sheetId, col, "col");
+
+	public void insertColDis(ColOperate colOperate, String excelId,
+			Integer step) {
+
+		/*
+		 * Map<String,Object> map = new HashMap<String,Object>(); String sheetId
+		 * = excelId+0; map.put("colOperate", colOperate); map.put("excelId",
+		 * excelId); map.put("step", step); map.put("sheetId", sheetId);
+		 * invoke('insertColSelf',map)
+		 */
+	}
+
+	/*
+	 * public void invoke(methodName){ list = { insertColSelf: { before: ['x'],
+	 * after: ['insertColEffectMSheet','insertColEffectMCell'] } } repalce
+	 * coding...
+	 * 
+	 * methodName()
+	 * 
+	 * String status = list['insertColSelf'] Map tempResult if(status){
+	 * if(status.size() >0){ for(int i = 0;i<size();i++){ if(tempResult !=
+	 * null){ tempResult = apply(status[i],tempResult) } } tempResult = null; }
+	 * } }
+	 */
+
+	public void insertColSelf(Map<String, Object> map) {
+		String excelId = (String) map.get("excelId");
+		String sheetId = (String) map.get("sheetId");
+		ColOperate colOperate = (ColOperate) map.get("colOperate");
+		List<RowCol> sortRcList = new ArrayList<RowCol>();
+		List<RowCol> sortClList = new ArrayList<RowCol>();
+		mrowColDao.getColList(sortClList, excelId, sheetId);
+		mrowColDao.getRowList(sortRcList, excelId, sheetId);
+		if (colOperate.getCol() > sortClList.size() - 1) {
+			return;
+		}
+		Map<String, Integer> rowMap = new HashMap<String, Integer>();
+
+		for (int i = 0; i < sortRcList.size(); i++) {
+			RowCol rc = sortRcList.get(i);
+			rowMap.put(rc.getAlias(), i);
+		}
+
+		MSheet msheet = msheetDao.getMSheet(excelId, sheetId);
+		String alias = msheet.getMaxcol() + 1 + "";
+
+		RowCol rowCol = new RowCol();
+		rowCol.setAlias(alias);
+		rowCol.setLength(71);
+		if (colOperate.getCol() == 0) {
+			rowCol.setPreAlias(null);
+		} else {
+			rowCol.setPreAlias(
+					sortClList.get(colOperate.getCol() - 1).getAlias());
+		}
+
+		mrowColDao.insertRowCol(excelId, sheetId, rowCol, "cList");
+		// 修改选中行的前列别名
+		String col = sortClList.get(colOperate.getCol()).getAlias();
+		mrowColDao.updateRowCol(excelId, sheetId, "cList", col, alias);
+		// 存一个列样式
+		MCol mcol = new MCol();
+		mcol.setSheetId(sheetId);
+		mcol.setAlias(alias);
+		mcol.setHidden(false);
+		mcol.setWidth(71);
+
+		baseDao.insert(excelId, mcol);
+
+		map.put("col", col);
+		map.put("msheet", msheet);
+		map.put("alias", alias);
+		map.put("sortRcList", sortRcList);
+		map.put("rowMap", rowMap);
+
+	}
+
+	public void insertColEffectMSheet(Map<String, Object> map) {
+		MSheet msheet = (MSheet) map.get("msheet");
+		String col = (String) map.get("col");
+		String alias = (String) map.get("alias");
+		String excelId = (String) map.get("excelId");
+		String sheetId = (String) map.get("sheetId");
+		// 当选中行是当前可视行时
+		if ((null != msheet.getFreeze())
+				&& (msheet.getViewColAlias().equals(col))
+				&& (msheet.getFreeze())) {
+			msheetDao.updateMSheetProperty(excelId, sheetId, "viewColAlias",
+					alias);
+		}
+
+		msheetDao.updateMaxCol(msheet.getMaxcol() + 1, excelId, sheetId);
+
+	}
+
+	public void insertColEffectMCell(Map<String, Object> map) {
+		// String col = sortClList.get(colOperate.getCol()).getAlias();
+		String excelId = (String) map.get("excelId");
+		String sheetId = (String) map.get("sheetId");
+		@SuppressWarnings("unchecked")
+		List<RowCol> sortRcList = (List<RowCol>) map.get("sortRcList");
+		@SuppressWarnings("unchecked")
+		Map<String, Integer> rowMap = (Map<String, Integer>) map.get("rowMap");
+		String alias = (String) map.get("alias");
+		Integer step = (Integer) map.get("step");
+		String col = (String) map.get("col");
+
+		List<MRowColCell> relationList = mrowColCellDao
+				.getMRowColCellList(excelId, sheetId, col, "col");
 		List<String> cellIdList = new ArrayList<>();
 
 		for (MRowColCell rcc : relationList) {
@@ -211,15 +315,15 @@ public class MColServiceImpl implements MColService {
 
 		}
 		if (insertList.size() > 0) {
-			baseDao.insert(excelId, insertList);
+			baseDao.insertList(excelId, insertList);
 		}
 		msheetDao.updateStep(excelId, sheetId, step);
-		
+
 	}
 
 	@Override
 	public void addCol(int num, String excelId, Integer step) {
-		String sheetId = excelId+0;
+		String sheetId = excelId + 0;
 		MSheet msheet = msheetDao.getMSheet(excelId, sheetId);
 		int maxCol = msheet.getMaxcol();
 		List<RowCol> sortCList = new ArrayList<>();
@@ -315,11 +419,11 @@ public class MColServiceImpl implements MColService {
 
 		}
 		// 删除列样式记录
-		mcolDao.delExcelCol(excelId, sheetId, alias);
+		mcolDao.delMCol(excelId, sheetId, alias);
 
 		// 查找关系表
-		List<MRowColCell> relationList = mcellDao.getMRowColCellList(excelId,
-				sheetId, alias, "col");
+		List<MRowColCell> relationList = mrowColCellDao
+				.getMRowColCellList(excelId, sheetId, alias, "col");
 		List<String> cellIdList = new ArrayList<String>();
 		// Map<String,String> relationMap = new HashMap<String,String>();
 		for (MRowColCell mrcc : relationList) {
@@ -330,7 +434,7 @@ public class MColServiceImpl implements MColService {
 		List<MCell> cellList = mcellDao.getMCellList(excelId, sheetId,
 				cellIdList);
 		// 删除关系表
-		mcellDao.delMRowColCell(excelId, sheetId, "col", alias);
+		mrowColCellDao.delMRowColCell(excelId, sheetId, "col", alias);
 		cellIdList.clear();// 存需要删除的MExcelCell的Id
 		List<Object> tempList = new ArrayList<Object>();// 存需要修改或增加的MCell对象
 		for (MCell mc : cellList) {
@@ -344,8 +448,8 @@ public class MColServiceImpl implements MColService {
 					MCell mec = mc;
 					String id = ids[0] + "_" + backAlias;
 					// 修改合并单元格其他关系表的cellId
-					mcellDao.updateMRowColCell(excelId, sheetId, mec.getId(),
-							id);
+					mrowColCellDao.updateMRowColCell(excelId, sheetId,
+							mec.getId(), id);
 					mec.setId(id);
 					mec.setColspan(mc.getColspan() - 1);
 
@@ -361,7 +465,7 @@ public class MColServiceImpl implements MColService {
 
 		mcellDao.delMCell(excelId, sheetId, cellIdList);
 		if (tempList.size() > 0) {
-			baseDao.insert(excelId, tempList);
+			baseDao.insertList(excelId, tempList);
 
 		}
 

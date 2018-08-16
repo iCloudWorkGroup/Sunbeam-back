@@ -1,63 +1,48 @@
 package com.acmr.excel.model.history;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
-public class History implements Serializable {
-	private Integer OperatorType;
-	private List<ChangeArea> changeAreaList = new ArrayList<ChangeArea>();
-	private Integer mergerColStart;
-	private Integer mergerColEnd;
-	private Integer mergerRowStart;
-	private Integer mergerRowEnd;
+public class History implements Serializable{
+	
+	// 记录方法名称
+	private String name;
+	//数据集id(表名)
+	private String excelId;
 
-	public Integer getOperatorType() {
-		return OperatorType;
+	private Before  before = new Before();
+
+	private Record record = new Record();
+
+	public Before getBefore() {
+		return before;
 	}
 
-	public void setOperatorType(Integer operatorType) {
-		OperatorType = operatorType;
+	public void setBefore(Before before) {
+		this.before = before;
 	}
 
-	public List<ChangeArea> getChangeAreaList() {
-		return changeAreaList;
+	public Record getRecord() {
+		return record;
 	}
 
-	public void setChangeAreaList(List<ChangeArea> changeAreaList) {
-		this.changeAreaList = changeAreaList;
+	public void setRecord(Record record) {
+		this.record = record;
 	}
 
-	public Integer getMergerColStart() {
-		return mergerColStart;
+	public String getName() {
+		return name;
 	}
 
-	public void setMergerColStart(Integer mergerColStart) {
-		this.mergerColStart = mergerColStart;
+	public void setName(String name) {
+		this.name = name;
 	}
 
-	public Integer getMergerColEnd() {
-		return mergerColEnd;
+	public String getExcelId() {
+		return excelId;
 	}
 
-	public void setMergerColEnd(Integer mergerColEnd) {
-		this.mergerColEnd = mergerColEnd;
-	}
-
-	public Integer getMergerRowStart() {
-		return mergerRowStart;
-	}
-
-	public void setMergerRowStart(Integer mergerRowStart) {
-		this.mergerRowStart = mergerRowStart;
-	}
-
-	public Integer getMergerRowEnd() {
-		return mergerRowEnd;
-	}
-
-	public void setMergerRowEnd(Integer mergerRowEnd) {
-		this.mergerRowEnd = mergerRowEnd;
+	public void setExcelId(String excelId) {
+		this.excelId = excelId;
 	}
 
 }

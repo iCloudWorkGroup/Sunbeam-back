@@ -18,7 +18,7 @@
 			<amq:transportConnector uri="tcp://localhost:61616" />
 		</amq:transportConnectors>
 	</amq:broker>-->
-	<context:property-placeholder location="classpath:properties/param.properties" />
+	
 	<amq:connectionFactory id="amqConnectionFactory"
 		brokerURL="${activemq.server}" userName="admin" password="admin" />
 

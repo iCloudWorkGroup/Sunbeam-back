@@ -242,5 +242,11 @@ public class CellController extends BaseController {
     	ColorSet cell = getJsonDataParameter(req, ColorSet.class);
 		this.assembleData(req, resp, cell, OperatorConstant.batchcolorset);
 	}
+    
+    @RequestMapping("/lock")
+   	public void lock(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+       	Cell cell = getJsonDataParameter(req, Cell.class);
+   		this.assembleData(req, resp, cell, OperatorConstant.cellLock);
+   	}
 
 }

@@ -1,5 +1,6 @@
 package com.acmr.excel.dao.impl;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -16,7 +17,7 @@ import com.acmr.excel.model.mongo.MExcelRow;
 import com.acmr.excel.model.mongo.MRow;
 
 @Repository("mrowDao")
-public class MRowDaoImpl implements MRowDao {
+public class MRowDaoImpl implements MRowDao,Serializable {
 
 	@Resource
 	private MongoTemplate mongoTemplate;
@@ -49,10 +50,20 @@ public class MRowDaoImpl implements MRowDao {
 				MRow.class, excelId);
 
 	}
+	
+	@Override
+	public void delMRowList(String excelId, String sheetId,
+			List<String> aliasList) {
+		mongoTemplate.remove(
+				new Query(Criteria.where("alias").in(aliasList).and("_class")
+						.is(MRow.class.getName()).and("sheetId").is(sheetId)),
+				MRow.class, excelId);
+		
+	}
 
 	@Override
 	public void updateRowHidden(String excelId, String sheetId, String alias,
-			boolean status) {
+			Boolean status) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("alias").is(alias).and("_class")
 				.is(MRow.class.getName()).and("sheetId").is(sheetId));
@@ -103,7 +114,7 @@ public class MRowDaoImpl implements MRowDao {
 	}
 
 	@Override
-	public void updateBorder(String property, Object value, List<String> aliasList,
+	public void updateBorderList(String property, Object value, List<String> aliasList,
 			String excelId, String sheetId) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("alias").in(aliasList).and("_class")
@@ -149,5 +160,6 @@ public class MRowDaoImpl implements MRowDao {
 		mongoTemplate.updateMulti(query, update, MRow.class, excelId);
 		
 	}
+
 
 }

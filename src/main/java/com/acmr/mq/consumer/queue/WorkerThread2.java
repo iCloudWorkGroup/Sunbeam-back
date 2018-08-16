@@ -1,7 +1,12 @@
 package com.acmr.mq.consumer.queue;
 
-import org.apache.log4j.Logger;
+import javax.annotation.Resource;
 
+import org.apache.log4j.Logger;
+import org.springframework.stereotype.Service;
+
+import com.acmr.excel.distribute.Distribute;
+import com.acmr.excel.distribute.Target;
 import com.acmr.excel.model.Cell;
 import com.acmr.excel.model.CellContent;
 import com.acmr.excel.model.CellFormate;
@@ -20,14 +25,19 @@ import com.acmr.excel.service.MRowService;
 import com.acmr.excel.service.MSheetService;
 import com.acmr.mq.Model;
 
+@Service("handle")
 public class WorkerThread2 implements Runnable {
 	private static Logger logger = Logger.getLogger(QueueReceiver.class);
 	private int step;
 	private String key;
 	private Model model;
+	@Resource
 	private MCellService mcellService;
+	@Resource
 	private MRowService mrowService;
+	@Resource
 	private MColService mcolService;
+	@Resource
 	private MSheetService msheetService;
 
 	public WorkerThread2(int step, String key, Model model,
@@ -42,6 +52,18 @@ public class WorkerThread2 implements Runnable {
 		this.mcolService = mcolService;
 		this.msheetService = msheetService;
 	}
+	
+	public WorkerThread2(int step, String key, Model model) {
+
+		this.step = step;
+		this.key = key;
+		this.model = model;
+	}
+	
+	public WorkerThread2() {
+
+	}
+	
 
 	@Override
 	public void run() {
@@ -49,9 +71,9 @@ public class WorkerThread2 implements Runnable {
 			int memStep = msheetService.getStep(key, key + 0);
 			if (memStep + 1 == step) {
 				System.out.println(step + "开始执行");
-				logger.info("begin excelId:" + model.getExcelId()
-						+ ";step:" + step + ";reqPath:"
-						+ model.getReqPath());
+				logger.info("begin excelId:" + model.getExcelId() + ";step:"
+						+ step + ";reqPath:" + model.getReqPath());
+
 				handleMessage(model);
 				return;
 			} else {
@@ -74,11 +96,10 @@ public class WorkerThread2 implements Runnable {
 		return this.step + "";
 	}
 
-	private void handleMessage(Model model) {
+	public void handleMessage(Model model) {
 		int reqPath = model.getReqPath();
 		String excelId = model.getExcelId();
 		int step = model.getStep();
-
 		Cell cell = null;
 		switch (reqPath) {
 		case OperatorConstant.textData:
@@ -115,20 +136,17 @@ public class WorkerThread2 implements Runnable {
 			mcellService.updateBgColor(cell, step, excelId);
 			break;
 		case OperatorConstant.textDataformat:
-		    CellFormate cellFormate = (CellFormate) model.getObject();
-	        mcellService.updateFormat(cellFormate, step, excelId);
-		    break;
+			CellFormate cellFormate = (CellFormate) model.getObject();
+			mcellService.updateFormat(cellFormate, step, excelId);
+			break;
 		case OperatorConstant.underline:
 			cell = (Cell) model.getObject();
 			mcellService.updateFontUnderline(cell, step, excelId);
 			break;
-		//
-		// case OperatorConstant.commentset:
-		// Comment comment = (Comment) model.getObject();
-		// handleExcelService.setComment(excelBook,
-		// comment,versionHistory,step);
-		// storeService.set(excelId+"_history", versionHistory);
-		// break;
+		 case OperatorConstant.commentset:
+		   cell = (Cell) model.getObject();
+		   mcellService.updateComment(cell, step, excelId);
+		   break;
 		case OperatorConstant.merge:
 			cell = (Cell) model.getObject();
 			mcellService.mergeCell(cell, step, excelId);
@@ -139,7 +157,7 @@ public class WorkerThread2 implements Runnable {
 			break;
 		case OperatorConstant.frame:
 			cell = (Cell) model.getObject();
-		    mcellService.updateBorder(cell, step, excelId);
+			mcellService.updateBorder(cell, step, excelId);
 			break;
 		case OperatorConstant.alignlevel:
 			cell = (Cell) model.getObject();
@@ -158,7 +176,25 @@ public class WorkerThread2 implements Runnable {
 			break;
 		case OperatorConstant.colsinsert:
 			ColOperate colOperate = (ColOperate) model.getObject();
-			mcolService.insertCol(colOperate, excelId, step);
+			
+			Distribute dis = new Distribute();
+			String sheetId = excelId+0;
+			dis.addParam("colOperate", colOperate);
+			dis.addParam("excelId", excelId);
+			dis.addParam("step", step);
+			dis.addParam("sheetId", sheetId);
+			
+			Target target1 = new Target(mcolService,"insertColSelf",1);
+			Target target2 = new Target(mcolService,"insertColEffectMSheet",1);
+			Target target3 = new Target(mcolService,"insertColEffectMCell",1);
+			dis.add(target1);
+			dis.add(target2);
+			dis.add(target3);
+			dis.exec();
+			
+			
+			
+			//mcolService.insertColDis(colOperate, excelId, step);
 			break;
 		case OperatorConstant.colsdelete:
 			ColOperate colOperate2 = (ColOperate) model.getObject();
@@ -210,12 +246,12 @@ public class WorkerThread2 implements Runnable {
 		case OperatorConstant.expand:
 			RowOrColExpand expand = (RowOrColExpand) model.getObject();
 			String type = expand.getType();
-			if("row".equals(type)){
-				 mrowService.addRow(expand.getNum(), excelId, step);
-			}else{
-				 mcolService.addCol(expand.getNum(), excelId, step);
-			}	 
-		    break;
+			if ("row".equals(type)) {
+				mrowService.addRow(expand.getNum(), excelId, step);
+			} else {
+				mcolService.addCol(expand.getNum(), excelId, step);
+			}
+			break;
 		// case OperatorConstant.addRowLine:
 		// RowLine rowLine = (RowLine) model.getObject();
 		// int rowNum = rowLine.getNum();
@@ -229,16 +265,15 @@ public class WorkerThread2 implements Runnable {
 		// case OperatorConstant.colorset:
 		// cell = (Cell) model.getObject();
 		// handleExcelService.colorSet(cell, excelBook);
-		// case OperatorConstant.undo:
-		// sheetService.undo(versionHistory, step,
-		// excelBook.getSheets().get(0));
-		// storeService.set(excelId+"_history", versionHistory);
-		// break;
-		// case OperatorConstant.redo:
-		// sheetService.redo(versionHistory, step,
-		// excelBook.getSheets().get(0));
-		// storeService.set(excelId+"_history", versionHistory);
-		// break;
+	    case OperatorConstant.undo:
+		    msheetService.undo(excelId);
+	    break;
+		case OperatorConstant.redo:
+		    msheetService.redo(excelId);
+		break;
+		case OperatorConstant.cellLock:
+			
+		break;
 		// case OperatorConstant.batchcolorset:
 		// ColorSet colorSet= (ColorSet) model.getObject();
 		// handleExcelService.batchColorSet(colorSet, excelBook);
@@ -248,9 +283,33 @@ public class WorkerThread2 implements Runnable {
 		// System.out.println(JSON.toJSONString(versionHistory));
 		// storeService.set(excelId,excelBook);
 		System.out.println(step + "结束执行");
-		logger.info("end excelId:" + excelId + ";step:" + step
-				+ ";reqPath:" + reqPath);
+		logger.info("end excelId:" + excelId + ";step:" + step + ";reqPath:"
+				+ reqPath);
 		// mongodbServiceImpl.update(excelId, step, "step");
 	}
 
+	public int getStep() {
+		return step;
+	}
+
+	public void setStep(int step) {
+		this.step = step;
+	}
+
+	public String getKey() {
+		return key;
+	}
+
+	public void setKey(String key) {
+		this.key = key;
+	}
+
+	public Model getModel() {
+		return model;
+	}
+
+	public void setModel(Model model) {
+		this.model = model;
+	}
+  
 }

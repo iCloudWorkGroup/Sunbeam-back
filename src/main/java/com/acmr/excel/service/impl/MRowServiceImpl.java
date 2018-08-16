@@ -10,6 +10,7 @@ import javax.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import com.acmr.excel.dao.MCellDao;
+import com.acmr.excel.dao.MRowColCellDao;
 import com.acmr.excel.dao.MRowColDao;
 import com.acmr.excel.dao.MRowDao;
 import com.acmr.excel.dao.MSheetDao;
@@ -39,6 +40,8 @@ public class MRowServiceImpl implements MRowService {
 	private MSheetDao msheetDao;
 	@Resource
 	private MRowDao mrowDao;
+	@Resource
+	private MRowColCellDao mrowColCellDao;
 
 	public void insertRow(RowOperate rowOperate, String excelId, Integer step) {
 		String sheetId = excelId + 0;
@@ -91,7 +94,7 @@ public class MRowServiceImpl implements MRowService {
 		msheetDao.updateMaxRow(msheet.getMaxrow() + 1, excelId, sheetId);
 
 		String row = sortRcList.get(rowOperate.getRow()).getAlias();
-		List<MRowColCell> relationList = mcellDao.getMRowColCellList(excelId,
+		List<MRowColCell> relationList = mrowColCellDao.getMRowColCellList(excelId,
 				sheetId, row, "row");
 		List<String> cellIdList = new ArrayList<>();
 
@@ -125,7 +128,7 @@ public class MRowServiceImpl implements MRowService {
 
 		if (tempList.size() > 0) {
 
-			baseDao.insert(excelId, tempList);
+			baseDao.insertList(excelId, tempList);
 		}
 
 		msheetDao.updateStep(excelId, sheetId, step);
@@ -176,7 +179,7 @@ public class MRowServiceImpl implements MRowService {
 	public void addRow(int num, String excelId, Integer step) {
 		String sheetId = excelId + 0;
 		MSheet msheet = msheetDao.getMSheet(excelId, sheetId);
-		int maxRow = msheet.getMaxcol();
+		int maxRow = msheet.getMaxrow();
 		List<RowCol> sortRList = new ArrayList<>();
 		mrowColDao.getRowList(sortRList, excelId, sheetId);
 		// 增加新的行
@@ -274,7 +277,7 @@ public class MRowServiceImpl implements MRowService {
 		// 删除行样式记录
 		mrowDao.delMRow(excelId, sheetId, alias);
 
-		List<MRowColCell> relationList = mcellDao.getMRowColCellList(excelId,
+		List<MRowColCell> relationList = mrowColCellDao.getMRowColCellList(excelId,
 				sheetId, alias, "row");
 		List<String> cellIdList = new ArrayList<String>();
 
@@ -285,7 +288,7 @@ public class MRowServiceImpl implements MRowService {
 		List<MCell> cellList = mcellDao.getMCellList(excelId, sheetId,
 				cellIdList);
 		// 删除关系表
-		mcellDao.delMRowColCell(excelId, sheetId, "row", alias);
+		mrowColCellDao.delMRowColCell(excelId, sheetId, "row", alias);
 		cellIdList.clear();// 存需要删除的MExcelCell的Id
 		List<Object> tempList = new ArrayList<Object>();// 存需要修改或增加的MCell对象
 		for (MCell mc : cellList) {
@@ -300,7 +303,7 @@ public class MRowServiceImpl implements MRowService {
 					MCell mec = mc;
 					String id = backAlias + "_" + ids[1];
 					// 修改合并单元格其他关系表的cellId
-					mcellDao.updateMRowColCell(excelId, sheetId, mec.getId(),
+					mrowColCellDao.updateMRowColCell(excelId, sheetId, mec.getId(),
 							id);
 					mec.setId(id);
 					mec.setRowspan(mc.getRowspan() - 1);
@@ -318,7 +321,7 @@ public class MRowServiceImpl implements MRowService {
 
 		mcellDao.delMCell(excelId, sheetId, cellIdList);
 		if (tempList.size() > 0) {
-			baseDao.insert(excelId, tempList);
+			baseDao.insertList(excelId, tempList);
 		}
 		msheetDao.updateStep(excelId, sheetId, step);
 

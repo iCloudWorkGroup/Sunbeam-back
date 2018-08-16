@@ -103,9 +103,9 @@ public class Test1 {
 	    update.set("content."+"famly", "sun");
 	    mongoTemplate.updateMulti(query, update, MCol.class,"aa");
 		*/
-	    String s = "1.00000";
+	    /*String s = "1.00000";
 	    Double a = Double.valueOf(s);
-	    System.out.println(row.getClass());
+	    System.out.println(row.getClass());*/
 	   
 	  
 	}

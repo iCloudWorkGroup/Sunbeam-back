@@ -9,25 +9,13 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-
-
-
-
-
-
-
-
-
-
-import net.spy.memcached.MemcachedClient;
 
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
+import com.acmr.excel.service.MBookService;
 import com.acmr.excel.util.PropertiesReaderUtil;
 import com.acmr.rmi.service.RmiService;
 
@@ -61,17 +49,17 @@ public class RmiServer implements ServletContextListener {
 
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
-//		WebApplicationContext springContext = WebApplicationContextUtils.getWebApplicationContext(event.getServletContext());
-//		MemcachedClient memcachedClient = (MemcachedClient) springContext.getBean("memcachedClient");
-//		try {
-//			RmiService rmi = new RmiServiceImpl(memcachedClient);
-//			String port = PropertiesReaderUtil.get("rmi.port");
-//			reg = LocateRegistry.createRegistry(Integer.valueOf(port));
-//			reg.rebind("RmiService", rmi);
-//			System.out.println("rmi server start");
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+		WebApplicationContext springContext = WebApplicationContextUtils.getWebApplicationContext(event.getServletContext());
+		MBookService mbookService = (MBookService) springContext.getBean("mbookService");
+		try {
+			RmiService rmi = new RmiServiceImpl(mbookService);
+			String port = PropertiesReaderUtil.get("rmi.port");
+			reg = LocateRegistry.createRegistry(Integer.valueOf(port));
+			reg.rebind("RmiService", rmi);
+			System.out.println("rmi server start");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 }
