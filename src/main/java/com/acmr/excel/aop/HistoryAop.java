@@ -6,7 +6,7 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.logging.log4j.core.config.Order;
+
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -38,7 +38,6 @@ import com.acmr.redis.Redis;
 
 @Aspect
 @Component
-@Order(1)
 public class HistoryAop {
 
 	public  List<History> list;
