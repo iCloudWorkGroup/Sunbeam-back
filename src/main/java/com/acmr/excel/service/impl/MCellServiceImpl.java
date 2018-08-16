@@ -70,11 +70,10 @@ public class MCellServiceImpl implements MCellService {
 		String id = rowAlias + "_" + colAlias;
 		MCell mcell = mcellDao.getMCell(excelId, sheetId, id);
 		MSheet msheet = msheetDao.getMSheet(excelId, sheetId);
-		if(msheet.getProtect()){
-         if((null==mcell)||(mcell.getContent().getLocked())){
-        	 return;
-         }
-		
+		if(null!=msheet.getProtect()&&msheet.getProtect()){
+	         if((null==mcell)||(mcell.getContent().getLocked())){
+	        	 return;
+	         }
 		}
 		if (null == mcell) {
 			mcell = new MCell();

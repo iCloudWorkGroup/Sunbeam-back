@@ -17,6 +17,7 @@ import com.acmr.excel.model.complete.Content;
 import com.acmr.excel.model.mongo.MCell;
 import com.acmr.excel.model.mongo.MCol;
 import com.acmr.excel.model.mongo.MRow;
+import com.acmr.excel.model.mongo.MSheet;
 
 
 public class Test1 {
@@ -106,7 +107,8 @@ public class Test1 {
 	    /*String s = "1.00000";
 	    Double a = Double.valueOf(s);
 	    System.out.println(row.getClass());*/
-	   
+	   MSheet sheet = new MSheet();
+	   sheet.getProtect();
 	  
 	}
 
