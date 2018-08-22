@@ -166,6 +166,7 @@ public class WorkerThread2 implements Runnable {
 		case OperatorConstant.alignvertical:
 			cell = (Cell) model.getObject();
 			mcellService.updateAlignvertical(cell, step, excelId);
+			break;
 		case OperatorConstant.rowsinsert:
 			RowOperate rowOperate = (RowOperate) model.getObject();
 			mrowService.insertRow(rowOperate, excelId, step);
@@ -272,7 +273,8 @@ public class WorkerThread2 implements Runnable {
 		    msheetService.redo(excelId);
 		break;
 		case OperatorConstant.cellLock:
-			
+			cell = (Cell) model.getObject();
+			mcellService.updateLock(cell, step, excelId);
 		break;
 		// case OperatorConstant.batchcolorset:
 		// ColorSet colorSet= (ColorSet) model.getObject();

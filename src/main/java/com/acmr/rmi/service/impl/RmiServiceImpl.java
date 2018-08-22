@@ -35,7 +35,6 @@ public class RmiServiceImpl extends UnicastRemoteObject implements RmiService {
 		
 		ExcelBook excelBook = mbookService.reloadExcelBook(excelId,step);
 		
-		
 		return excelBook;
 	}
 	

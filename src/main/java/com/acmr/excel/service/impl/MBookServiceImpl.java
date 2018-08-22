@@ -45,6 +45,7 @@ import com.acmr.excel.util.BinarySearch;
 import com.acmr.excel.util.CellFormateUtil;
 import com.acmr.excel.util.ExcelUtil;
 
+import acmr.excel.ExcelException;
 import acmr.excel.ExcelHelper;
 import acmr.excel.pojo.Constants.CELLTYPE;
 import acmr.util.ListHashMap;
@@ -249,7 +250,7 @@ public class MBookServiceImpl implements MBookService {
 			} else {
 				content.setItalic(null);
 			}
-			if (font.getSize() == 200) {
+			if (font.getSize() == 220) {
 				content.setSize(null);
 			} else {
 				content.setSize(font.getSize() / 20 + "");
@@ -924,7 +925,7 @@ public class MBookServiceImpl implements MBookService {
 		}
 	}
 
-	private ExcelBook getExcelBook(String excelId, String sheetId) {
+	public ExcelBook getExcelBook(String excelId, String sheetId) {
 
 		ExcelBook book = new ExcelBook();
 		ListHashMap<ExcelSheet> sheets = book.getSheets();
@@ -1059,7 +1060,7 @@ public class MBookServiceImpl implements MBookService {
 		cell.setText(content.getDisplayTexts());
 		cell.setValue(content.getTexts());
 		if (null == content.getType()) {
-			cell.setType(CELLTYPE.BLANK);
+			cell.setType(CELLTYPE.STRING);
 		} else {
 			cell.setType(CellFormateUtil.MTypeToType(content.getType()));
 		}
@@ -1072,7 +1073,7 @@ public class MBookServiceImpl implements MBookService {
 		}else {
 			switch (content.getAlignRow()) {
 			case "left":
-				
+				style.setAlign((short) 1);
 				break;
 			case "center":
 				style.setAlign((short) 2);
@@ -1135,7 +1136,212 @@ public class MBookServiceImpl implements MBookService {
 		style.setBottomborder(bottomborder);
 
 		ExcelFont font = new ExcelFont();
-		font.setFontname(content.getFamily());
+		if(null == content.getFamily()){
+			font.setFontname("宋体");
+		}else{
+			
+			switch (content.getFamily()) {
+			case "microsoft Yahei":
+				
+				font.setFontname("微软雅黑");
+				break;
+			case "SimSun":
+				
+				font.setFontname("宋体");
+				break;
+			case "SimHei":
+				font.setFontname("黑体");
+				break;
+			case "KaiTi":
+				
+				font.setFontname("楷体");
+				break;
+			default:
+				font.setFontname(content.getFamily());
+				break;
+			}
+		}
+		
+		if (null == content.getSize()) {
+			font.setSize((short) 220);
+		} else {
+			font.setSize((short) (Short.parseShort(content.getSize()) * 20));
+		}
+
+		if (null != content.getWeight() && content.getWeight()) {
+			font.setBoldweight((short) 700);
+		} else {
+			font.setBoldweight((short) 400);
+		}
+		if (null == content.getColor()) {
+			ExcelColor fontColor = new ExcelColor();
+			font.setColor(fontColor);
+		} else {
+			ExcelColor fontColor = ExcelUtil.getColor(content.getColor());
+			font.setColor(fontColor);
+		}
+		if (null == content.getUnderline()) {
+			font.setUnderline((byte) 0);
+		} else {
+			font.setUnderline(content.getUnderline().byteValue());
+		}
+		if (null == content.getItalic()) {
+			font.setItalic(false);
+		} else {
+			font.setItalic(content.getItalic());
+		}
+		style.setFont(font);
+		if (null == content.getBackground()) {
+			ExcelColor fgcolor = new ExcelColor(0, 0, 0);
+			style.setFgcolor(fgcolor);
+			ExcelColor bgcolor = new ExcelColor(0, 0, 0);
+			style.setBgcolor(bgcolor);
+		} else {
+			ExcelColor fgcolor = ExcelUtil.getColor(content.getBackground());
+			style.setFgcolor(fgcolor);
+			ExcelColor bgcolor = new ExcelColor(0, 0, 0);
+			style.setBgcolor(bgcolor);
+			style.setPattern((short)1);
+		}
+		
+        if(null == content.getExpress()){
+        	style.setDataformat("General");
+        }else{
+        	style.setDataformat(content.getExpress());
+        }
+		
+		if (null == content.getWordWrap()) {
+			style.setWraptext(false);
+		} else {
+			style.setWraptext(content.getWordWrap());
+		}
+		if (null == content.getLocked()) {
+			style.setLocked(true);
+		} else {
+			style.setLocked(content.getLocked());
+		}
+
+		cell.setCellstyle(style);
+
+		return cell;
+	}
+
+	private ExcelRow getExcelRow(MRow mrow)  {
+		ExcelRow row = new ExcelRow();
+
+		Content content = mrow.getProps().getContent();
+		Border border = mrow.getProps().getBorder();
+		CustomProp cp = mrow.getProps().getCustomProp();
+
+		row.setHeight(mrow.getHeight());
+		try {
+			row.setCode(mrow.getAlias());
+		} catch (ExcelException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(null == mrow.getHidden()){
+			row.setRowhidden(false);
+		}else{
+			row.setRowhidden(mrow.getHidden());
+		}
+
+		ExcelCellStyle style = new ExcelCellStyle();
+		if(null == content.getAlignRow()){
+			style.setAlign((short) 1);
+		}else {
+			switch (content.getAlignRow()) {
+			case "left":
+				style.setAlign((short) 1);
+				break;
+			case "center":
+				style.setAlign((short) 2);
+				break;
+			case "right":
+				style.setAlign((short) 3);
+				break;
+			default:
+				style.setAlign((short) 2);
+				break;
+			}
+		}
+		
+		if(null == content.getAlignCol()){
+			style.setValign((short) 0);
+		}else{
+			switch (content.getAlignCol()) {
+			case "top":
+				style.setValign((short) 0);
+				break;
+			case "middle":
+				style.setValign((short) 1);
+				break;
+			case "bottom":
+				style.setValign((short) 2);
+				break;
+			default:
+				style.setValign((short) 1);
+				break;
+			}
+		}
+
+		
+		Excelborder topborder = new Excelborder();
+		// ExcelColor topColor = ExcelUtil.getColor(border.getTop());
+		if (null == border.getTop()) {
+			topborder.setSort((short) 0);
+		} else {
+			topborder.setSort(border.getTop().shortValue());
+		}
+		style.setTopborder(topborder);
+		Excelborder leftborder = new Excelborder();
+		if (null == border.getLeft()) {
+			leftborder.setSort((short) 0);
+		} else {
+			leftborder.setSort(border.getLeft().shortValue());
+		}
+		style.setLeftborder(leftborder);
+		Excelborder rightborder = new Excelborder();
+		if (null == border.getRight()) {
+			rightborder.setSort((short) 0);
+		} else {
+			rightborder.setSort(border.getRight().shortValue());
+		}
+		style.setRightborder(rightborder);
+		Excelborder bottomborder = new Excelborder();
+		if (null == border.getBottom()) {
+			bottomborder.setSort((short) 0);
+		} else {
+			bottomborder.setSort(border.getBottom().shortValue());
+		}
+		style.setBottomborder(bottomborder);
+
+		ExcelFont font = new ExcelFont();
+		if(null == content.getFamily()){
+			font.setFontname("宋体");
+		}else{
+			
+			switch (content.getFamily()) {
+			case "microsoft Yahei":
+				
+				font.setFontname("微软雅黑");
+				break;
+			case "SimSun":
+				
+				font.setFontname("宋体");
+				break;
+			case "SimHei":
+				font.setFontname("黑体");
+				break;
+			case "KaiTi":
+				
+				font.setFontname("楷体");
+				break;
+			default:
+				font.setFontname(content.getFamily());
+				break;
+			}
+		}
 		if (null == content.getSize()) {
 			font.setSize((short) 220);
 		} else {
@@ -1171,155 +1377,21 @@ public class MBookServiceImpl implements MBookService {
 		} else {
 			ExcelColor fgcolor = ExcelUtil.getColor(content.getBackground());
 			style.setFgcolor(fgcolor);
+			style.setPattern((short)1);
 		}
 
-		style.setDataformat(content.getExpress());
+		if(null == content.getExpress()){
+        	style.setDataformat("General");
+        }else{
+        	style.setDataformat(content.getExpress());
+        }
+		
 		if (null == content.getWordWrap()) {
 			style.setWraptext(false);
 		} else {
 			style.setWraptext(content.getWordWrap());
 		}
-		if (null == content.getLocked()) {
-			style.setLocked(true);
-		} else {
-			style.setLocked(content.getLocked());
-		}
-
-		cell.setCellstyle(style);
-
-		return cell;
-	}
-
-	private ExcelRow getExcelRow(MRow mrow) {
-		ExcelRow row = new ExcelRow();
-
-		Content content = mrow.getProps().getContent();
-		Border border = mrow.getProps().getBorder();
-		CustomProp cp = mrow.getProps().getCustomProp();
-
-		row.setHeight(mrow.getHeight());
-		//col.setCode(mcol.getAlias());
-		if(null == mrow.getHidden()){
-			row.setRowhidden(false);
-		}else{
-			row.setRowhidden(mrow.getHidden());
-		}
-
-		ExcelCellStyle style = new ExcelCellStyle();
-		if(null == content.getAlignRow()){
-			style.setAlign((short) 1);
-		}else {
-			switch (content.getAlignRow()) {
-			case "left":
-				
-				break;
-			case "center":
-				style.setAlign((short) 2);
-				break;
-			case "right":
-				style.setAlign((short) 3);
-				break;
-			default:
-				style.setAlign((short) 2);
-				break;
-			}
-		}
 		
-		if(null == content.getAlignCol()){
-			style.setValign((short) 0);
-		}else{
-			switch (content.getAlignCol()) {
-			case "top":
-				style.setValign((short) 0);
-				break;
-			case "middle":
-				style.setValign((short) 1);
-				break;
-			case "bottom":
-				style.setValign((short) 2);
-				break;
-			default:
-				style.setValign((short) 1);
-				break;
-			}
-		}
-
-		
-		Excelborder topborder = new Excelborder();
-		// ExcelColor topColor = ExcelUtil.getColor(border.getTop());
-		if (null == border.getTop()) {
-			topborder.setSort((short) 0);
-		} else {
-			topborder.setSort(border.getTop().shortValue());
-		}
-		style.setTopborder(topborder);
-		Excelborder leftborder = new Excelborder();
-		if (null == border.getLeft()) {
-			leftborder.setSort((short) 0);
-		} else {
-			leftborder.setSort(border.getLeft().shortValue());
-		}
-		style.setLeftborder(leftborder);
-		Excelborder rightborder = new Excelborder();
-		if (null == border.getRight()) {
-			rightborder.setSort((short) 0);
-		} else {
-			rightborder.setSort(border.getRight().shortValue());
-		}
-		style.setRightborder(rightborder);
-		Excelborder bottomborder = new Excelborder();
-		if (null == border.getBottom()) {
-			bottomborder.setSort((short) 0);
-		} else {
-			bottomborder.setSort(border.getBottom().shortValue());
-		}
-		style.setBottomborder(bottomborder);
-
-		ExcelFont font = new ExcelFont();
-		font.setFontname(content.getFamily());
-		if (null == content.getSize()) {
-			font.setSize((short) 200);
-		} else {
-			font.setSize((short) (Short.parseShort(content.getSize()) * 20));
-		}
-
-		if (null != content.getWeight() && content.getWeight()) {
-			font.setBoldweight((short) 700);
-		} else {
-			font.setBoldweight((short) 400);
-		}
-		if (null == content.getColor()) {
-			ExcelColor fontColor = new ExcelColor();
-			font.setColor(fontColor);
-		} else {
-			ExcelColor fontColor = ExcelUtil.getColor(content.getColor());
-			font.setColor(fontColor);
-		}
-		if (null == content.getUnderline()) {
-			font.setUnderline((byte) 0);
-		} else {
-			font.setUnderline(content.getUnderline().byteValue());
-		}
-		if (null == content.getItalic()) {
-			font.setItalic(false);
-		} else {
-			font.setItalic(content.getItalic());
-		}
-		style.setFont(font);
-		if (null == content.getBackground()) {
-			ExcelColor fgcolor = new ExcelColor(0, 0, 0);
-			style.setFgcolor(fgcolor);
-		} else {
-			ExcelColor fgcolor = ExcelUtil.getColor(content.getBackground());
-			style.setFgcolor(fgcolor);
-		}
-
-		style.setDataformat(content.getExpress());
-		if (null == content.getWordWrap()) {
-			style.setWraptext(false);
-		} else {
-			style.setWraptext(content.getWordWrap());
-		}
 		if (null == content.getLocked()) {
 			style.setLocked(true);
 		} else {
@@ -1339,7 +1411,12 @@ public class MBookServiceImpl implements MBookService {
 		CustomProp cp = mcol.getProps().getCustomProp();
 
 		col.setWidth(mcol.getWidth());
-		//col.setCode(mcol.getAlias());
+		try {
+			col.setCode(mcol.getAlias());
+		} catch (ExcelException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		if(null == mcol.getHidden()){
 			col.setColumnhidden(false);
 		}else{
@@ -1352,7 +1429,7 @@ public class MBookServiceImpl implements MBookService {
 		}else {
 			switch (content.getAlignRow()) {
 			case "left":
-				
+				style.setAlign((short) 1);
 				break;
 			case "center":
 				style.setAlign((short) 2);
@@ -1415,7 +1492,31 @@ public class MBookServiceImpl implements MBookService {
 		style.setBottomborder(bottomborder);
 
 		ExcelFont font = new ExcelFont();
-		font.setFontname(content.getFamily());
+		if(null == content.getFamily()){
+			font.setFontname("宋体");
+		}else{
+			
+			switch (content.getFamily()) {
+			case "microsoft Yahei":
+				
+				font.setFontname("微软雅黑");
+				break;
+			case "SimSun":
+				
+				font.setFontname("宋体");
+				break;
+			case "SimHei":
+				font.setFontname("黑体");
+				break;
+			case "KaiTi":
+				
+				font.setFontname("楷体");
+				break;
+			default:
+				font.setFontname(content.getFamily());
+				break;
+			}
+		}
 		if (null == content.getSize()) {
 			font.setSize((short) 220);
 		} else {
@@ -1451,9 +1552,15 @@ public class MBookServiceImpl implements MBookService {
 		} else {
 			ExcelColor fgcolor = ExcelUtil.getColor(content.getBackground());
 			style.setFgcolor(fgcolor);
+			style.setPattern((short)1);
 		}
 
-		style.setDataformat(content.getExpress());
+		if(null == content.getExpress()){
+        	style.setDataformat("General");
+        }else{
+        	style.setDataformat(content.getExpress());
+        }
+		
 		if (null == content.getWordWrap()) {
 			style.setWraptext(false);
 		} else {

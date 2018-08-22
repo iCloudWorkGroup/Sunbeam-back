@@ -58,6 +58,9 @@ public class Constant {
 		unRecordAction.put("cols_cancelhide", true);
 		unRecordAction.put("rows_hide", true);
 		unRecordAction.put("rows_show", true);
+		unRecordAction.put("welcom", true);
+		unRecordAction.put("main", true);
+		unRecordAction.put("download", true);
 		
 		
 		unInterceptAction.put("protect", true);
@@ -69,6 +72,9 @@ public class Constant {
 		unInterceptAction.put("openexcel", true);
 		unInterceptAction.put("welcom", true);
 		unInterceptAction.put("main", true);
+		unInterceptAction.put("download", true);
+		unInterceptAction.put("upload", true);
+		unInterceptAction.put("reopen", true);
 	}
 
 }

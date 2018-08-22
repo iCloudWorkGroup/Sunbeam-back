@@ -35,9 +35,9 @@ public class ProtectInterceptor implements HandlerInterceptor{
 		 System.out.println(handlerMethod.getMethod().getName());
 		 String excelId = req.getHeader("X-Book-Id");
 		 String sheetId = excelId+0;
-		 if(null != Constant.unInterceptAction.get(methodName)){
+		 if((null != Constant.unInterceptAction.get(methodName))||(null==excelId)){
 				return true;
-			}else{
+		   }else{
 				MSheet msheet = msheetDao.getMSheet(excelId, sheetId);
 				 if(null !=msheet.getProtect()&&msheet.getProtect()){
 					 return false;

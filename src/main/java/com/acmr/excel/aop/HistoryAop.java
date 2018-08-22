@@ -186,7 +186,10 @@ public class HistoryAop {
 
 	@Before("pointCut1()")
 	public void beforeDao(JoinPoint joinPoint) {
-
+		if(null==excelId){
+			return;
+		}
+		
 		if ((null == methodName)||(null != Constant.unRecordAction.get(methodName))) {
 			return;
 		}

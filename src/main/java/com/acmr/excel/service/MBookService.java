@@ -39,6 +39,14 @@ public interface MBookService {
 	ExcelBook reloadExcelBook(String excelId,Integer step);
 	
 	/**
+	 * 根据excelId,返回一个ExcelBook对象的表格
+	 * @param excelId
+	 * @param step
+	 * @return
+	 */
+	ExcelBook getExcelBook(String excelId,String sheetId);
+	
+	/**
 	 * 获取所有的表明
 	 * @return
 	 */

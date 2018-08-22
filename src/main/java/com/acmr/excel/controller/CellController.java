@@ -222,8 +222,8 @@ public class CellController extends BaseController {
 	 */
     @RequestMapping("/comment-plus")
 	public void comment_plus(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-		Comment comment = getJsonDataParameter(req, Comment.class);
-		this.assembleData(req, resp, comment, OperatorConstant.commentset);
+		Cell cell = getJsonDataParameter(req, Cell.class);
+		this.assembleData(req, resp, cell, OperatorConstant.commentset);
 	}
 	
     @RequestMapping("/comment-reduce")

@@ -803,7 +803,7 @@ public class CellFormateUtil {
 		CELLTYPE type;
 		switch(mtype){
 		 case "routine":
-			 type = CELLTYPE.BLANK;
+			 type = CELLTYPE.STRING;
 			 break;
 		 case "text":
 			 type = CELLTYPE.STRING;
@@ -821,7 +821,7 @@ public class CellFormateUtil {
 			 type = CELLTYPE.NUMERIC;
 			 break;
 		default:
-			type = CELLTYPE.BLANK;
+			type = CELLTYPE.STRING;
 			break;
 		}
 		return type;
