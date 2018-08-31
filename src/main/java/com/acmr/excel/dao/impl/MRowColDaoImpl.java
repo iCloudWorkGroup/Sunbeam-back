@@ -34,6 +34,9 @@ public class MRowColDaoImpl implements MRowColDao,Serializable {
 						new Query(Criteria.where("_id").is("rList")
 								.and("sheetId").is(sheetId)),
 						MRowColList.class, excelId);
+		if (null == rowColList) {
+			return;
+		}
 		List<RowCol> rcList = rowColList.getRcList();// 得到行列表
 		if (rcList.size() == 0) {
 			return;

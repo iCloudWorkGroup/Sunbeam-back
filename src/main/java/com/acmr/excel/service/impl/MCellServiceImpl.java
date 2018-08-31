@@ -662,6 +662,10 @@ public class MCellServiceImpl implements MCellService {
 						if (null == cellId) {
 							creatMCell(sheetId, row, col, tempList, "left",
 									line);
+							baseDao.insertList(excelId, tempList);// 存储新创建的关系表及MCell对象
+							tempList.clear();
+							relationMap.put(key, key);
+							
 						} else {
 							cellIdList.add(cellId);
 						}
@@ -676,6 +680,9 @@ public class MCellServiceImpl implements MCellService {
 						if (null == cellId) {
 							creatMCell(sheetId, row, col, tempList, "top",
 									line);
+							baseDao.insertList(excelId, tempList);// 存储新创建的关系表及MCell对象
+							tempList.clear();
+							relationMap.put(key, key);
 						} else {
 							cellIdList.add(cellId);
 						}
@@ -690,6 +697,9 @@ public class MCellServiceImpl implements MCellService {
 						if (null == cellId) {
 							creatMCell(sheetId, row, col, tempList, "right",
 									line);
+							baseDao.insertList(excelId, tempList);// 存储新创建的关系表及MCell对象
+							tempList.clear();
+							relationMap.put(key, key);
 						} else {
 							cellIdList.add(cellId);
 						}
@@ -704,6 +714,7 @@ public class MCellServiceImpl implements MCellService {
 						if (null == cellId) {
 							creatMCell(sheetId, row, col, tempList, "bottom",
 									line);
+							//relationMap.put(key, key);最后一个不用加
 						} else {
 							cellIdList.add(cellId);
 						}
@@ -853,7 +864,7 @@ public class MCellServiceImpl implements MCellService {
 					}
 					List<MCell> ourerMcellList = mcellDao.getMCellList(excelId,
 							sheetId, outerCellIdList);
-					outerCellIdList.clear();// 清空存储符合条件的单元格
+					outerCellIdList.clear();// 清空后，存储符合条件的单元格
 					for (MCell mc : ourerMcellList) {
 						if (mc.getRowspan() == 1) {
 							outerCellIdList.add(mc.getId());
@@ -1088,7 +1099,7 @@ public class MCellServiceImpl implements MCellService {
 					}
 					mcellDao.updateBorder("right", line, outerCellIdList1,
 							excelId, sheetId);
-					mrowDao.updateBorder("right", line, outerCol1, excelId,
+					mcolDao.updateBorder("right", line, outerCol1, excelId,
 							sheetId);
 					break;
 				default:
