@@ -106,6 +106,11 @@ public class MSheetServiceImpl implements MSheetService {
 
 		return msheet.getStep();
 	}
+	
+	@Override
+	public void updateStep(String excelId, String sheetId) {
+		msheetDao.updateStep(excelId, sheetId, 0);
+	}
 
 	@Override
 	public void paste(OuterPaste outerpaste, String excelId, Integer step) {

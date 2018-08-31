@@ -122,6 +122,12 @@ public class MCell implements Serializable {
 		this.border = mc.getBorder();
 		this.customProp = mc.getCustomProp();
 	}
+	
+	public MCell(Content content) {
+		
+		this.content = content;
+		
+	}
 
 	public Occupy getOccupy() {
 		return occupy;

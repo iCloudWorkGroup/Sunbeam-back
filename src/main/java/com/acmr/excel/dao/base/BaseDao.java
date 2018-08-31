@@ -3,6 +3,8 @@ package com.acmr.excel.dao.base;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.annotation.Resource;
 
@@ -80,6 +82,43 @@ public class BaseDao {
 		Query query = new BasicQuery(dbObject, fieldsObject);
 		List<MSheet> result = mongoTemplate.find(query, MSheet.class, id);
 		return result.get(0).getStep();
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void threadInsert(String excelId,Collection<? extends Object>  list){
+		long start = System.currentTimeMillis();
+		int num;
+		if(list.size()/10000>0){
+			num = list.size()/10000+1;
+		}else{
+			num = list.size()/10000;
+			if(num ==0){
+				num=1;
+			}
+		}
+		
+		ThreadPoolExecutor threadPool = (ThreadPoolExecutor) Executors
+				.newFixedThreadPool(num);
+		for(int i=0;i<num;i++){
+			List<Object> li=null;
+			if(i==num-1){
+			   li =((List) list).subList(i*10000, list.size());
+			}else{
+			   li = ((List) list).subList(10000*i, 10000*(i+1));
+			}
+			
+			threadPool.execute(new ThreadDao(mongoTemplate,excelId,li));
+					
+		}
+		threadPool.shutdown();
+		while(true){
+			   if(threadPool.isTerminated()){
+	                //System.out.println("Finally do something ");
+	                long end = System.currentTimeMillis();
+	                System.out.println("保存用时: " + (end - start) + "ms");
+	                break;
+	            }
+		}
 	}
 
 }

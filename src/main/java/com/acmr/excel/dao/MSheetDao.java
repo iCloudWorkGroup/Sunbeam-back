@@ -81,4 +81,11 @@ public interface MSheetDao {
 	 * @param msheet
 	 */
 	void updateMSheetByObject(String excelId,String sheetId,MSheet msheet);
+	
+	/**
+	 * 清空对应的表
+	 * @param excelId
+	 * @param sheetId
+	 */
+	void clearCollection(String excelId);
 }

@@ -178,7 +178,7 @@ public class WorkerThread2 implements Runnable {
 		case OperatorConstant.colsinsert:
 			ColOperate colOperate = (ColOperate) model.getObject();
 			
-			Distribute dis = new Distribute();
+			/*Distribute dis = new Distribute();
 			String sheetId = excelId+0;
 			dis.addParam("colOperate", colOperate);
 			dis.addParam("excelId", excelId);
@@ -191,11 +191,9 @@ public class WorkerThread2 implements Runnable {
 			dis.add(target1);
 			dis.add(target2);
 			dis.add(target3);
-			dis.exec();
+			dis.exec();*/
 			
-			
-			
-			//mcolService.insertColDis(colOperate, excelId, step);
+			mcolService.insertCol(colOperate, excelId, step);
 			break;
 		case OperatorConstant.colsdelete:
 			ColOperate colOperate2 = (ColOperate) model.getObject();

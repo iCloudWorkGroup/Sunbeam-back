@@ -3,8 +3,6 @@ package com.acmr.excel.dao;
 import java.util.List;
 
 import com.acmr.excel.model.mongo.MCell;
-import com.acmr.excel.model.mongo.MExcelCell;
-import com.acmr.excel.model.mongo.MRowColCell;
 
 public interface MCellDao {
 

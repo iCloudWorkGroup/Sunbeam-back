@@ -276,4 +276,18 @@ public class SheetController extends BaseController {
 		
 	}
 	
+	
+	/**
+	 * 清除队列
+	 * @param req
+	 * @param resp
+	 * @throws IOException
+	 */
+	@RequestMapping("/clear_queue")
+	public void clear_queue(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		String excelId = req.getHeader("X-Book-Id");
+		String sheetId = excelId+0;
+		msheetService.updateStep(excelId, sheetId);
+	}
+	
 }

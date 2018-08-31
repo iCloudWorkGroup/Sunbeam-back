@@ -1,5 +1,6 @@
 package com.acmr.excel.service.impl;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,8 +21,11 @@ import com.acmr.excel.distribute.Target;
 import com.acmr.excel.model.ColOperate;
 import com.acmr.excel.model.ColWidth;
 import com.acmr.excel.model.RowCol;
+import com.acmr.excel.model.complete.Content;
+import com.acmr.excel.model.complete.CustomProp;
 import com.acmr.excel.model.mongo.MCell;
 import com.acmr.excel.model.mongo.MCol;
+import com.acmr.excel.model.mongo.MRow;
 import com.acmr.excel.model.mongo.MRowColCell;
 import com.acmr.excel.model.mongo.MSheet;
 import com.acmr.excel.service.MColService;
@@ -60,30 +64,102 @@ public class MColServiceImpl implements MColService {
 			RowCol rc = sortRcList.get(i);
 			rowMap.put(rc.getAlias(), i);
 		}
-
+		
+		List<Object> insertList = new ArrayList<Object>();// 存需要插入的对象
+		
 		MSheet msheet = msheetDao.getMSheet(excelId, sheetId);
 		String alias = msheet.getMaxcol() + 1 + "";
 
 		RowCol rowCol = new RowCol();
 		rowCol.setAlias(alias);
-		rowCol.setLength(71);
+		// 存一个列样式
+		MCol mcol = new MCol();
+		mcol.setSheetId(sheetId);
+		mcol.setAlias(alias);
+		
 		if (colOperate.getCol() == 0) {
 			rowCol.setPreAlias(null);
+			rowCol.setLength(71);
+			
+			mcol.setHidden(false);
+			mcol.setWidth(71);
 		} else {
+			String preAlias = sortClList.get(colOperate.getCol() - 1).getAlias();
+			MCol preMCol = mcolDao.getMCol(excelId, sheetId, preAlias);
+			
 			rowCol.setPreAlias(
 					sortClList.get(colOperate.getCol() - 1).getAlias());
+			rowCol.setLength(preMCol.getWidth());
+			
+			mcol.setHidden(preMCol.getHidden());
+			mcol.setWidth(preMCol.getWidth());
+			setMColProperty(mcol,preMCol.getProps().getContent(),preMCol.getProps().getCustomProp());
+			
+			//获取前一列所有单元格,并将其content中属性赋值给新插入列的单元格
+			List<MRowColCell> relation = mrowColCellDao.getMRowColCellList(excelId, sheetId, preAlias, "col");
+			List<String> cellIdList = new ArrayList<String>();
+			for(MRowColCell mrcc:relation){
+				cellIdList.add(mrcc.getCellId());
+			}
+			List<MCell> mcellList = mcellDao.getMCellList(excelId, sheetId, cellIdList);
+			for(MCell mc:mcellList){
+				String[] ids = mc.getId().split("_");
+				if(mc.getColspan()==1&&mc.getRowspan()==1){
+					MCell mcell = new MCell(mc.getContent());
+					mcell.setSheetId(sheetId);
+					mcell.setId(ids[0]+"_"+alias);
+					mcell.setRowspan(1);
+					mcell.setColspan(1);
+					
+					mcell.getContent().setTexts(null);
+					mcell.getContent().setDisplayTexts(null);
+					mcell.getContent().setType(null);
+					mcell.getContent().setExpress(null);
+					insertList.add(mcell);
+					
+					MRowColCell mrcc = new MRowColCell();
+					mrcc.setCellId(ids[0]+"_"+alias);
+					mrcc.setRow(ids[0]);
+					mrcc.setCol(alias);
+					mrcc.setSheetId(sheetId);
+					insertList.add(mrcc);// 关系表
+				}else{
+					int span = Integer.parseInt(preAlias)-Integer.parseInt(ids[1])+1;
+					if(span==mc.getColspan()){
+						String row = ids[0];
+						Integer index = rowMap.get(row);
+						for (int i = 0; i < mc.getRowspan(); i++) {
+							MRowColCell mrcc = new MRowColCell();
+							row = sortRcList.get(index).getAlias();
+							index++;
+							mrcc.setCellId(row+"_"+alias);
+							mrcc.setRow(row);
+							mrcc.setCol(alias);
+							mrcc.setSheetId(sheetId);
+							insertList.add(mrcc);
+							
+							MCell mcell = new MCell(mc.getContent());
+							mcell.setSheetId(sheetId);
+							mcell.setId(row+"_"+alias);
+							mcell.setRowspan(1);
+							mcell.setColspan(1);
+							
+							mcell.getContent().setTexts(null);
+							mcell.getContent().setDisplayTexts(null);
+							mcell.getContent().setType(null);
+							mcell.getContent().setExpress(null);
+							insertList.add(mcell);
+						}
+					}
+				}
+				
+			}
 		}
 
 		mrowColDao.insertRowCol(excelId, sheetId, rowCol, "cList");
 		// 修改选中行的前列别名
 		String nextAlias = sortClList.get(colOperate.getCol()).getAlias();
 		mrowColDao.updateRowCol(excelId, sheetId, "cList", nextAlias, alias);
-		// 存一个列样式
-		MCol mcol = new MCol();
-		mcol.setSheetId(sheetId);
-		mcol.setAlias(alias);
-		mcol.setHidden(false);
-		mcol.setWidth(71);
 
 		baseDao.insert(excelId, mcol);
 
@@ -108,7 +184,7 @@ public class MColServiceImpl implements MColService {
 		List<MCell> mcellList = mcellDao.getMCellList(excelId, sheetId,
 				cellIdList);
 
-		List<Object> insertList = new ArrayList<Object>();// 存需要插入的对象
+		
 
 		for (MCell mc : mcellList) {
 			String[] ids = mc.getId().split("_");
@@ -175,30 +251,6 @@ public class MColServiceImpl implements MColService {
 		 * }
 		 */
 	}
-
-	public void insertColDis(ColOperate colOperate, String excelId,
-			Integer step) {
-
-		/*
-		 * Map<String,Object> map = new HashMap<String,Object>(); String sheetId
-		 * = excelId+0; map.put("colOperate", colOperate); map.put("excelId",
-		 * excelId); map.put("step", step); map.put("sheetId", sheetId);
-		 * invoke('insertColSelf',map)
-		 */
-	}
-
-	/*
-	 * public void invoke(methodName){ list = { insertColSelf: { before: ['x'],
-	 * after: ['insertColEffectMSheet','insertColEffectMCell'] } } repalce
-	 * coding...
-	 * 
-	 * methodName()
-	 * 
-	 * String status = list['insertColSelf'] Map tempResult if(status){
-	 * if(status.size() >0){ for(int i = 0;i<size();i++){ if(tempResult !=
-	 * null){ tempResult = apply(status[i],tempResult) } } tempResult = null; }
-	 * } }
-	 */
 
 	public void insertColSelf(Map<String, Object> map) {
 		String excelId = (String) map.get("excelId");
@@ -545,6 +597,48 @@ public class MColServiceImpl implements MColService {
 
 		msheetDao.updateStep(excelId, sheetId, step);
 
+	}
+	
+	private void setMColProperty(MCol mcol, Content content,
+			CustomProp customProp) {
+		try {
+			Class<? extends Content> c = content.getClass();
+			Content mc = mcol.getProps().getContent();
+			Field[] cFields = c.getDeclaredFields();
+			for (Field f : cFields) {
+				f.setAccessible(true);
+				Object value = f.get(content);
+				if (null != value) {
+					Field mf = mc.getClass().getDeclaredField(f.getName());
+					mf.setAccessible(true);
+					mf.set(mc, value);
+				}
+			}
+
+			Class<? extends CustomProp> p = customProp.getClass();
+			CustomProp mp = mcol.getProps().getCustomProp();
+			Field[] pFields = p.getDeclaredFields();
+			for (Field f : pFields) {
+				f.setAccessible(true);
+				Object value = f.get(customProp);
+				if (null != value) {
+					Field pf = mp.getClass().getDeclaredField(f.getName());
+					pf.setAccessible(true);
+					pf.set(mp, value);
+				}
+			}
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void insertColDis(ColOperate colOperate, String excelId,
+			Integer step) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

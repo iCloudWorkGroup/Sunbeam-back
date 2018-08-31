@@ -55,6 +55,7 @@ public class MCellServiceImpl implements MCellService {
 	private MRowDao mrowDao;
 	@Resource
 	private MRowColCellDao mrowColCellDao;
+	private MCol MCol;
 
 	public void saveContent(CellContent cell, int step, String excelId) {
 		String sheetId = excelId + 0;
@@ -1240,6 +1241,19 @@ public class MCellServiceImpl implements MCellService {
 								mr.setSheetId(sheetId);
 								tempList.add(mr);
 								MCell mc = new MCell(row + "_" + col, sheetId);
+								
+								
+								 // 将行、列自带的属性赋值给单元格 
+								 MRow mrow=mrowDao.getMRow(excelId, sheetId, row);
+								 OperProp rp = mrow.getProps(); 
+								 MCol mcol= mcolDao.getMCol(excelId, sheetId, col);
+								 OperProp cp = mcol.getProps();
+								 setMCellProperty(mc, rp.getContent(),
+								 rp.getBorder(), rp.getCustomProp());
+								 setMCellProperty(mc, cp.getContent(),
+								 cp.getBorder(), cp.getCustomProp());
+								 
+								
 								if ("type".equals(property1)
 										&& "express".equals(property2)) {
 									Field f = mc.getContent().getClass()
@@ -1257,15 +1271,7 @@ public class MCellServiceImpl implements MCellService {
 									f.set(mc.getContent(), value1);
 								}
 								
-								/*// 将行、列自带的属性赋值给单元格
-								MRow mrow = mrowDao.getMRow(excelId, sheetId, row);
-								OperProp rp = mrow.getProps();
-								MCol mcol = mcolDao.getMCol(excelId, sheetId, col);
-								OperProp cp = mcol.getProps();
-								setMCellProperty(mc, rp.getContent(),
-										rp.getBorder(), rp.getCustomProp());
-								setMCellProperty(mc, cp.getContent(),
-										cp.getBorder(), cp.getCustomProp());*/
+								
 								
 								tempList.add(mc);
 							} else {
@@ -1324,6 +1330,18 @@ public class MCellServiceImpl implements MCellService {
 								mr.setSheetId(sheetId);
 								tempList.add(mr);// 关系表
 								MCell mcell = new MCell(key, sheetId);
+								
+								// 将行、列自带的属性赋值给单元格
+								MRow mrow = mrowDao.getMRow(excelId, sheetId, row);
+								OperProp rp = mrow.getProps();
+								OperProp cp = mc.getProps();
+								setMCellProperty(mcell, rp.getContent(),
+										rp.getBorder(), rp.getCustomProp());
+								setMCellProperty(mcell, cp.getContent(),
+										cp.getBorder(), cp.getCustomProp());
+								
+								
+								
 								if ("type".equals(property1)
 										&& "express".equals(property2)) {
 									Field f = mcell.getContent().getClass()
@@ -1417,6 +1435,18 @@ public class MCellServiceImpl implements MCellService {
 								mrcc.setSheetId(sheetId);
 								tempList.add(mrcc);// 关系表
 								MCell mcell = new MCell(key, sheetId);
+								
+								// 将行、列自带的属性赋值给单元格
+								OperProp rp = mr.getProps();
+								MCol mcol = mcolDao.getMCol(excelId, sheetId, col);
+								OperProp cp = mcol.getProps();
+								setMCellProperty(mcell, rp.getContent(),
+										rp.getBorder(), rp.getCustomProp());
+								setMCellProperty(mcell, cp.getContent(),
+										cp.getBorder(), cp.getCustomProp());
+								
+								
+								
 								if ("type".equals(property1)
 										&& "express".equals(property2)) {
 									Field f = mcell.getContent().getClass()

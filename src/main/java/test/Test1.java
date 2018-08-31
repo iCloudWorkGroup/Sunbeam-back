@@ -109,6 +109,8 @@ public class Test1 {
 	    System.out.println(row.getClass());*/
 	   MSheet sheet = new MSheet();
 	   sheet.getProtect();
+	   
+	   mongoTemplate.dropCollection("aaa");
 	  
 	}
 

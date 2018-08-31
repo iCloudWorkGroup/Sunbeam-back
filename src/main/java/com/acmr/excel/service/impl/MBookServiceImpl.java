@@ -84,6 +84,9 @@ public class MBookServiceImpl implements MBookService {
 		if (book == null) {
 			return false;
 		}
+		
+		msheetDao.clearCollection(excelId);//清空原有表
+		
 		MBook mbook = new MBook();
 		mbook.setId(excelId);
 		mbook.setName("新建Excel");
@@ -119,8 +122,8 @@ public class MBookServiceImpl implements MBookService {
 		cList.setId("cList");
 		cList.setSheetId(sheetId);
 		getMCol(cols, mcols, cList, sheetId);
-		// mongoTemplate.insert(mcols, excelId);
-		baseDao.insertList(excelId, mcols);// 存列表样式
+		baseDao.threadInsert(excelId, mcols);
+		// baseDao.insertList(excelId, mcols);// 存列表样式
 		baseDao.insert(excelId, cList);// 向数据库存贮简化的列信息
 
 		List<ExcelRow> rows = excelSheet.getRows();
@@ -131,15 +134,15 @@ public class MBookServiceImpl implements MBookService {
 		rList.setSheetId(sheetId);
 		getMRow(rows, mrows, rList, tempList, sheetId);
 		baseDao.insert(excelId, rList);// 向数据库存贮行信息
-		// mongoTemplate.insert(mrows,excelId);
-		baseDao.insertList(excelId, mrows);// 存储行样式
+		baseDao.threadInsert(excelId, mrows);
+		// baseDao.insertList(excelId, mrows);// 存储行样式
 
 		List<Sheet> sheets = book.getNativeSheet();// 找出合并的单元格
 		getMergeCell(sheets, tempList, sheetId);
 
 		long start = System.currentTimeMillis();
-		// mongoTemplate.insert(tempList, excelId);
-		baseDao.insertList(excelId, tempList);
+		baseDao.threadInsert(excelId, tempList);
+		//baseDao.insertList(excelId, tempList);
 		long end = System.currentTimeMillis() - start;
 		System.out.println("存储时间为:" + end);
 

@@ -828,7 +828,7 @@ public class CellFormateUtil {
 	}
 
 	public static void main(String[] args) throws ParseException {
-		XSSFWorkbook wb = new XSSFWorkbook();
+		/*XSSFWorkbook wb = new XSSFWorkbook();
 		XSSFSheet sheet = wb.createSheet(); 
 		XSSFRow  row = sheet.createRow(0);
 		XSSFCell cell = row.createCell(0);
@@ -843,6 +843,16 @@ public class CellFormateUtil {
 		cell.setCellStyle(style);
 		DataFormatter f = new DataFormatter();
 		String text = f.formatCellValue(cell);
-		System.out.println(text);
+		System.out.println(text);*/
+		
+		String pattern1 = "yyyy年MM月dd日";
+		String pattern2 = "yyyy年MM月";
+		String pattern3 = "yyyy/MM/dd";
+		String content = "2010/33/45";
+		Date d1 = getDate(content, pattern1);
+		Date d2 = getDate(content, pattern2);
+		Date d3 = getDate(content, pattern3);
+		System.out.println(d3);
+		
 	}
 }

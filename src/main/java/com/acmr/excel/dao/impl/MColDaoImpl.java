@@ -12,10 +12,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import com.acmr.excel.dao.MColDao;
-import com.acmr.excel.model.mongo.MCell;
 import com.acmr.excel.model.mongo.MCol;
-import com.acmr.excel.model.mongo.MExcelColumn;
-import com.acmr.excel.model.mongo.MRow;
 
 @Repository("mcolDao")
 public class MColDaoImpl implements MColDao,Serializable {

@@ -2,7 +2,6 @@ package com.acmr.excel.dao;
 
 import java.util.List;
 
-import com.acmr.excel.model.mongo.MExcelRow;
 import com.acmr.excel.model.mongo.MRow;
 
 public interface MRowDao {

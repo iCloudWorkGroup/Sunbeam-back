@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -103,7 +104,7 @@ public class ExcelController extends BaseController {
 	
 	@RequestMapping(value="/testup")
 	public void testup(HttpServletRequest req, HttpServletResponse resp){
-		
+		long startTime = new Date().getTime();
 		List<MultipartFile> files = ((MultipartHttpServletRequest) req).getFiles("file");
 		ExcelBook excel = new ExcelBook();
 		InputStream is;
@@ -114,8 +115,14 @@ public class ExcelController extends BaseController {
 			} else {
 				excel.LoadExcel(files.get(0).getInputStream(), XLSTYPE.XLSX);
 			}
+			long thentime = new Date().getTime();
+			System.out.println(new Date().getTime()-startTime);
+			
 			ExcelSheet sheet = excel.getSheets().get(0);
-			mongoTemplate.insert(sheet);
+			baseDao.threadInsert("123344",sheet.getCols());
+			baseDao.threadInsert("123344",sheet.getRows());
+			
+			System.out.println(new Date().getTime()-thentime);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -127,7 +134,6 @@ public class ExcelController extends BaseController {
 	@SuppressWarnings("unused")
 	@RequestMapping(value="/testload",method=RequestMethod.GET)
 	public void testload(HttpServletRequest req, HttpServletResponse resp){
-		
 		
 			ExcelBook excel = null;
 			if (excel != null) {
@@ -236,6 +242,7 @@ public class ExcelController extends BaseController {
 	@RequestMapping("/upload")
 	public void upload(HttpServletRequest req, HttpServletResponse resp) throws Exception {
 		List<MultipartFile> files = ((MultipartHttpServletRequest) req).getFiles("file");
+		long starDate = System.currentTimeMillis();
 		ExcelBook excel = new ExcelBook();
 		InputStream is = files.get(0).getInputStream();
 		if (ExcelUtil.isExcel2003(is)) {
@@ -243,7 +250,7 @@ public class ExcelController extends BaseController {
 		} else {
 			excel.LoadExcel(files.get(0).getInputStream(), XLSTYPE.XLSX);
 		}
-		
+		System.out.println("读取用时："+(System.currentTimeMillis()-starDate));
 		/*ExcelSheet excelSheet = excel.getSheets().get(0);
 		List<ExcelColumn> colList = excelSheet.getCols();
 		int colSize = colList.size();

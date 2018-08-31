@@ -33,6 +33,13 @@ public interface MSheetService {
 	 * @return
 	 */
 	int getStep(String excelId, String sheetId);
+	
+	/**
+	 * 更新步骤
+	 * @param excelId
+	 * @param sheetId
+	 */
+	void updateStep(String excelId,String sheetId);
 
 	/**
 	 * 外部粘贴

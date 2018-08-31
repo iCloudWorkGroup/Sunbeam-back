@@ -30,7 +30,7 @@
 			threads-allowed-to-block-for-connection-multiplier="100"
 			connect-timeout="10000" max-wait-time="15000" auto-connect-retry="true"
 			socket-keep-alive="true" socket-timeout="15000" slave-ok="true"
-			write-number="0" write-timeout="0" write-fsync="true" />
+			write-number="1" write-timeout="0" write-fsync="true" />
 	</mongo:mongo>
 
 

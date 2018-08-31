@@ -133,4 +133,10 @@ public class MSheetDaoImpl implements MSheetDao,Serializable {
 			// TODO: handle exception
 		}
 	}
+
+	@Override
+	public void clearCollection(String excelId) {
+		mongoTemplate.dropCollection(excelId);
+		
+	}
 }

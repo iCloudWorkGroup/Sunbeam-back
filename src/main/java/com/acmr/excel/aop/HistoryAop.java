@@ -308,7 +308,7 @@ public class HistoryAop {
 						excelId, excelId + 0, (ArrayList) arg[2],
 						(ArrayList) arg[3]);
 				mrowColCellList.addAll(list);
-			} else if ("delMRowColCellList".equals(methodName)) {
+			} else if ("delMRowColCellList1".equals(methodName)) {
 				List<MRowColCell> list = mrowColCellDao.getMRowColCellList(
 						excelId, excelId + 0, (ArrayList) arg[2]);
 				mrowColCellList.addAll(list);
