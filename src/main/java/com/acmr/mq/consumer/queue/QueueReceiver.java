@@ -1,3 +1,4 @@
+
 /**
  * 
  */
@@ -29,8 +30,17 @@ import com.acmr.mq.Model;
 public class QueueReceiver implements MessageListener {
 	private static Logger logger = Logger.getLogger(QueueReceiver.class);
 	
+	/*@Resource
+	private WorkerThread2 handle;*/
+	
 	@Resource
-	private WorkerThread2 handle;
+	private MCellService mcellService;
+	@Resource
+	private MRowService mrowService;
+	@Resource
+	private MColService mcolService;
+	@Resource
+	private MSheetService msheetService;
 
 	
 
@@ -44,13 +54,13 @@ public class QueueReceiver implements MessageListener {
 				int step = model.getStep();
 				logger.info("excelId:" + excelId+ ";step:" + step + ";reqPath:"+ model.getReqPath());
 				ExecutorService executor = Executors.newFixedThreadPool(1);
-				//Runnable worker = new WorkerThread2(step, excelId, model,
-				//		mcellService, mrowService, mcolService, msheetService);
+				Runnable worker = new WorkerThread2(step, excelId, model,
+						mcellService, mrowService, mcolService, msheetService);
 				//Runnable worker = new WorkerThread2(step, excelId, model);
-				handle.setKey(excelId);
+				/*handle.setKey(excelId);
 				handle.setModel(model);
-				handle.setStep(step);
-				executor.execute(handle);
+				handle.setStep(step);*/
+				executor.execute(worker);
 				executor.shutdown();
 			} catch (JMSException e) {
 				logger.info(e.getLocalizedMessage());

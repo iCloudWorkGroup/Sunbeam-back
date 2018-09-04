@@ -491,15 +491,44 @@ public class CellFormateUtil {
 	}
 
 	public static void setShowText(Content content) {
+		String type = content.getType();
+		if ("date".equals(type)) {
+			String text = content.getTexts();
+			String express = content.getExpress();
+			String pattern2 = "yyyy/MM/dd";
+			String pattern1 = "yyyy年MM月dd日";
+			if ("yyyy/mm/dd".equals(express)) {
+				Date d1 = getDate(text, pattern1);
+				if (null == d1) {
+					content.setDisplayTexts(text);
+					return;
+				} else {
+					SimpleDateFormat format = new SimpleDateFormat(pattern2);
+					String display = format.format(d1);
+					content.setDisplayTexts(display);
+					return;
+				}
+			}else{
+				Date d1 = getDate(text, pattern2);
+				if (null == d1) {
+					content.setDisplayTexts(text);
+					return;
+				} else {
+					SimpleDateFormat format = new SimpleDateFormat(pattern1);
+					String display = format.format(d1);
+					content.setDisplayTexts(display);
+					return;
+				}
+			}
+		}
 		XSSFWorkbook wb = new XSSFWorkbook();
-		XSSFSheet sheet = wb.createSheet(); 
-		XSSFRow  row = sheet.createRow(0);
+		XSSFSheet sheet = wb.createSheet();
+		XSSFRow row = sheet.createRow(0);
 		XSSFCell cell = row.createCell(0);
-	    String type = content.getType();
+
 		switch (type) {
 		case "routine":
 		case "text":
-		case "date":
 			cell.setCellValue(content.getTexts());
 			break;
 		case "number":
@@ -515,15 +544,15 @@ public class CellFormateUtil {
 			break;
 		}
 		XSSFCellStyle style = cell.getCellStyle();
-		XSSFDataFormat format= wb.createDataFormat();
+		XSSFDataFormat format = wb.createDataFormat();
 		style.setDataFormat(format.getFormat(content.getExpress()));
 		cell.setCellStyle(style);
 		DataFormatter f = new DataFormatter();
 		String text = f.formatCellValue(cell);
-		if("".equals(text)||null==text){
+		if ("".equals(text) || null == text) {
 			content.setDisplayTexts(content.getTexts());
-		}else{
-          content.setDisplayTexts(text);
+		} else {
+			content.setDisplayTexts(text);
 		}
 	}
 
@@ -775,51 +804,50 @@ public class CellFormateUtil {
 		}
 		return s;
 	}
-	
-	
-	public static String TypeToMtype(CELLTYPE type ){
+
+	public static String TypeToMtype(CELLTYPE type) {
 		String mtype = "";
-		switch(type){
-		 case BLANK:
-			 mtype = "routine";
-			 break;
-		 case NUMERIC:
-			 mtype = "number";
-			 break;
-		 case STRING:
-			 mtype = "text";
-			 break;
-		 case DATE:
-			 mtype = "date";
-			 break;
+		switch (type) {
+		case BLANK:
+			mtype = "routine";
+			break;
+		case NUMERIC:
+			mtype = "number";
+			break;
+		case STRING:
+			mtype = "text";
+			break;
+		case DATE:
+			mtype = "date";
+			break;
 		default:
 			mtype = "routine";
 			break;
 		}
 		return mtype;
 	}
-	
-	public static CELLTYPE MTypeToType(String mtype ){
+
+	public static CELLTYPE MTypeToType(String mtype) {
 		CELLTYPE type;
-		switch(mtype){
-		 case "routine":
-			 type = CELLTYPE.STRING;
-			 break;
-		 case "text":
-			 type = CELLTYPE.STRING;
-			 break;
-		 case "number":
-			 type = CELLTYPE.NUMERIC;
-			 break;
-		 case "date":
-			 type = CELLTYPE.DATE;
-			 break;
-		 case "currency":
-			 type = CELLTYPE.NUMERIC;
-			 break;
-		 case "percent":
-			 type = CELLTYPE.NUMERIC;
-			 break;
+		switch (mtype) {
+		case "routine":
+			type = CELLTYPE.STRING;
+			break;
+		case "text":
+			type = CELLTYPE.STRING;
+			break;
+		case "number":
+			type = CELLTYPE.NUMERIC;
+			break;
+		case "date":
+			type = CELLTYPE.DATE;
+			break;
+		case "currency":
+			type = CELLTYPE.NUMERIC;
+			break;
+		case "percent":
+			type = CELLTYPE.NUMERIC;
+			break;
 		default:
 			type = CELLTYPE.STRING;
 			break;
@@ -828,31 +856,29 @@ public class CellFormateUtil {
 	}
 
 	public static void main(String[] args) throws ParseException {
-		/*XSSFWorkbook wb = new XSSFWorkbook();
-		XSSFSheet sheet = wb.createSheet(); 
-		XSSFRow  row = sheet.createRow(0);
-		XSSFCell cell = row.createCell(0);
-		
-		SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy/MM/dd");
-		Date date = simpleDateFormat.parse("2018/8/8");
-		
-	    cell.setCellValue("2018/8/8");
-	    XSSFCellStyle style = cell.getCellStyle();
-		XSSFDataFormat format= wb.createDataFormat();
-		style.setDataFormat(format.getFormat("yyyy\"年\"m\"月\"d\"日\";@"));
-		cell.setCellStyle(style);
-		DataFormatter f = new DataFormatter();
-		String text = f.formatCellValue(cell);
-		System.out.println(text);*/
-		
+		/*
+		 * XSSFWorkbook wb = new XSSFWorkbook(); XSSFSheet sheet =
+		 * wb.createSheet(); XSSFRow row = sheet.createRow(0); XSSFCell cell =
+		 * row.createCell(0);
+		 * 
+		 * SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy/MM/dd");
+		 * Date date = simpleDateFormat.parse("2018/8/8");
+		 * 
+		 * cell.setCellValue("2018/8/8"); XSSFCellStyle style =
+		 * cell.getCellStyle(); XSSFDataFormat format= wb.createDataFormat();
+		 * style.setDataFormat(format.getFormat("yyyy\"年\"m\"月\"d\"日\";@"));
+		 * cell.setCellStyle(style); DataFormatter f = new DataFormatter();
+		 * String text = f.formatCellValue(cell); System.out.println(text);
+		 */
+
 		String pattern1 = "yyyy年MM月dd日";
 		String pattern2 = "yyyy年MM月";
 		String pattern3 = "yyyy/MM/dd";
-		String content = "2010/33/45";
+		String content = "2010/3/8";
 		Date d1 = getDate(content, pattern1);
 		Date d2 = getDate(content, pattern2);
 		Date d3 = getDate(content, pattern3);
 		System.out.println(d3);
-		
+
 	}
 }

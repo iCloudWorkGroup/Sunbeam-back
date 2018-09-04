@@ -35,7 +35,7 @@ public class Constant {
 		accessControlAllowOriginList.add("http://localhost:4711");
 		accessControlAllowOriginList.add("http://192.168.2.193:8080");
 		accessControlAllowOriginList.add("http://192.168.2.241:8080");
-		// accessControlAllowOriginList.add("http://localhost:8080");
+		accessControlAllowOriginList.add("http://localhost:8080");
 		accessControlAllowOriginList.add("http://192.168.2.207:8080");
 		accessControlAllowOriginList.add("http://192.168.2.16:8080");
 		accessControlAllowOriginList.add("http://192.168.2.234:8080");
@@ -61,6 +61,7 @@ public class Constant {
 		unRecordAction.put("welcom", true);
 		unRecordAction.put("main", true);
 		unRecordAction.put("download", true);
+		unRecordAction.put("clear_queue", true);
 		
 		
 		unInterceptAction.put("protect", true);
@@ -75,6 +76,7 @@ public class Constant {
 		unInterceptAction.put("download", true);
 		unInterceptAction.put("upload", true);
 		unInterceptAction.put("reopen", true);
+		unInterceptAction.put("clear_queue", true);
 	}
 
 }

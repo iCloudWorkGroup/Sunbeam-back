@@ -25,7 +25,7 @@ import com.acmr.excel.service.MRowService;
 import com.acmr.excel.service.MSheetService;
 import com.acmr.mq.Model;
 
-@Service("handle")
+
 public class WorkerThread2 implements Runnable {
 	private static Logger logger = Logger.getLogger(QueueReceiver.class);
 	private int step;

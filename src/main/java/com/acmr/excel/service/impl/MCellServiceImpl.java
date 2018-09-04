@@ -349,6 +349,8 @@ public class MCellServiceImpl implements MCellService {
 								mc.setId(id);
 								mc.setRowspan(rowList.size());
 								mc.setColspan(colList.size());
+								Border border = new Border();
+								mc.setBorder(border);
 								cellIdList.add(cellId);
 							} else {
 								cellIdList.add(cellId);
@@ -381,7 +383,7 @@ public class MCellServiceImpl implements MCellService {
 			}
 
 		}
-	}
+	}                                                                
 
 	@Override
 	public void splitCell(Cell cell, int step, String excelId) {
@@ -451,6 +453,31 @@ public class MCellServiceImpl implements MCellService {
 									mcell.getContent().setDisplayTexts(null);
 									mcell.getContent().setTexts(null);
 								}
+								Border border = mcell.getBorder();
+								Border bo = new Border();
+								if(null != border){
+									if(null!=border.getLeft()){
+										if(j==0){
+											bo.setLeft(border.getLeft());
+										}
+									}
+									if(null!=border.getTop()){
+										if(i==0){
+											bo.setTop(border.getTop());
+										}
+									}
+									if(null!=border.getRight()){
+										if(j== mc.getColspan()-1){
+											bo.setRight(border.getRight());
+										}
+									}
+									if(null!=border.getBottom()){
+										if(i==mc.getRowspan()-1){
+											bo.setBottom(border.getBottom());
+										}
+									}
+								}
+								mcell.setBorder(bo);
 								mcList.add(mcell);
 								// 存关系表
 								MRowColCell mrcc = new MRowColCell();
