@@ -104,8 +104,11 @@ public class MCellServiceImpl implements MCellService {
 		try {
 			text = java.net.URLDecoder.decode(text, "utf-8");
 			Content content = mcell.getContent();
-			content.setType("routine");
-			content.setExpress("G");
+			if(null==content.getType()||null == content.getExpress()){
+				content.setType("routine");
+				content.setExpress("G");
+			}
+			
 			content.setTexts(text);
 			CellFormateUtil.setShowText(mcell.getContent());
 
