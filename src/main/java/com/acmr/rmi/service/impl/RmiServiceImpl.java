@@ -32,7 +32,7 @@ public class RmiServiceImpl extends UnicastRemoteObject implements RmiService {
 		long start = System.currentTimeMillis();
 		boolean result =  mbookService.saveExcelBook(excelBook, excelId);
 		long end = System.currentTimeMillis();
-		logger.info("客户端"+ip+";用时："+(end-start)+"ms");
+		logger.info("save方法，客户端"+ip+";用时："+(end-start)+"ms");
 	    return result;
 	}
 
@@ -44,7 +44,7 @@ public class RmiServiceImpl extends UnicastRemoteObject implements RmiService {
 		long start = System.currentTimeMillis();
 		ExcelBook excelBook = mbookService.reloadExcelBook(excelId,step);
 		long end = System.currentTimeMillis();
-		logger.info("客户端:"+ip+";用时："+(end-start)+"ms");
+		logger.info("get方法，客户端:"+ip+";用时："+(end-start)+"ms");
 		return excelBook;
 	}
 	

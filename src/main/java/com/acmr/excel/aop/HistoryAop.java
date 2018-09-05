@@ -40,12 +40,12 @@ import com.acmr.redis.Redis;
 @Component
 public class HistoryAop {
 
-	public  List<History> list;
+	private  List<History> list;
 
 	/* 当前操作位置 */
-	public  int index;
+	private  int index;
 	
-	public HistoryCache cache;
+	private HistoryCache cache;
 
 	private History history;
 
@@ -120,7 +120,7 @@ public class HistoryAop {
 			list = new ArrayList<History>();
 			cache = new HistoryCache();
 		}else{
-			list = cache.getList();
+		 	list = cache.getList();
 			
 			//当中断前进后退操作时，删除这部之后所有的记录
 			if(!("undo".equals(methodName)||"redo".equals(methodName))){

@@ -38,9 +38,11 @@ import com.acmr.excel.model.Constant;
 import com.acmr.excel.model.Position;
 import com.acmr.excel.model.complete.CompleteExcel;
 import com.acmr.excel.service.MBookService;
+import com.acmr.excel.service.MSheetService;
 import com.acmr.excel.util.ExcelUtil;
 import com.acmr.excel.util.FileUtil;
 import com.acmr.excel.util.JsonReturn;
+import com.acmr.excel.util.StringUtil;
 import com.acmr.excel.util.UUIDUtil;
 import com.acmr.excel.util.UploadThread;
 
@@ -73,6 +75,8 @@ public class ExcelController extends BaseController {
 	
 	@Resource
 	private MongoTemplate mongoTemplate;
+	@Resource
+	private MSheetService msheetService;
 	
 	
 
@@ -285,7 +289,35 @@ public class ExcelController extends BaseController {
 	@RequestMapping(value="/reload")
 	public void position(HttpServletRequest req, HttpServletResponse resp) throws Exception {
 		String excelId = req.getHeader("X-Book-Id");
+		String curStep = req.getHeader("X-Step");
 		String sheetId = excelId+0;
+		int memStep = 0 ;
+		int cStep = 0;
+		
+		if(!StringUtil.isEmpty(curStep)){
+			cStep = Integer.valueOf(curStep);
+		}
+		if(cStep>0){
+		  while(true){
+			memStep = msheetService.getStep(excelId,sheetId);
+			if(cStep!=memStep){
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}else{
+				break;
+			}
+		  }
+		}
+		if(StringUtil.isEmpty(excelId) || StringUtil.isEmpty(curStep)){
+			resp.setStatus(400);
+			return;
+		}
+		
+		
 		Position position = getJsonDataParameter(req, Position.class);
 		int height = position.getBottom();
 		int right = position.getRight();
