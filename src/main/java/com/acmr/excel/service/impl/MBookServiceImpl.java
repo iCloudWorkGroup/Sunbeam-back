@@ -909,12 +909,14 @@ public class MBookServiceImpl implements MBookService {
 	@Override
 	public ExcelBook reloadExcelBook(String excelId, Integer step) {
 		String sheetId = excelId + 0;
-		while (true) {
+		ExcelBook book=null;
+		for (int i=0;i<1000;i++) {
+			
 			MSheet msheet = msheetDao.getMSheet(excelId, sheetId);
 			int memStep = msheet.getStep();
 			if (memStep == step) {
 				
-				ExcelBook book = getExcelBook(excelId,sheetId);
+				book = getExcelBook(excelId,sheetId);
 
 				return book;
 			} else {
@@ -924,8 +926,9 @@ public class MBookServiceImpl implements MBookService {
 					e.printStackTrace();
 				}
 				continue;
-			}
+		   }
 		}
+		return book;
 	}
 
 	public ExcelBook getExcelBook(String excelId, String sheetId) {

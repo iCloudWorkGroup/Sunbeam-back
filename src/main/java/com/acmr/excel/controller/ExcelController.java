@@ -290,15 +290,20 @@ public class ExcelController extends BaseController {
 	public void position(HttpServletRequest req, HttpServletResponse resp) throws Exception {
 		String excelId = req.getHeader("X-Book-Id");
 		String curStep = req.getHeader("X-Step");
+		if(StringUtil.isEmpty(excelId) || StringUtil.isEmpty(curStep)){
+			resp.setStatus(400);
+			return;
+		}
 		String sheetId = excelId+0;
 		int memStep = 0 ;
 		int cStep = 0;
 		
+		CompleteExcel excel=null;
 		if(!StringUtil.isEmpty(curStep)){
 			cStep = Integer.valueOf(curStep);
 		}
-		if(cStep>0){
-		  while(true){
+		
+		  for(int i=0;i<1000;i++){
 			memStep = msheetService.getStep(excelId,sheetId);
 			if(cStep!=memStep){
 				try {
@@ -308,21 +313,14 @@ public class ExcelController extends BaseController {
 					e.printStackTrace();
 				}
 			}else{
+				Position position = getJsonDataParameter(req, Position.class);
+				int height = position.getBottom();
+				int right = position.getRight();
+				
+				excel = mbookService.reload(excelId, sheetId, 0, height, 0, right,0);
 				break;
 			}
 		  }
-		}
-		if(StringUtil.isEmpty(excelId) || StringUtil.isEmpty(curStep)){
-			resp.setStatus(400);
-			return;
-		}
-		
-		
-		Position position = getJsonDataParameter(req, Position.class);
-		int height = position.getBottom();
-		int right = position.getRight();
-		
-		CompleteExcel excel = mbookService.reload(excelId, sheetId, 0, height, 0, right,0);
 	
 		this.sendJson(resp, excel);
 		
