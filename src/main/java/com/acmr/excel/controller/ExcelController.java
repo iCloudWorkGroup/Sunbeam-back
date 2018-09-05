@@ -59,39 +59,39 @@ import acmr.excel.pojo.ExcelSheet;
  * 
  * @author jinhr
  */
- @Controller
- @RequestMapping
- @Scope("singleton")
+@Controller
+@RequestMapping
+@Scope("singleton")
 public class ExcelController extends BaseController {
-	private static Logger log = Logger.getLogger(ExcelController.class); 
-	
+	private static Logger log = Logger.getLogger(ExcelController.class);
+
 	@Resource
 	private BaseDao baseDao;
 	@Resource
 	private MSheetDao mexcelDao;
-	
+
 	@Resource
 	private MBookService mbookService;
-	
+
 	@Resource
 	private MongoTemplate mongoTemplate;
 	@Resource
 	private MSheetService msheetService;
-	
-	
 
 	/**
 	 * excel下载
 	 */
-	@RequestMapping(value="/download/{excelId}",method=RequestMethod.GET)
-	public void download(HttpServletRequest req, HttpServletResponse resp,@PathVariable String excelId) {
-		String sheetId = excelId+0;
+	@RequestMapping(value = "/download/{excelId}", method = RequestMethod.GET)
+	public void download(HttpServletRequest req, HttpServletResponse resp,
+			@PathVariable String excelId) {
+		String sheetId = excelId + 0;
 		ExcelBook excelBook = mbookService.getExcelBook(excelId, sheetId);
 		if (excelBook != null) {
 			try {
 				OutputStream out = resp.getOutputStream();
 				resp.setContentType("application/octet-stream");
-				resp.setHeader("Content-disposition", "attachment;filename="+ URLEncoder.encode("模板" + ".xlsx", "utf-8"));
+				resp.setHeader("Content-disposition", "attachment;filename="
+						+ URLEncoder.encode("模板" + ".xlsx", "utf-8"));
 				excelBook.saveExcel(out, XLSTYPE.XLSX);
 				out.flush();
 				out.close();
@@ -105,11 +105,12 @@ public class ExcelController extends BaseController {
 		}
 
 	}
-	
-	@RequestMapping(value="/testup")
-	public void testup(HttpServletRequest req, HttpServletResponse resp){
+
+	@RequestMapping(value = "/testup")
+	public void testup(HttpServletRequest req, HttpServletResponse resp) {
 		long startTime = new Date().getTime();
-		List<MultipartFile> files = ((MultipartHttpServletRequest) req).getFiles("file");
+		List<MultipartFile> files = ((MultipartHttpServletRequest) req)
+				.getFiles("file");
 		ExcelBook excel = new ExcelBook();
 		InputStream is;
 		try {
@@ -120,70 +121,71 @@ public class ExcelController extends BaseController {
 				excel.LoadExcel(files.get(0).getInputStream(), XLSTYPE.XLSX);
 			}
 			long thentime = new Date().getTime();
-			System.out.println(new Date().getTime()-startTime);
-			
+			System.out.println(new Date().getTime() - startTime);
+
 			ExcelSheet sheet = excel.getSheets().get(0);
-			baseDao.threadInsert("123344",sheet.getCols());
-			baseDao.threadInsert("123344",sheet.getRows());
-			
-			System.out.println(new Date().getTime()-thentime);
+			baseDao.threadInsert("123344", sheet.getCols());
+			baseDao.threadInsert("123344", sheet.getRows());
+
+			System.out.println(new Date().getTime() - thentime);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
-	}
-	
-	@SuppressWarnings("unused")
-	@RequestMapping(value="/testload",method=RequestMethod.GET)
-	public void testload(HttpServletRequest req, HttpServletResponse resp){
-		
-			ExcelBook excel = null;
-			if (excel != null) {
-				try {
-					OutputStream out = resp.getOutputStream();
-					resp.setContentType("application/octet-stream");
-					resp.setHeader("Content-disposition", "attachment;filename="+ URLEncoder.encode("模板" + ".xlsx", "utf-8"));
-					excel.saveExcel(out, XLSTYPE.XLSX);
-					out.flush();
-					out.close();
-				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (ExcelException e) {
-					e.printStackTrace();
-				}
-			}
-		
+
 	}
 
-	
+	@SuppressWarnings("unused")
+	@RequestMapping(value = "/testload", method = RequestMethod.GET)
+	public void testload(HttpServletRequest req, HttpServletResponse resp) {
+
+		ExcelBook excel = null;
+		if (excel != null) {
+			try {
+				OutputStream out = resp.getOutputStream();
+				resp.setContentType("application/octet-stream");
+				resp.setHeader("Content-disposition", "attachment;filename="
+						+ URLEncoder.encode("模板" + ".xlsx", "utf-8"));
+				excel.saveExcel(out, XLSTYPE.XLSX);
+				out.flush();
+				out.close();
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (ExcelException e) {
+				e.printStackTrace();
+			}
+		}
+
+	}
+
 	/**
 	 * 初始化excel页面
 	 */
-	@RequestMapping(value="/main/{sbmId}")
-	public ModelAndView main(HttpServletRequest req, HttpServletResponse resp,@PathVariable String sbmId) {
-		
+	@RequestMapping(value = "/main/{sbmId}")
+	public ModelAndView main(HttpServletRequest req, HttpServletResponse resp,
+			@PathVariable String sbmId) {
+
 		log.info("初始化excel");
-		
+
 		String uuid = UUIDUtil.getUUID();
-		
-		return new ModelAndView("/index").addObject("sbmId", sbmId).
-				addObject("frontName",Constant.frontName).addObject("uuid", uuid);
+
+		return new ModelAndView("/index").addObject("sbmId", sbmId)
+				.addObject("frontName", Constant.frontName)
+				.addObject("uuid", uuid);
 	}
-	
+
 	/**
 	 * 初始化表明列表页面
 	 */
 	@RequestMapping("/")
-	public ModelAndView welcom(HttpServletRequest req, HttpServletResponse resp) {
+	public ModelAndView welcom(HttpServletRequest req,
+			HttpServletResponse resp) {
 		List<String> excels = mbookService.getExcels();
-		
+
 		return new ModelAndView("/show").addObject("excels", excels);
 	}
-	
 
 	/**
 	 * 创建一个默认的excel
@@ -205,6 +207,7 @@ public class ExcelController extends BaseController {
 		excelBook.getSheets().add(sheet);
 		return excelBook;
 	}
+
 	private String readFile(String filepath) {
 		String content = "";
 		try {
@@ -226,16 +229,15 @@ public class ExcelController extends BaseController {
 		return content;
 	}
 
+	@RequestMapping(value = "/reopen/{excelId}", method = RequestMethod.GET)
+	public ModelAndView reopen(HttpServletRequest req, HttpServletResponse resp,
+			@PathVariable String excelId) {
 
-	@RequestMapping(value="/reopen/{excelId}",method=RequestMethod.GET)
-	public ModelAndView reopen(HttpServletRequest req, HttpServletResponse resp,@PathVariable String excelId) {
-
-		return new ModelAndView("/index").addObject("excelId", excelId).addObject("sheetId", "1")
-				.addObject("build", false).addObject("frontName",Constant.frontName);
+		return new ModelAndView("/index").addObject("excelId", excelId)
+				.addObject("sheetId", "1").addObject("build", false)
+				.addObject("frontName", Constant.frontName);
 	}
 
-
-	
 	/**
 	 * 上传excel
 	 * 
@@ -244,8 +246,10 @@ public class ExcelController extends BaseController {
 	 * @throws Exception
 	 */
 	@RequestMapping("/upload")
-	public void upload(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-		List<MultipartFile> files = ((MultipartHttpServletRequest) req).getFiles("file");
+	public void upload(HttpServletRequest req, HttpServletResponse resp)
+			throws Exception {
+		List<MultipartFile> files = ((MultipartHttpServletRequest) req)
+				.getFiles("file");
 		long starDate = System.currentTimeMillis();
 		ExcelBook excel = new ExcelBook();
 		InputStream is = files.get(0).getInputStream();
@@ -254,79 +258,57 @@ public class ExcelController extends BaseController {
 		} else {
 			excel.LoadExcel(files.get(0).getInputStream(), XLSTYPE.XLSX);
 		}
-		System.out.println("读取用时："+(System.currentTimeMillis()-starDate));
-		/*ExcelSheet excelSheet = excel.getSheets().get(0);
-		List<ExcelColumn> colList = excelSheet.getCols();
-		int colSize = colList.size();
-		if (colSize < 26) {
-			for (int i = colSize; i < 26; i++) {
-				excelSheet.addColumn();
-			}
-		}*/
+		System.out.println("读取用时：" + (System.currentTimeMillis() - starDate));
+		/*
+		 * ExcelSheet excelSheet = excel.getSheets().get(0); List<ExcelColumn>
+		 * colList = excelSheet.getCols(); int colSize = colList.size(); if
+		 * (colSize < 26) { for (int i = colSize; i < 26; i++) {
+		 * excelSheet.addColumn(); } }
+		 */
 		String excelId = UUIDUtil.getUUID();
-		
+
 		JsonReturn data = new JsonReturn("");
-		
-		boolean result =  mbookService.saveExcelBook(excel, excelId);
-		
-		if(result){
+
+		boolean result = mbookService.saveExcelBook(excel, excelId);
+
+		if (result) {
 			data.setReturncode(200);
 			data.setReturndata(excelId);
-		}else{
+		} else {
 			data = null;
 			resp.setStatus(413);
 		}
-		
+
 		this.sendJson(resp, data);
 	}
-	
 
 	/**
 	 * 重新打开excel
 	 * 
 	 * @throws Exception
 	 */
-	@RequestMapping(value="/reload")
-	public void position(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+	@RequestMapping(value = "/reload")
+	public void position(HttpServletRequest req, HttpServletResponse resp)
+			throws Exception {
 		String excelId = req.getHeader("X-Book-Id");
-		String curStep = req.getHeader("X-Step");
-		if(StringUtil.isEmpty(excelId) || StringUtil.isEmpty(curStep)){
+
+		if (StringUtil.isEmpty(excelId)) {
 			resp.setStatus(400);
 			return;
 		}
-		String sheetId = excelId+0;
-		int memStep = 0 ;
-		int cStep = 0;
-		
-		CompleteExcel excel=null;
-		if(!StringUtil.isEmpty(curStep)){
-			cStep = Integer.valueOf(curStep);
-		}
-		
-		  for(int i=0;i<1000;i++){
-			memStep = msheetService.getStep(excelId,sheetId);
-			if(cStep!=memStep){
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}else{
-				Position position = getJsonDataParameter(req, Position.class);
-				int height = position.getBottom();
-				int right = position.getRight();
-				
-				excel = mbookService.reload(excelId, sheetId, 0, height, 0, right,0);
-				break;
-			}
-		  }
-	
-		this.sendJson(resp, excel);
-		
-	}
+		String sheetId = excelId + 0;
 
-	
+		CompleteExcel excel = null;
+
+		Position position = getJsonDataParameter(req, Position.class);
+		int height = position.getBottom();
+		int right = position.getRight();
+
+		excel = mbookService.reload(excelId, sheetId, 0, height, 0, right, 0);
+
+		this.sendJson(resp, excel);
+
+	}
 
 	/**
 	 * 大文件上传
@@ -335,7 +317,8 @@ public class ExcelController extends BaseController {
 	 * @param resp
 	 */
 
-	public void uploadBigFile(HttpServletRequest req, HttpServletResponse resp) {
+	public void uploadBigFile(HttpServletRequest req,
+			HttpServletResponse resp) {
 		InputStream is;
 		try {
 			is = req.getInputStream();
@@ -383,8 +366,8 @@ public class ExcelController extends BaseController {
 	 * @throws IOException
 	 */
 
-	public void downloadBigFile(HttpServletRequest req, HttpServletResponse resp)
-			throws IOException {
+	public void downloadBigFile(HttpServletRequest req,
+			HttpServletResponse resp) throws IOException {
 		String fileName = req.getParameter("fname");
 		InputStream is = new FileInputStream("d:\\temp\\" + fileName);
 		resp.reset();

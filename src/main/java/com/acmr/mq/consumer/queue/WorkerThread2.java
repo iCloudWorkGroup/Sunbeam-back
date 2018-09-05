@@ -1,12 +1,7 @@
 package com.acmr.mq.consumer.queue;
 
-import javax.annotation.Resource;
-
 import org.apache.log4j.Logger;
-import org.springframework.stereotype.Service;
 
-import com.acmr.excel.distribute.Distribute;
-import com.acmr.excel.distribute.Target;
 import com.acmr.excel.model.Cell;
 import com.acmr.excel.model.CellContent;
 import com.acmr.excel.model.CellFormate;
@@ -31,13 +26,13 @@ public class WorkerThread2 implements Runnable {
 	private int step;
 	private String key;
 	private Model model;
-	@Resource
+
 	private MCellService mcellService;
-	@Resource
+	
 	private MRowService mrowService;
-	@Resource
+	
 	private MColService mcolService;
-	@Resource
+	
 	private MSheetService msheetService;
 
 	public WorkerThread2(int step, String key, Model model,
