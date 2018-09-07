@@ -7,11 +7,21 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.ServerNotActiveException;
 
+import acmr.excel.pojo.ExcelBook;
+import acmr.excel.pojo.ExcelSheet;
+
 
 public class Test {
    public static void main(String[] args) throws AccessException, RemoteException, NotBoundException, ServerNotActiveException {
 	   Registry registry = LocateRegistry.getRegistry("192.168.3.84", 11999);
 	   RmiService rmiService = (RmiService) registry.lookup("RmiService");
-	   rmiService.getExcelBook("ebc482ea-2e12-4f0f-9f9a-a9dbf187a321", 0);
+	   ExcelBook book1 = new ExcelBook();
+	   ExcelSheet  sheet = new ExcelSheet();
+	   sheet.addRow();
+	   sheet.addColumn();
+	   book1.getSheets().add(sheet);
+	   rmiService.saveExcelBook("123", book1);
+	   ExcelBook  book= rmiService.getExcelBook("123", 0);
+	   System.out.println(book);
 }
 }

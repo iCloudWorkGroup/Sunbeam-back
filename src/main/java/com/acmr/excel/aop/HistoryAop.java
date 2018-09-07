@@ -2,6 +2,7 @@ package com.acmr.excel.aop;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -11,6 +12,7 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.acmr.excel.dao.MCellDao;
@@ -40,7 +42,7 @@ import com.acmr.redis.Redis;
 @Component
 public class HistoryAop {
 
-	private  List<History> list;
+	private  CopyOnWriteArrayList<History> list;
 
 	/* 当前操作位置 */
 	private  int index;
@@ -117,10 +119,10 @@ public class HistoryAop {
 		sheetId = excelId + 0;
 		cache = (HistoryCache) redis.get(excelId);
 		if(null == cache){
-			list = new ArrayList<History>();
+			list = new CopyOnWriteArrayList<History>();
 			cache = new HistoryCache();
 		}else{
-		 	list = cache.getList();
+		   	list = cache.getList();
 			
 			//当中断前进后退操作时，删除这部之后所有的记录
 			if(!("undo".equals(methodName)||"redo".equals(methodName))){
@@ -129,6 +131,7 @@ public class HistoryAop {
 				for(int i=index;i<list.size();i++){
 					list.remove(i);
 				}*/
+				cache.setList(list);
 				redis.set(excelId, cache);
 			}
 			

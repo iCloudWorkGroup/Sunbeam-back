@@ -3,6 +3,7 @@ package com.acmr.excel.model.history;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class HistoryCache implements Serializable{
   
@@ -11,7 +12,7 @@ public class HistoryCache implements Serializable{
 	//用于标识上一个方法名称
 	private String flag;
 	
-	private List<History> list = new ArrayList<History>();
+	private CopyOnWriteArrayList<History> list = new CopyOnWriteArrayList<History>();
 
 	public int getIndex() {
 		return index;
@@ -28,23 +29,23 @@ public class HistoryCache implements Serializable{
 	public void setFlag(String flag) {
 		this.flag = flag;
 	}
-
-	public List<History> getList() {
+	
+    public CopyOnWriteArrayList<History> getList() {
 		return list;
 	}
 
-	public void setList(List<History> list) {
+	public void setList(CopyOnWriteArrayList<History> list) {
 		this.list = list;
 	}
-	
-    public HistoryCache(){}
+
+	public HistoryCache(){}
     
-    public HistoryCache(int index,List<History> list){
+    public HistoryCache(int index,CopyOnWriteArrayList<History> list){
     	this.index = index;
     	this.list = list;
     }
     
-    public HistoryCache(int index,String flag,List<History> list){
+    public HistoryCache(int index,String flag,CopyOnWriteArrayList<History> list){
     	this.index = index;
     	this.flag = flag;
     	this.list = list;

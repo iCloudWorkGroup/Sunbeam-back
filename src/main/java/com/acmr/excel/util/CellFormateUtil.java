@@ -497,11 +497,21 @@ public class CellFormateUtil {
 			String express = content.getExpress();
 			String pattern2 = "yyyy/MM/dd";
 			String pattern1 = "yyyy年MM月dd日";
+			String pattern3 = "yyyy/M/d";
+			String pattern4 = "yyyy年M月d日";
 			if ("yyyy/mm/dd".equals(express)) {
 				Date d1 = getDate(text, pattern1);
 				if (null == d1) {
-					content.setDisplayTexts(text);
-					return;
+					Date d3 = getDate(text,pattern3);
+					if(null==d3){
+						content.setDisplayTexts(text);
+						return;
+					}else{
+						SimpleDateFormat format = new SimpleDateFormat(pattern2);
+						String display = format.format(d3);
+						content.setDisplayTexts(display);
+						return;
+					}
 				} else {
 					SimpleDateFormat format = new SimpleDateFormat(pattern2);
 					String display = format.format(d1);
@@ -511,8 +521,16 @@ public class CellFormateUtil {
 			}else{
 				Date d1 = getDate(text, pattern2);
 				if (null == d1) {
-					content.setDisplayTexts(text);
-					return;
+					Date d4 = getDate(text,pattern4);
+					if(null==d4){
+						content.setDisplayTexts(text);
+						return;
+					}else{
+						SimpleDateFormat format = new SimpleDateFormat(pattern1);
+						String display = format.format(d4);
+						content.setDisplayTexts(display);
+						return;
+					}
 				} else {
 					SimpleDateFormat format = new SimpleDateFormat(pattern1);
 					String display = format.format(d1);
