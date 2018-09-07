@@ -37,6 +37,7 @@ import com.acmr.excel.model.mongo.MSheet;
 import com.acmr.redis.Redis;
 
 
+
 public class HistoryAop {
 
 	private  CopyOnWriteArrayList<History> list;
@@ -102,6 +103,7 @@ public class HistoryAop {
 	@Before("pointCut()")
 	public void beforeAction(JoinPoint joinPoint) {
 		System.out.println("进入切点");
+		
 		methodName = joinPoint.getSignature().getName();
 		System.out.println(joinPoint.getStaticPart().toShortString());
 		System.out.println(joinPoint.getSourceLocation().toString());
