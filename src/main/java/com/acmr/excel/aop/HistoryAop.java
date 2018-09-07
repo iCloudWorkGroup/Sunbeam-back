@@ -36,7 +36,7 @@ import com.acmr.excel.model.mongo.MRowColList;
 import com.acmr.excel.model.mongo.MSheet;
 import com.acmr.redis.Redis;
 
-@Component
+
 public class HistoryAop {
 
 	private  CopyOnWriteArrayList<History> list;
@@ -101,11 +101,11 @@ public class HistoryAop {
 	@SuppressWarnings("unchecked")
 	@Before("pointCut()")
 	public void beforeAction(JoinPoint joinPoint) {
-
+		System.out.println("进入切点");
 		methodName = joinPoint.getSignature().getName();
 		System.out.println(joinPoint.getStaticPart().toShortString());
 		System.out.println(joinPoint.getSourceLocation().toString());
-		System.out.println();
+		
 
 		Object[] arg = joinPoint.getArgs();
 		HttpServletRequest req = (HttpServletRequest) arg[0];
