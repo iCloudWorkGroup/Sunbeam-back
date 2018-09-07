@@ -7,12 +7,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
-
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.acmr.excel.dao.MCellDao;
@@ -38,7 +36,6 @@ import com.acmr.excel.model.mongo.MRowColList;
 import com.acmr.excel.model.mongo.MSheet;
 import com.acmr.redis.Redis;
 
-@Aspect
 @Component
 public class HistoryAop {
 
