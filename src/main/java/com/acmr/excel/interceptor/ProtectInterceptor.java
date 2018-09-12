@@ -32,7 +32,7 @@ public class ProtectInterceptor implements HandlerInterceptor{
 		if(handler instanceof HandlerMethod) {
 		 HandlerMethod handlerMethod = (HandlerMethod)handler;	
 		 String methodName = handlerMethod.getMethod().getName();
-		 System.out.println(handlerMethod.getMethod().getName());
+		 System.out.println("进入拦截器:"+handlerMethod.getMethod().getName());
 		 String excelId = req.getHeader("X-Book-Id");
 		 String sheetId = excelId+0;
 		 if((null != Constant.unInterceptAction.get(methodName))||(null==excelId)){

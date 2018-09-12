@@ -40,7 +40,7 @@ import com.acmr.redis.Redis;
 
 @Component
 @Scope("request")
-public class HistoryAop {
+public class HistoryAop2 {
 
 	private  CopyOnWriteArrayList<History> list;
 

@@ -132,13 +132,13 @@ public class MBookServiceImpl implements MBookService {
 		MRowColList rList = new MRowColList();
 		rList.setId("rList");
 		rList.setSheetId(sheetId);
-		getMRow(rows, mrows, rList, tempList, sheetId);
+		getMRow(excelSheet,rows, mrows, rList, tempList, sheetId);
 		baseDao.insert(excelId, rList);// 向数据库存贮行信息
 		baseDao.threadInsert(excelId, mrows);
 		// baseDao.insertList(excelId, mrows);// 存储行样式
 
-		List<Sheet> sheets = book.getNativeSheet();// 找出合并的单元格
-		getMergeCell(sheets, tempList, sheetId);
+		/*List<Sheet> sheets = book.getNativeSheet();// 找出合并的单元格
+		getMergeCell(sheets, tempList, sheetId);*/
 
 		long start = System.currentTimeMillis();
 		baseDao.threadInsert(excelId, tempList);
@@ -338,7 +338,7 @@ public class MBookServiceImpl implements MBookService {
 		}
 	}
 
-	private void getMRow(List<ExcelRow> rows, List<MRow> mrows,
+	private void getMRow(ExcelSheet excelSheet,List<ExcelRow> rows, List<MRow> mrows,
 			MRowColList rList, List<Object> tempList, String sheetId) {
 		for (int i = 0; i < rows.size(); i++) {
 			ExcelRow excelRow = rows.get(i);
@@ -528,7 +528,8 @@ public class MBookServiceImpl implements MBookService {
 				List<ExcelCell> cells = excelRow.getCells();
 				for (int j = 0; j < cells.size(); j++) {
 					ExcelCell cell = cells.get(j);
-					if (cell != null && cell.getColspan() < 2
+				   if(null!=cell){
+					if (cell.getColspan() < 2
 							&& cell.getRowspan() < 2) {// 判断是否合并单元格
 						int row = i + 1;
 						int col = j + 1;
@@ -541,7 +542,22 @@ public class MBookServiceImpl implements MBookService {
 						mrcl.setCol(col + "");
 						mrcl.setCellId(row + "_" + col);
 						tempList.add(mrcl);
+					}else{
+						if(excelSheet.checkisMegFirstCell(i, j)){
+							int row = i + 1;
+							int col = j + 1;
+							MCell mcell = getMCell(cell, sheetId, row, col);
+							tempList.add(mcell);
+							// 关系映射表
+							MRowColCell mrcl = new MRowColCell();
+							mrcl.setSheetId(sheetId);
+							mrcl.setRow(row + "");
+							mrcl.setCol(col + "");
+							mrcl.setCellId(row + "_" + col);
+							tempList.add(mrcl);
+						}
 					}
+				  }
 				}
 
 			}
@@ -1182,7 +1198,7 @@ public class MBookServiceImpl implements MBookService {
 			font.setBoldweight((short) 400);
 		}
 		if (null == content.getColor()) {
-			ExcelColor fontColor = new ExcelColor();
+			ExcelColor fontColor = new ExcelColor(0,0,0);
 			font.setColor(fontColor);
 		} else {
 			ExcelColor fontColor = ExcelUtil.getColor(content.getColor());

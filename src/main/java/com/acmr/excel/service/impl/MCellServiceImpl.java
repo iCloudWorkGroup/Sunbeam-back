@@ -1643,7 +1643,7 @@ public class MCellServiceImpl implements MCellService {
 		List<Coordinate> coordinates = cell.getCoordinate();
 		String comment = cell.getComment();
 		try {
-			updateProperty(coordinates, excelId, sheetId, "comment", comment);
+			updateProperty(coordinates, excelId, sheetId,step, "comment", comment);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1666,7 +1666,7 @@ public class MCellServiceImpl implements MCellService {
 	}
 
 	public void updateProperty(List<Coordinate> coordinates, String excelId,
-			String sheetId, String property, Object value) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+			String sheetId,int step, String property, Object value) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 		List<RowCol> sortRList = new ArrayList<RowCol>();
 		List<RowCol> sortCList = new ArrayList<RowCol>();
 		mrowColDao.getRowList(sortRList, excelId, sheetId);
@@ -1712,10 +1712,10 @@ public class MCellServiceImpl implements MCellService {
 							mr.setSheetId(sheetId);
 							tempList.add(mr);
 							MCell mc = new MCell(row + "_" + col, sheetId);
-							Field f = mc.getContent().getClass()
+							Field f = mc.getCustomProp().getClass()
 									.getDeclaredField(property);
 							f.setAccessible(true);
-							f.set(mc.getContent(), value);
+							f.set(mc.getCustomProp(), value);
 
 							// 将行、列自带的属性赋值给单元格
 							MRow mrow = mrowDao.getMRow(excelId, sheetId, row);
@@ -1741,6 +1741,9 @@ public class MCellServiceImpl implements MCellService {
 	   if(cellIdList.size()>0){
 		   mcellDao.updateCustomProp(property, value, cellIdList, excelId, sheetId);
 	   }
+	   
+	   msheetDao.updateStep(excelId, sheetId, step);
+	   
 	}
 
 	

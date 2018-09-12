@@ -491,87 +491,93 @@ public class CellFormateUtil {
 	}
 
 	public static void setShowText(Content content) {
-		String type = content.getType();
-		if ("date".equals(type)) {
-			String text = content.getTexts();
-			String express = content.getExpress();
-			String pattern2 = "yyyy/MM/dd";
-			String pattern1 = "yyyy年MM月dd日";
-			String pattern3 = "yyyy/M/d";
-			String pattern4 = "yyyy年M月d日";
-			if ("yyyy/mm/dd".equals(express)) {
-				Date d1 = getDate(text, pattern1);
-				if (null == d1) {
-					Date d3 = getDate(text,pattern3);
-					if(null==d3){
-						content.setDisplayTexts(text);
-						return;
-					}else{
+		try {
+			String type = content.getType();
+			if ("date".equals(type)) {
+				String text = content.getTexts();
+				String express = content.getExpress();
+				String pattern2 = "yyyy/MM/dd";
+				String pattern1 = "yyyy年MM月dd日";
+				String pattern3 = "yyyy/M/d";
+				String pattern4 = "yyyy年M月d日";
+				if ("yyyy/mm/dd".equals(express)) {
+					Date d1 = getDate(text, pattern1);
+					if (null == d1) {
+						Date d3 = getDate(text,pattern3);
+						if(null==d3){
+							content.setDisplayTexts(text);
+							return;
+						}else{
+							SimpleDateFormat format = new SimpleDateFormat(pattern2);
+							String display = format.format(d3);
+							content.setDisplayTexts(display);
+							return;
+						}
+					} else {
 						SimpleDateFormat format = new SimpleDateFormat(pattern2);
-						String display = format.format(d3);
+						String display = format.format(d1);
 						content.setDisplayTexts(display);
 						return;
 					}
-				} else {
-					SimpleDateFormat format = new SimpleDateFormat(pattern2);
-					String display = format.format(d1);
-					content.setDisplayTexts(display);
-					return;
-				}
-			}else{
-				Date d1 = getDate(text, pattern2);
-				if (null == d1) {
-					Date d4 = getDate(text,pattern4);
-					if(null==d4){
-						content.setDisplayTexts(text);
-						return;
-					}else{
+				}else{
+					Date d1 = getDate(text, pattern2);
+					if (null == d1) {
+						Date d4 = getDate(text,pattern4);
+						if(null==d4){
+							content.setDisplayTexts(text);
+							return;
+						}else{
+							SimpleDateFormat format = new SimpleDateFormat(pattern1);
+							String display = format.format(d4);
+							content.setDisplayTexts(display);
+							return;
+						}
+					} else {
 						SimpleDateFormat format = new SimpleDateFormat(pattern1);
-						String display = format.format(d4);
+						String display = format.format(d1);
 						content.setDisplayTexts(display);
 						return;
 					}
-				} else {
-					SimpleDateFormat format = new SimpleDateFormat(pattern1);
-					String display = format.format(d1);
-					content.setDisplayTexts(display);
-					return;
 				}
 			}
-		}
-		XSSFWorkbook wb = new XSSFWorkbook();
-		XSSFSheet sheet = wb.createSheet();
-		XSSFRow row = sheet.createRow(0);
-		XSSFCell cell = row.createCell(0);
+			XSSFWorkbook wb = new XSSFWorkbook();
+			XSSFSheet sheet = wb.createSheet();
+			XSSFRow row = sheet.createRow(0);
+			XSSFCell cell = row.createCell(0);
 
-		switch (type) {
-		case "routine":
-		case "text":
-			cell.setCellValue(content.getTexts());
-			break;
-		case "number":
-		case "currency":
-		case "percent":
-			try {
-				cell.setCellValue(Double.valueOf(content.getTexts()));
-			} catch (Exception e) {
+			switch (type) {
+			case "routine":
+			case "text":
 				cell.setCellValue(content.getTexts());
+				break;
+			case "number":
+			case "currency":
+			case "percent":
+				try {
+					cell.setCellValue(Double.valueOf(content.getTexts()));
+				} catch (Exception e) {
+					cell.setCellValue(content.getTexts());
+				}
+				break;
+			default:
+				break;
 			}
-			break;
-		default:
-			break;
-		}
-		XSSFCellStyle style = cell.getCellStyle();
-		XSSFDataFormat format = wb.createDataFormat();
-		style.setDataFormat(format.getFormat(content.getExpress()));
-		cell.setCellStyle(style);
-		DataFormatter f = new DataFormatter();
-		String text = f.formatCellValue(cell);
-		if ("".equals(text) || null == text) {
+			XSSFCellStyle style = cell.getCellStyle();
+			XSSFDataFormat format = wb.createDataFormat();
+			style.setDataFormat(format.getFormat(content.getExpress()));
+			cell.setCellStyle(style);
+			DataFormatter f = new DataFormatter();
+			String text = f.formatCellValue(cell);
+			if ("".equals(text) || null == text) {
+				content.setDisplayTexts(content.getTexts());
+			} else {
+				content.setDisplayTexts(text);
+			}
+			
+		} catch (Exception e) {
 			content.setDisplayTexts(content.getTexts());
-		} else {
-			content.setDisplayTexts(text);
 		}
+	
 	}
 
 	public static void setShowText(ExcelCell excelCell, Content content) {

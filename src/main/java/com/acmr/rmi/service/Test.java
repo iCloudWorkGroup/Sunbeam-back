@@ -21,6 +21,7 @@ public class Test {
 	   sheet.addColumn();
 	   book1.getSheets().add(sheet);
 	   rmiService.saveExcelBook("123", book1);
+	   rmiService.saveExcelBook("123init", book1);
 	   ExcelBook  book= rmiService.getExcelBook("123", 0);
 	   System.out.println(book);
 }

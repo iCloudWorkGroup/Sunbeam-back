@@ -447,7 +447,7 @@ public class MRowServiceImpl implements MRowService {
 		mrowDao.updateRowHidden(excelId, sheetId, alias, true);
 		mrowColDao.updateRowColLength(excelId, sheetId, "rList", alias, 0);
 		// mcellDao.updateHidden("rowId", alias, true, excelId);
-		msheetDao.updateStep(excelId, "", step);
+		msheetDao.updateStep(excelId, sheetId, step);
 
 	}
 
