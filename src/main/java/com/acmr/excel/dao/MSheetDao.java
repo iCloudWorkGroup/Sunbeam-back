@@ -88,4 +88,6 @@ public interface MSheetDao {
 	 * @param sheetId
 	 */
 	void clearCollection(String excelId);
+	
+	void delCollections();
 }

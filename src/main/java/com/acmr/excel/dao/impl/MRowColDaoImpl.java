@@ -58,7 +58,11 @@ public class MRowColDaoImpl implements MRowColDao,Serializable {
 		sortRcList.add(rowCol);
 		boolean flag = true;
 		while (flag) {
-			int top = rowCol.getTop()+rowCol.getLength()+1;
+			int length = rowCol.getLength();
+			if(length==0){
+				length = -1;
+			}
+			int top = rowCol.getTop()+length+1;
 			rowCol = map.get(rowCol.getAlias());
 			if (null == rowCol) {
 				break;
@@ -87,6 +91,9 @@ public class MRowColDaoImpl implements MRowColDao,Serializable {
 						new Query(Criteria.where("_id").is("cList")
 								.and("sheetId").is(sheetId)),
 						MRowColList.class, excelId);
+		if(null==colList){
+			return;
+		}
 		List<RowCol> cList = colList.getRcList();
 		if (cList.size() == 0) {
 			return;
@@ -109,7 +116,11 @@ public class MRowColDaoImpl implements MRowColDao,Serializable {
 		sortClList.add(rowCol);
 		boolean flag = true;
 		while (flag) {
-			int top = rowCol.getTop()+rowCol.getLength()+1;
+			int length = rowCol.getLength();
+			if(length == 0){
+				length = -1;
+			}
+			int top = rowCol.getTop()+length+1;
 			rowCol = map.get(rowCol.getAlias());
 			
 			if (null == rowCol) {

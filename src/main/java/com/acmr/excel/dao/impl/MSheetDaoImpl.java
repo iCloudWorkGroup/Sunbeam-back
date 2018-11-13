@@ -19,7 +19,7 @@ import com.acmr.excel.model.complete.Content;
 import com.acmr.excel.model.mongo.MSheet;
 
 @Repository("msheetDao")
-public class MSheetDaoImpl implements MSheetDao,Serializable {
+public class MSheetDaoImpl implements MSheetDao, Serializable {
 
 	@Resource
 	private MongoTemplate mongoTemplate;
@@ -102,9 +102,9 @@ public class MSheetDaoImpl implements MSheetDao,Serializable {
 
 	@Override
 	public List<String> getTableList() {
-		 Set<String> set = mongoTemplate.getCollectionNames();
-		 List<String> excels = new ArrayList<>(set);
-		 return excels;
+		Set<String> set = mongoTemplate.getCollectionNames();
+		List<String> excels = new ArrayList<>(set);
+		return excels;
 	}
 
 	@Override
@@ -115,10 +115,10 @@ public class MSheetDaoImpl implements MSheetDao,Serializable {
 		Update update = new Update();
 		setUpdate(update, msheet);
 		mongoTemplate.updateFirst(query, update, MSheet.class, excelId);
-		
+
 	}
-	
-	private void setUpdate(Update update,MSheet msheet){
+
+	private void setUpdate(Update update, MSheet msheet) {
 		try {
 			Class<? extends MSheet> m = msheet.getClass();
 			Field[] mFields = m.getDeclaredFields();
@@ -137,6 +137,14 @@ public class MSheetDaoImpl implements MSheetDao,Serializable {
 	@Override
 	public void clearCollection(String excelId) {
 		mongoTemplate.dropCollection(excelId);
-		
+
+	}
+
+	@Override
+	public void delCollections() {
+		Set<String> set = mongoTemplate.getCollectionNames();
+		for (String id : set) {
+			mongoTemplate.dropCollection(id);
+		}
 	}
 }

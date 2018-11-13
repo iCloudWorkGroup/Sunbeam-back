@@ -15,7 +15,7 @@ public interface MSheetService {
 	 * @param excelId
 	 * @param step
 	 */
-	void frozen(Frozen frozen, String excelId, Integer step);
+	void frozen(String excelId,Frozen frozen,  Integer step);
 
 	/**
 	 * 解除冻结
@@ -48,7 +48,7 @@ public interface MSheetService {
 	 * @param excelId
 	 * @param step
 	 */
-	void paste(OuterPaste paste, String excelId, Integer step);
+	void paste(String excelId,OuterPaste paste, Integer step);
 
 	/**
 	 * 判断是否可以进行外部粘贴粘贴
@@ -84,7 +84,7 @@ public interface MSheetService {
 	 * @param excelId
 	 * @param step
 	 */
-	void cut(Copy copy, String excelId, Integer step);
+	void cut(String excelId,Copy copy,  Integer step);
 
 	/**
 	 * 复制
@@ -93,7 +93,7 @@ public interface MSheetService {
 	 * @param excelId
 	 * @param step
 	 */
-	void copy(Copy copy, String excelId, Integer step);
+	void copy(String excelId,Copy copy,  Integer step);
 	
 	/**
 	 * 前进
@@ -112,5 +112,5 @@ public interface MSheetService {
 	 * @param sheetParam
 	 * @param excelId
 	 */
-	void updateProtect(String excelId,MSheet msheet);
+	boolean updateProtect(String excelId,MSheet msheet);
 }

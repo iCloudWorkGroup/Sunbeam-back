@@ -7,6 +7,7 @@ public class Validate {
 
 	private Rule rule;
 	private List<Coordinate> coordinates = new ArrayList<Coordinate>();
+	private int count;//用于统计有多少个单元格引用这条验证
 
 	public Rule getRule() {
 		return rule;
@@ -22,6 +23,14 @@ public class Validate {
 
 	public void setCoordinates(List<Coordinate> coordinates) {
 		this.coordinates = coordinates;
+	}
+
+	public int getCount() {
+		return count;
+	}
+
+	public void setCount(int count) {
+		this.count = count;
 	}
 
 }

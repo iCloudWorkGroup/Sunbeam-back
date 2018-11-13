@@ -2,8 +2,10 @@ package com.acmr.excel.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Resource;
 
@@ -54,6 +56,7 @@ import acmr.excel.pojo.ExcelCell;
 import acmr.excel.pojo.ExcelCellStyle;
 import acmr.excel.pojo.ExcelColor;
 import acmr.excel.pojo.ExcelColumn;
+import acmr.excel.pojo.ExcelDataValidation;
 import acmr.excel.pojo.ExcelFont;
 import acmr.excel.pojo.ExcelRow;
 import acmr.excel.pojo.ExcelSheet;
@@ -103,12 +106,28 @@ public class MBookServiceImpl implements MBookService {
 		ExcelSheetFreeze freeze = excelSheet.getFreeze();
 		if (null != freeze) {
 			msheet.setFreeze(freeze.isFreeze());
+			/* if(freeze.getActivepan()==0){ */
 			msheet.setViewRowAlias(Integer
 					.toString(freeze.getFirstrow() + 1 - freeze.getRow()));
 			msheet.setViewColAlias(Integer
 					.toString(freeze.getFirstcol() + 1 - freeze.getCol()));
 			msheet.setRowAlias(Integer.toString(freeze.getFirstrow() + 1));
 			msheet.setColAlias(Integer.toString(freeze.getFirstcol() + 1));
+			/*
+			 * }else if(freeze.getActivepan() == 1 ){
+			 * msheet.setViewRowAlias(Integer .toString(freeze.getFirstrow() + 1
+			 * - freeze.getRow())); msheet.setViewColAlias(Integer
+			 * .toString(freeze.getFirstcol() + 1 - freeze.getCol()));
+			 * msheet.setRowAlias(Integer.toString(freeze.getFirstrow()));
+			 * msheet.setColAlias(Integer.toString(freeze.getFirstcol()+1));
+			 * }else if(freeze.getActivepan() == 2){
+			 * msheet.setViewRowAlias(Integer .toString(freeze.getFirstrow() + 1
+			 * - freeze.getRow())); msheet.setViewColAlias(Integer
+			 * .toString(freeze.getFirstcol() + 1 - freeze.getCol()));
+			 * msheet.setRowAlias(Integer.toString(freeze.getFirstrow()+1));
+			 * msheet.setColAlias(Integer.toString(freeze.getFirstcol())); }
+			 */
+
 		} else {
 			msheet.setFreeze(false);
 			msheet.setViewColAlias("1");
@@ -132,20 +151,21 @@ public class MBookServiceImpl implements MBookService {
 		MRowColList rList = new MRowColList();
 		rList.setId("rList");
 		rList.setSheetId(sheetId);
-		getMRow(excelSheet,rows, mrows, rList, tempList, sheetId);
+		getMRow(excelSheet, rows, mrows, rList, tempList, sheetId);
 		baseDao.insert(excelId, rList);// 向数据库存贮行信息
 		baseDao.threadInsert(excelId, mrows);
 		// baseDao.insertList(excelId, mrows);// 存储行样式
 
-		/*List<Sheet> sheets = book.getNativeSheet();// 找出合并的单元格
-		getMergeCell(sheets, tempList, sheetId);*/
+		/*
+		 * List<Sheet> sheets = book.getNativeSheet();// 找出合并的单元格
+		 * getMergeCell(sheets, tempList, sheetId);
+		 */
 
 		long start = System.currentTimeMillis();
 		baseDao.threadInsert(excelId, tempList);
 		// baseDao.insertList(excelId, tempList);
 		long end = System.currentTimeMillis() - start;
 		System.out.println("存储时间为:" + end);
-
 		return true;
 
 	}
@@ -160,22 +180,23 @@ public class MBookServiceImpl implements MBookService {
 			MCol mcol = new MCol();
 			RowCol rc = new RowCol();
 
-			rc.setAlias(excelColumn.getCode());
+			rc.setAlias((i + 1) + "");
 			if (i > 0) {
 
-				rc.setPreAlias(cols.get(i - 1).getCode());// 存贮它前一行的别名
+				rc.setPreAlias(i + "");// 存贮它前一行的别名
 			}
 			mcol.setSheetId(sheetId);
-			mcol.setAlias(excelColumn.getCode());
+			mcol.setAlias((i + 1) + "");
 			boolean hidden = excelColumn.isColumnhidden();
+			int width = excelColumn.getWidth() * 4 / 3;
 			if (hidden) {
 				mcol.setHidden(true);
 				mcol.setWidth(excelColumn.getWidth());
 				rc.setLength(0);
 			} else {
-				mcol.setWidth(excelColumn.getWidth());
+				mcol.setWidth(width);
 				mcol.setHidden(false);
-				rc.setLength(excelColumn.getWidth());
+				rc.setLength(width);
 			}
 
 			cList.getRcList().add(rc);// 存简化列属性
@@ -186,7 +207,7 @@ public class MBookServiceImpl implements MBookService {
 			Content content = operProp.getContent();
 			switch (style.getAlign()) {
 			case 1:
-				content.setAlignRow(null);
+				content.setAlignRow("left");
 				break;
 			case 2:
 				content.setAlignRow("center");
@@ -196,12 +217,12 @@ public class MBookServiceImpl implements MBookService {
 				break;
 
 			default:
-
+				content.setAlignRow(null);
 				break;
 			}
 			switch (style.getValign()) {
 			case 0:
-				content.setAlignCol(null);
+				content.setAlignCol("top");
 				break;
 			case 1:
 				content.setAlignCol("middle");
@@ -209,9 +230,8 @@ public class MBookServiceImpl implements MBookService {
 			case 2:
 				content.setAlignCol("bottom");
 				break;
-
 			default:
-
+				content.setAlignCol(null);
 				break;
 			}
 
@@ -279,6 +299,11 @@ public class MBookServiceImpl implements MBookService {
 				content.setBackground(
 						CellFormateUtil.getBackground(style.getFgcolor()));
 			}
+
+			if (style.getPattern() == 0) {
+				content.setBackground(null);
+			}
+
 			if (style.isLocked()) {
 				content.setLocked(null);
 			} else {
@@ -297,8 +322,10 @@ public class MBookServiceImpl implements MBookService {
 					border.setTop(2);
 				} else if (topBorder == 1) {
 					border.setTop(1);
-				} else {
+				} else if (topBorder == 0) {
 					border.setTop(null);
+				} else {
+					border.setTop(1);
 				}
 			}
 			Excelborder excelBottomborder = style.getBottomborder();
@@ -308,8 +335,10 @@ public class MBookServiceImpl implements MBookService {
 					border.setBottom(2);
 				} else if (bottomBorder == 1) {
 					border.setBottom(1);
-				} else {
+				} else if (bottomBorder == 0) {
 					border.setBottom(null);
+				} else {
+					border.setBottom(1);
 				}
 			}
 			Excelborder excelLeftborder = style.getLeftborder();
@@ -319,8 +348,10 @@ public class MBookServiceImpl implements MBookService {
 					border.setLeft(2);
 				} else if (leftBorder == 1) {
 					border.setLeft(1);
-				} else {
+				} else if (leftBorder == 0) {
 					border.setLeft(null);
+				} else {
+					border.setLeft(1);
 				}
 			}
 			Excelborder excelRightborder = style.getRightborder();
@@ -330,16 +361,19 @@ public class MBookServiceImpl implements MBookService {
 					border.setRight(2);
 				} else if (rightBorder == 1) {
 					border.setRight(1);
-				} else {
+				} else if (rightBorder == 0) {
 					border.setRight(null);
+				} else {
+					border.setRight(1);
 				}
 			}
 
 		}
 	}
 
-	private void getMRow(ExcelSheet excelSheet,List<ExcelRow> rows, List<MRow> mrows,
-			MRowColList rList, List<Object> tempList, String sheetId) {
+	private void getMRow(ExcelSheet excelSheet, List<ExcelRow> rows,
+			List<MRow> mrows, MRowColList rList, List<Object> tempList,
+			String sheetId) {
 		for (int i = 0; i < rows.size(); i++) {
 			ExcelRow excelRow = rows.get(i);
 			if (excelRow != null) {
@@ -349,23 +383,24 @@ public class MBookServiceImpl implements MBookService {
 				MRow mrow = new MRow();
 				RowCol rc = new RowCol();
 
-				rc.setAlias(excelRow.getCode());
+				rc.setAlias((i + 1) + "");
 				if (i > 0) {
 
-					rc.setPreAlias(rows.get(i - 1).getCode());// 存贮它前一行的别名
+					rc.setPreAlias(i + "");// 存贮它前一行的别名
 				}
 
 				mrow.setSheetId(sheetId);
-				mrow.setAlias(excelRow.getCode());
+				mrow.setAlias((i + 1) + "");
 				boolean hidden = excelRow.isRowhidden();
+				int height = excelRow.getHeight() * 4 / 3;
 				if (hidden) {
 					mrow.setHidden(true);
-					mrow.setHeight(excelRow.getHeight());
+					mrow.setHeight(height);
 					rc.setLength(0);
 				} else {
-					mrow.setHeight(excelRow.getHeight());
+					mrow.setHeight(height);
 					mrow.setHidden(false);
-					rc.setLength(excelRow.getHeight());
+					rc.setLength(height);
 				}
 
 				rList.getRcList().add(rc);// 存简化行属性
@@ -377,7 +412,7 @@ public class MBookServiceImpl implements MBookService {
 
 				switch (style.getAlign()) {
 				case 1:
-					content.setAlignRow(null);
+					content.setAlignRow("left");
 					break;
 				case 2:
 					content.setAlignRow("center");
@@ -387,12 +422,12 @@ public class MBookServiceImpl implements MBookService {
 					break;
 
 				default:
-
+					content.setAlignRow(null);
 					break;
 				}
 				switch (style.getValign()) {
 				case 0:
-					content.setAlignCol(null);
+					content.setAlignCol("top");
 					break;
 				case 1:
 					content.setAlignCol("middle");
@@ -402,7 +437,7 @@ public class MBookServiceImpl implements MBookService {
 					break;
 
 				default:
-
+					content.setAlignCol(null);
 					break;
 				}
 
@@ -468,6 +503,11 @@ public class MBookServiceImpl implements MBookService {
 					content.setBackground(
 							CellFormateUtil.getBackground(style.getFgcolor()));
 				}
+
+				if (style.getPattern() == 0) {
+					content.setBackground(null);
+				}
+
 				if (style.isLocked()) {
 					content.setLocked(null);
 				} else {
@@ -486,8 +526,10 @@ public class MBookServiceImpl implements MBookService {
 						border.setTop(2);
 					} else if (topBorder == 1) {
 						border.setTop(1);
-					} else {
+					} else if (topBorder == 0) {
 						border.setTop(null);
+					} else {
+						border.setTop(1);
 					}
 				}
 				Excelborder excelBottomborder = style.getBottomborder();
@@ -497,8 +539,10 @@ public class MBookServiceImpl implements MBookService {
 						border.setBottom(2);
 					} else if (bottomBorder == 1) {
 						border.setBottom(1);
-					} else {
+					} else if (bottomBorder == 0) {
 						border.setBottom(null);
+					} else {
+						border.setBottom(1);
 					}
 				}
 				Excelborder excelLeftborder = style.getLeftborder();
@@ -508,8 +552,10 @@ public class MBookServiceImpl implements MBookService {
 						border.setLeft(2);
 					} else if (leftBorder == 1) {
 						border.setLeft(1);
-					} else {
+					} else if (leftBorder == 0) {
 						border.setLeft(null);
+					} else {
+						border.setLeft(1);
 					}
 				}
 				Excelborder excelRightborder = style.getRightborder();
@@ -519,8 +565,10 @@ public class MBookServiceImpl implements MBookService {
 						border.setRight(2);
 					} else if (rightBorder == 1) {
 						border.setRight(1);
-					} else {
+					} else if (rightBorder == 0) {
 						border.setRight(null);
+					} else {
+						border.setRight(1);
 					}
 				}
 
@@ -528,22 +576,8 @@ public class MBookServiceImpl implements MBookService {
 				List<ExcelCell> cells = excelRow.getCells();
 				for (int j = 0; j < cells.size(); j++) {
 					ExcelCell cell = cells.get(j);
-				   if(null!=cell){
-					if (cell.getColspan() < 2
-							&& cell.getRowspan() < 2) {// 判断是否合并单元格
-						int row = i + 1;
-						int col = j + 1;
-						MCell mcell = getMCell(cell, sheetId, row, col);
-						tempList.add(mcell);
-						// 关系映射表
-						MRowColCell mrcl = new MRowColCell();
-						mrcl.setSheetId(sheetId);
-						mrcl.setRow(row + "");
-						mrcl.setCol(col + "");
-						mrcl.setCellId(row + "_" + col);
-						tempList.add(mrcl);
-					}else{
-						if(excelSheet.checkisMegFirstCell(i, j)){
+					if (null != cell) {
+						if (cell.getColspan() < 2 && cell.getRowspan() < 2) {// 判断是否合并单元格
 							int row = i + 1;
 							int col = j + 1;
 							MCell mcell = getMCell(cell, sheetId, row, col);
@@ -555,9 +589,35 @@ public class MBookServiceImpl implements MBookService {
 							mrcl.setCol(col + "");
 							mrcl.setCellId(row + "_" + col);
 							tempList.add(mrcl);
+						} else {
+							if (excelSheet.checkisMegFirstCell(i, j)) {
+								int row = i + 1;
+								int col = j + 1;
+								MCell mcell = getMCell(cell, sheetId, row, col);
+								tempList.add(mcell);
+								// 关系映射表
+								MRowColCell mrcl = new MRowColCell();
+								mrcl.setSheetId(sheetId);
+								mrcl.setRow(row + "");
+								mrcl.setCol(col + "");
+								mrcl.setCellId(row + "_" + col);
+								tempList.add(mrcl);
+							} else {
+								int[] ids = excelSheet.getMergFirstCell(i, j);
+								int row = i + 1;
+								int col = j + 1;
+								// 关系映射表
+								MRowColCell mrcl = new MRowColCell();
+								mrcl.setSheetId(sheetId);
+								mrcl.setRow(row + "");
+								mrcl.setCol(col + "");
+
+								mrcl.setCellId(
+										(ids[0] + 1) + "_" + (ids[1] + 1));
+								tempList.add(mrcl);
+							}
 						}
 					}
-				  }
 				}
 
 			}
@@ -583,8 +643,10 @@ public class MBookServiceImpl implements MBookService {
 				border.setTop(2);
 			} else if (topBorder == 1) {
 				border.setTop(1);
-			} else {
+			} else if (topBorder == 0) {
 				border.setTop(0);
+			} else {
+				border.setTop(1);
 			}
 		}
 
@@ -595,8 +657,10 @@ public class MBookServiceImpl implements MBookService {
 				border.setBottom(2);
 			} else if (bottomBorder == 1) {
 				border.setBottom(1);
-			} else {
+			} else if (bottomBorder == 0) {
 				border.setBottom(0);
+			} else {
+				border.setBottom(1);
 			}
 		}
 		Excelborder excelLeftborder = style.getLeftborder();
@@ -606,8 +670,10 @@ public class MBookServiceImpl implements MBookService {
 				border.setLeft(2);
 			} else if (leftBorder == 1) {
 				border.setLeft(1);
-			} else {
+			} else if (leftBorder == 0) {
 				border.setLeft(0);
+			} else {
+				border.setLeft(1);
 			}
 		}
 		Excelborder excelRightborder = style.getRightborder();
@@ -617,8 +683,10 @@ public class MBookServiceImpl implements MBookService {
 				border.setRight(2);
 			} else if (rightBorder == 1) {
 				border.setRight(1);
-			} else {
+			} else if (rightBorder == 0) {
 				border.setRight(0);
+			} else {
+				border.setRight(1);
 			}
 		}
 
@@ -635,7 +703,7 @@ public class MBookServiceImpl implements MBookService {
 			break;
 
 		default:
-
+			content.setAlignRow(null);
 			break;
 		}
 		switch (style.getValign()) {
@@ -650,7 +718,7 @@ public class MBookServiceImpl implements MBookService {
 			break;
 
 		default:
-
+			content.setAlignCol(null);
 			break;
 		}
 
@@ -688,17 +756,22 @@ public class MBookServiceImpl implements MBookService {
 		content.setItalic(font.isItalic());
 		content.setSize(font.getSize() / 20 + "");
 		content.setTexts(excelCell.getText());
-		CellFormateUtil.setShowText(excelCell, content);
+		content.setType(CellFormateUtil.TypeToMtype(excelCell.getType()));
+		content.setExpress(style.getDataformat());
+		CellFormateUtil.setShowText(content, excelCell.getValue());
 
 		content.setUnderline((int) font.getUnderline());
 		content.setWordWrap(style.isWraptext());
-		content.setType(CellFormateUtil.TypeToMtype(excelCell.getType()));
-		content.setExpress(style.getDataformat());
+
 		ExcelColor color = style.getFgcolor();
 		if (color != null) {
 			int[] rgb = color.getRGBInt();
 			content.setBackground(ExcelUtil.getRGB(rgb));
 		} else {
+			content.setBackground(null);
+		}
+
+		if (style.getPattern() == 0) {
 			content.setBackground(null);
 		}
 
@@ -785,7 +858,25 @@ public class MBookServiceImpl implements MBookService {
 		mrowColDao.getRowList(sortRList, excelId, sheetId);
 		mrowColDao.getColList(sortCList, excelId, sheetId);
 		if (type == 0) {
-			addRowOrCol(excelId, sheetId, sortRList, sortCList, rowEnd, colEnd);
+			int rowHeight;
+			if (sortRList.size() == 0) {
+				rowHeight = 0;
+			} else {
+				RowCol rowTop = sortRList.get(sortRList.size() - 1);
+				rowHeight = rowTop.getTop() + rowTop.getLength();
+			}
+
+			int colWeight;
+			if (sortCList.size() == 0) {
+				colWeight = 0;
+			} else {
+				RowCol colTop = sortCList.get(sortCList.size() - 1);
+				colWeight = colTop.getTop() + colTop.getLength();
+			}
+			if (rowEnd > rowHeight || colEnd > colWeight) {
+				addRowOrCol(excelId, sheetId, sortRList, sortCList, rowEnd,
+						colEnd, rowHeight, colWeight);
+			}
 		}
 
 		Map<String, Integer> rMap = new HashMap<String, Integer>();
@@ -1008,6 +1099,8 @@ public class MBookServiceImpl implements MBookService {
 			cellMap.put(mc.getId(), mc);
 		}
 
+		Set<MCell> mcellSet = new HashSet<MCell>();
+
 		for (int i = 0; i < rowList.size(); i++) {
 			String rowId = rowList.get(i);
 			MRow mrow = rowMap.get(rowId);
@@ -1030,10 +1123,35 @@ public class MBookServiceImpl implements MBookService {
 					cells.add(null);
 				} else {
 					MCell mc = cellMap.get(cellId);
-					ExcelCell cell = getExcelCell(mc);
-					cells.add(cell);
+					if (mc.getRowspan() < 2 && mc.getColspan() < 2) {
+						ExcelCell cell = getExcelCell(mc);
+						cells.add(cell);
+						
+						ExcelDataValidation  edv = new ExcelDataValidation();
+						
+						
+						
+						
+					} else {
+						cells.add(null);
+						mcellSet.add(mc);
+					}
+
 				}
 
+			}
+		}
+
+		// 处理合并单元格
+		for (MCell mc : mcellSet) {
+			ExcelCell cell = getExcelCell(mc);
+			String[] ids = mc.getId().split("_");
+			int row = Integer.parseInt(ids[0]) - 1;
+			int col = Integer.parseInt(ids[1]) - 1;
+			for (int i = row; i < row + mc.getRowspan(); i++) {
+				for (int j = col; j < col + mc.getColspan(); j++) {
+					rows.get(i).set(j, cell);
+				}
 			}
 		}
 
@@ -1043,20 +1161,29 @@ public class MBookServiceImpl implements MBookService {
 		} else {
 			sheet.setName(msheet.getSheetName());
 		}
-		ExcelSheetFreeze freeze = new ExcelSheetFreeze();
+		ExcelSheetFreeze freeze = null;
 		if (null != msheet.getFreeze() && msheet.getFreeze()) {
+			freeze = new ExcelSheetFreeze();
 			freeze.setFreeze(msheet.getFreeze());
+			
+			freeze.setActivepan(0);
 			int firstRow = rMap.get(msheet.getRowAlias());
+			if(firstRow == 0){//整列冻结
+				freeze.setActivepan(1);
+			}
 			freeze.setFirstrow(firstRow);
-			int firstCol = cMap.get(msheet.getColAlias());
-			freeze.setFirstcol(firstCol);
 			int viewRow = rMap.get(msheet.getViewRowAlias());
-			int viewCol = cMap.get(msheet.getViewColAlias());
 			freeze.setRow(firstRow - viewRow);
+			
+			
+			int firstCol = cMap.get(msheet.getColAlias());
+			if(firstCol == 0){//整行冻结
+				freeze.setActivepan(2);
+			}
+			freeze.setFirstcol(firstCol);
+			int viewCol = cMap.get(msheet.getViewColAlias());
 			freeze.setCol(firstCol - viewCol);
-
-		} else {
-			freeze.setFreeze(false);
+			
 		}
 		sheet.setFreeze(freeze);
 		sheet.setMaxcol(colList.size());
@@ -1074,6 +1201,7 @@ public class MBookServiceImpl implements MBookService {
 
 	private ExcelCell getExcelCell(MCell mcell) {
 		ExcelCell cell = new ExcelCell();
+		ExcelCellStyle style = new ExcelCellStyle();
 
 		Content content = mcell.getContent();
 		Border border = mcell.getBorder();
@@ -1081,19 +1209,39 @@ public class MBookServiceImpl implements MBookService {
 
 		cell.setRowspan(mcell.getRowspan());
 		cell.setColspan(mcell.getColspan());
-		cell.setText(content.getDisplayTexts());
-		cell.setValue(content.getTexts());
+
 		if (null == content.getType()) {
 			cell.setType(CELLTYPE.STRING);
 		} else {
 			cell.setType(CellFormateUtil.MTypeToType(content.getType()));
 		}
 
+		if (null == content.getExpress()) {
+			style.setDataformat("General");
+		} else {
+			style.setDataformat(content.getExpress());
+		}
+
+		cell.setText(content.getDisplayTexts());
+		if (CELLTYPE.NUMERIC == cell.getType()) {
+			CellFormateUtil.NumToExcel(style);
+			try {
+				cell.setValue(Double.parseDouble(content.getTexts()));
+				cell.setText(content.getTexts());
+			} catch (Exception e) {
+				cell.setValue(content.getTexts());
+			}
+
+		} else if (CELLTYPE.DATE == cell.getType()) {
+			CellFormateUtil.DateToExcel(cell, content, style);
+		} else {
+			cell.setValue(content.getTexts());
+		}
+
 		cell.setMemo(cp.getComment());
 
-		ExcelCellStyle style = new ExcelCellStyle();
 		if (null == content.getAlignRow()) {
-			style.setAlign((short) 1);
+			style.setAlign((short) 0);
 		} else {
 			switch (content.getAlignRow()) {
 			case "left":
@@ -1106,13 +1254,13 @@ public class MBookServiceImpl implements MBookService {
 				style.setAlign((short) 3);
 				break;
 			default:
-				style.setAlign((short) 2);
+				style.setAlign((short) 0);
 				break;
 			}
 		}
 
 		if (null == content.getAlignCol()) {
-			style.setValign((short) 0);
+			style.setValign((short) 1);
 		} else {
 			switch (content.getAlignCol()) {
 			case "top":
@@ -1198,8 +1346,8 @@ public class MBookServiceImpl implements MBookService {
 			font.setBoldweight((short) 400);
 		}
 		if (null == content.getColor()) {
-			ExcelColor fontColor = new ExcelColor(0,0,0);
-			font.setColor(fontColor);
+
+			font.setColor(null);
 		} else {
 			ExcelColor fontColor = ExcelUtil.getColor(content.getColor());
 			font.setColor(fontColor);
@@ -1216,22 +1364,15 @@ public class MBookServiceImpl implements MBookService {
 		}
 		style.setFont(font);
 		if (null == content.getBackground()) {
-			ExcelColor fgcolor = new ExcelColor(0, 0, 0);
-			style.setFgcolor(fgcolor);
-			ExcelColor bgcolor = new ExcelColor(0, 0, 0);
-			style.setBgcolor(bgcolor);
+			style.setFgcolor(null);
+			style.setPattern((short) 0);
+		} else if ("transparent".equals(content.getBackground())) {
+			style.setFgcolor(null);
+			style.setPattern((short) 0);
 		} else {
 			ExcelColor fgcolor = ExcelUtil.getColor(content.getBackground());
 			style.setFgcolor(fgcolor);
-			ExcelColor bgcolor = new ExcelColor(0, 0, 0);
-			style.setBgcolor(bgcolor);
 			style.setPattern((short) 1);
-		}
-
-		if (null == content.getExpress()) {
-			style.setDataformat("General");
-		} else {
-			style.setDataformat(content.getExpress());
 		}
 
 		if (null == content.getWordWrap()) {
@@ -1257,7 +1398,7 @@ public class MBookServiceImpl implements MBookService {
 		Border border = mrow.getProps().getBorder();
 		CustomProp cp = mrow.getProps().getCustomProp();
 
-		row.setHeight(mrow.getHeight());
+		row.setHeight(mrow.getHeight() * 3 / 4);
 		try {
 			row.setCode(mrow.getAlias());
 		} catch (ExcelException e) {
@@ -1266,13 +1407,15 @@ public class MBookServiceImpl implements MBookService {
 		}
 		if (null == mrow.getHidden()) {
 			row.setRowhidden(false);
+			row.getCellstyle().setHidden(false);
 		} else {
 			row.setRowhidden(mrow.getHidden());
+			row.getCellstyle().setHidden(mrow.getHidden());
 		}
 
 		ExcelCellStyle style = new ExcelCellStyle();
 		if (null == content.getAlignRow()) {
-			style.setAlign((short) 1);
+			style.setAlign((short) 0);
 		} else {
 			switch (content.getAlignRow()) {
 			case "left":
@@ -1285,13 +1428,13 @@ public class MBookServiceImpl implements MBookService {
 				style.setAlign((short) 3);
 				break;
 			default:
-				style.setAlign((short) 2);
+				style.setAlign((short) 0);
 				break;
 			}
 		}
 
 		if (null == content.getAlignCol()) {
-			style.setValign((short) 0);
+			style.setValign((short) 1);
 		} else {
 			switch (content.getAlignCol()) {
 			case "top":
@@ -1377,8 +1520,8 @@ public class MBookServiceImpl implements MBookService {
 			font.setBoldweight((short) 400);
 		}
 		if (null == content.getColor()) {
-			ExcelColor fontColor = new ExcelColor();
-			font.setColor(fontColor);
+
+			font.setColor(null);
 		} else {
 			ExcelColor fontColor = ExcelUtil.getColor(content.getColor());
 			font.setColor(fontColor);
@@ -1395,8 +1538,11 @@ public class MBookServiceImpl implements MBookService {
 		}
 		style.setFont(font);
 		if (null == content.getBackground()) {
-			ExcelColor fgcolor = new ExcelColor(0, 0, 0);
-			style.setFgcolor(fgcolor);
+			style.setFgcolor(null);
+			style.setPattern((short) 0);
+		} else if ("transparent".equals(content.getBackground())) {
+			style.setFgcolor(null);
+			style.setPattern((short) 0);
 		} else {
 			ExcelColor fgcolor = ExcelUtil.getColor(content.getBackground());
 			style.setFgcolor(fgcolor);
@@ -1433,7 +1579,7 @@ public class MBookServiceImpl implements MBookService {
 		Border border = mcol.getProps().getBorder();
 		CustomProp cp = mcol.getProps().getCustomProp();
 
-		col.setWidth(mcol.getWidth());
+		col.setWidth(mcol.getWidth() * 3 / 4);
 		try {
 			col.setCode(mcol.getAlias());
 		} catch (ExcelException e) {
@@ -1442,13 +1588,15 @@ public class MBookServiceImpl implements MBookService {
 		}
 		if (null == mcol.getHidden()) {
 			col.setColumnhidden(false);
+			col.getCellstyle().setHidden(false);
 		} else {
 			col.setColumnhidden(mcol.getHidden());
+			col.getCellstyle().setHidden(mcol.getHidden());
 		}
 
 		ExcelCellStyle style = new ExcelCellStyle();
 		if (null == content.getAlignRow()) {
-			style.setAlign((short) 1);
+			style.setAlign((short) 0);
 		} else {
 			switch (content.getAlignRow()) {
 			case "left":
@@ -1461,13 +1609,13 @@ public class MBookServiceImpl implements MBookService {
 				style.setAlign((short) 3);
 				break;
 			default:
-				style.setAlign((short) 2);
+				style.setAlign((short) 0);
 				break;
 			}
 		}
 
 		if (null == content.getAlignCol()) {
-			style.setValign((short) 0);
+			style.setValign((short) 1);
 		} else {
 			switch (content.getAlignCol()) {
 			case "top":
@@ -1552,8 +1700,8 @@ public class MBookServiceImpl implements MBookService {
 			font.setBoldweight((short) 400);
 		}
 		if (null == content.getColor()) {
-			ExcelColor fontColor = new ExcelColor();
-			font.setColor(fontColor);
+
+			font.setColor(null);
 		} else {
 			ExcelColor fontColor = ExcelUtil.getColor(content.getColor());
 			font.setColor(fontColor);
@@ -1569,9 +1717,13 @@ public class MBookServiceImpl implements MBookService {
 			font.setItalic(content.getItalic());
 		}
 		style.setFont(font);
+
 		if (null == content.getBackground()) {
-			ExcelColor fgcolor = new ExcelColor(0, 0, 0);
-			style.setFgcolor(fgcolor);
+			style.setFgcolor(null);
+			style.setPattern((short) 0);
+		} else if ("transparent".equals(content.getBackground())) {
+			style.setFgcolor(null);
+			style.setPattern((short) 0);
 		} else {
 			ExcelColor fgcolor = ExcelUtil.getColor(content.getBackground());
 			style.setFgcolor(fgcolor);
@@ -1600,19 +1752,13 @@ public class MBookServiceImpl implements MBookService {
 		return col;
 	}
 
-	private void addRowOrCol(String excelId, String sheetId,
+	private synchronized void addRowOrCol(String excelId, String sheetId,
 			List<RowCol> sortRList, List<RowCol> sortCList, int rowEnd,
-			int colEnd) {
+			int colEnd, int rowHeight, int colWeight) {
 		MSheet msheet = msheetDao.getMSheet(excelId, sheetId);
 		int maxRow = msheet.getMaxrow();
 		int maxCol = msheet.getMaxcol();
-		int rowHeight;
-		if (sortRList.size() == 0) {
-			rowHeight = 0;
-		} else {
-			RowCol rowTop = sortRList.get(sortRList.size() - 1);
-			rowHeight = rowTop.getTop() + rowTop.getLength();
-		}
+		System.out.println("获取行值：" + maxRow + ";获取列值：" + maxCol);
 
 		if (rowEnd > rowHeight) {
 			int length = rowEnd - rowHeight;
@@ -1651,13 +1797,8 @@ public class MBookServiceImpl implements MBookService {
 				sortRList.add(rowCol);
 
 			}
-		}
-		int colWeight;
-		if (sortCList.size() == 0) {
-			colWeight = 0;
-		} else {
-			RowCol colTop = sortCList.get(sortCList.size() - 1);
-			colWeight = colTop.getTop() + colTop.getLength();
+
+			msheet.setMaxrow(maxRow);
 		}
 
 		if (colEnd > colWeight) {
@@ -1695,11 +1836,10 @@ public class MBookServiceImpl implements MBookService {
 				sortCList.add(rowCol);
 
 			}
-
 			msheet.setMaxcol(maxCol);
-			msheet.setMaxrow(maxRow);
-			baseDao.update(excelId, msheet);// 更新最大行，最大列
 		}
+
+		baseDao.update(excelId, msheet);// 更新最大行，最大列
 	}
 
 	private int getIndexByPixel(List<RowCol> sortRclist, int pixel) {
@@ -1724,7 +1864,7 @@ public class MBookServiceImpl implements MBookService {
 
 	private int getIndexByPixelBegin(List<RowCol> sortRclist, int pixel) {
 		if (sortRclist.size() == 0) {
-			return 0;
+			return -1;
 		}
 
 		RowCol rowColTop = sortRclist.get(sortRclist.size() - 1);
@@ -1748,8 +1888,8 @@ public class MBookServiceImpl implements MBookService {
 		}
 		Glx glx = glxList.get(i - 1);
 		int tempWidth = glx.getWidth();
-		if (null != glx.getHidden() && glx.getHidden()) {
-			tempWidth = 0;
+		if ((null != glx.getHidden() && glx.getHidden()) || (tempWidth == 0)) {
+			tempWidth = -1;
 		}
 		return glx.getLeft() + tempWidth + 1;
 	}
@@ -1760,8 +1900,8 @@ public class MBookServiceImpl implements MBookService {
 		}
 		Gly gly = glyList.get(i - 1);
 		int tempHeight = gly.getHeight();
-		if (null != gly.getHidden() && gly.getHidden()) {
-			tempHeight = 0;
+		if ((null != gly.getHidden() && gly.getHidden()) || (tempHeight == 0)) {
+			tempHeight = -1;
 		}
 
 		return gly.getTop() + tempHeight + 1;
@@ -1771,6 +1911,13 @@ public class MBookServiceImpl implements MBookService {
 	public List<String> getExcels() {
 
 		return msheetDao.getTableList();
+	}
+
+	@Override
+	public void delCollections() {
+
+		msheetDao.delCollections();
+
 	}
 
 }

@@ -52,5 +52,9 @@ public class OperatorConstant {
 	public static final int redo = 35;
 	//单元格锁定
 	public static final int cellLock =38; 
+	
+	public static final int clearCell = 39;
+	
+	public static final int protect = 40;
 
 }

@@ -1,15 +1,16 @@
 package com.acmr.excel.model.history;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.acmr.excel.model.mongo.MCol;
 
 public class MColBefore implements Serializable{
   
-	private List<String> idList;
+	private List<String> idList = new ArrayList<String>();
 	
-	private List<MCol> mcolList;
+	private List<MCol> mcolList = new ArrayList<MCol>();
 
 	public List<String> getIdList() {
 		return idList;
@@ -30,5 +31,8 @@ public class MColBefore implements Serializable{
 	public MColBefore(List<String> idList,List<MCol> mcolList){
 		this.idList = idList;
 		this.mcolList = mcolList;
+	}
+	public MColBefore(){
+		
 	}
 }

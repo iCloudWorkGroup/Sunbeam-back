@@ -7,6 +7,7 @@ import java.util.Map;
 public class Content implements Serializable, Cloneable {
 	private String alignCol;
 	private String alignRow;
+	private String alignRowFormat;
 	private Boolean weight;
 	private String color;
 	private String displayTexts;
@@ -150,6 +151,14 @@ public class Content implements Serializable, Cloneable {
 			e.printStackTrace();
 		}
 		return o;
+	}
+
+	public String getAlignRowFormat() {
+		return alignRowFormat;
+	}
+
+	public void setAlignRowFormat(String alignRowFormat) {
+		this.alignRowFormat = alignRowFormat;
 	}
 
 	public static void main(String[] args) {

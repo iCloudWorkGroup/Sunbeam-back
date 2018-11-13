@@ -36,11 +36,8 @@ public class BinarySearchTest {
 	@Parameters
 	public static Collection data(){
 		return Arrays.asList(new Object[][]{
-			{-2,0},
-			{0,0},
-			{720,10},
-			{1008,14},
-			{1600,14}
+			{1,0},
+			{1234,14}
 		});
 		
 	}
@@ -56,14 +53,15 @@ public class BinarySearchTest {
 		
 		MRowColDaoImpl mrc = (MRowColDaoImpl) applicationContext.getBean("mrowColDao");
 		list = new ArrayList<RowCol>();
-		mrc.getColList(list, "c37e5497-3935-4b8c-9c99-56c427b22185", "c37e5497-3935-4b8c-9c99-56c427b221850");
+		mrc.getRowList(list, "048f5332-70b0-4e2e-811a-13ca53d86601init", "048f5332-70b0-4e2e-811a-13ca53d86601init0");
 		
 	}
 	
 
 	@Test
 	public void testBinarySearch() {
-		assertEquals(index, BinarySearch.binarySearch(list, top));
+		int xiabiao = BinarySearch.binarySearch(list, top);
+		assertEquals(index,xiabiao );
 	}
 
 }

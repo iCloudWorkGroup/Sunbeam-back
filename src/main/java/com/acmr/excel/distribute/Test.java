@@ -55,6 +55,6 @@ public class Test {
 		
 		MColServiceImpl mc = (MColServiceImpl) applicationContext.getBean("mcolService");
 		ColOperate colOperate = new ColOperate();
-		mc.showCol(colOperate, "aa", 1);
+		mc.showCol("aa",colOperate, 1);
 	}
 }

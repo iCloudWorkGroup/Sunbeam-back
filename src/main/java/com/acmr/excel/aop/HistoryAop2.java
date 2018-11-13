@@ -37,45 +37,11 @@ import com.acmr.excel.model.mongo.MRowColList;
 import com.acmr.excel.model.mongo.MSheet;
 import com.acmr.redis.Redis;
 
-
+//@Aspect
 @Component
-@Scope("request")
 public class HistoryAop2 {
 
-	private  CopyOnWriteArrayList<History> list;
-
-	/* 当前操作位置 */
-	private  int index;
-	
-	private HistoryCache cache;
-
-	private History history;
-
-	private Record record;
-
-	private String methodName;
-
-	// 存储修改过属性行样式id
-	private List<String> rowIdList;
-	// 存放修改前mrow对象
-	private List<MRow> mrowList;
-
-	private List<String> colIdList;
-	private List<MCol> mcolList;
-
-	private List<String> cellIdList;
-	private List<MCell> mcellList;
-
-	private List<String> mrowColCellIdList;
-	private List<MRowColCell> mrowColCellList;
-
-	private List<MRowColList> rowList;
-	private List<MRowColList> colList;
-
-	private List<Object> delList;
-
-	private String excelId;
-	private String sheetId;
+	private ThreadLocal<HistoryCache> thCache;
 
 	@Resource
 	private MRowColDao mrowColDao;
@@ -99,134 +65,136 @@ public class HistoryAop2 {
 	@Pointcut("execution(* com.acmr.excel.dao..*.*(..))")
 	public void pointCut1() {
 	}
-	
-	@Pointcut("execution(* com.acmr.excel.service.*.*(..))")
+
+	@Pointcut("execution(* com.acmr.excel.service.*.*(..)) && (!within(com.acmr.excel.service.impl.MBookServiceImpl)) &&"
+			+ "(!execution(* com.acmr.excel.service.impl.MSheetServiceImpl.getStep(..)))"
+			+ "&&(!execution(* com.acmr.excel.service.impl.MSheetServiceImpl.updateStep(..)))")
 	public void pointCut2() {
 	}
 
-	@SuppressWarnings("unchecked")
-	
 	public void beforeAction(JoinPoint joinPoint) {
-		System.out.println("进入切点");
-		methodName = joinPoint.getSignature().getName();
-		System.out.println(joinPoint.getStaticPart().toShortString());
-		System.out.println(joinPoint.getSourceLocation().toString());
-		
 
-		Object[] arg = joinPoint.getArgs();
-		HttpServletRequest req = (HttpServletRequest) arg[0];
-		excelId = req.getHeader("X-Book-Id");
-		if(null==excelId){
+	}
+
+	@Before("pointCut2()")
+	public void beforeService(JoinPoint joinPoint) {
+		System.out.println("进入切点");
+		String methodName = joinPoint.getSignature().getName();
+		System.out.println(joinPoint.getStaticPart().toShortString());
+		System.out.println(methodName);
+
+		if (methodName.indexOf("saveExcelBook") > -1
+				|| methodName.indexOf("reloadExcelBook") > -1
+				|| methodName.indexOf("getExcelBook") > -1
+				|| methodName.indexOf("getExcels") > -1
+				|| methodName.indexOf("getStep") > -1
+				|| methodName.indexOf("updateStep") > -1
+				|| methodName.indexOf("isAblePaste") > -1
+				|| methodName.indexOf("isCut") > -1
+				|| methodName.indexOf("isCopy") > -1
+				|| methodName.indexOf("isCut") > -1) {
 			return;
 		}
-		sheetId = excelId + 0;
-		cache = (HistoryCache) redis.get(excelId);
-		if(null == cache){
-			list = new CopyOnWriteArrayList<History>();
+
+		Object[] arg = joinPoint.getArgs();
+		String bookId;
+		try {
+			bookId = (String) arg[0];
+		} catch (Exception e) {
+			return;
+		}
+
+		HistoryCache cache = (HistoryCache) redis.get(bookId);
+		CopyOnWriteArrayList<History> list = null;
+		if (null == cache) {
 			cache = new HistoryCache();
-		}else{
-		   	list = cache.getList();
-			
-			//当中断前进后退操作时，删除这部之后所有的记录
-			if(!("undo".equals(methodName)||"redo".equals(methodName))){
-				
-				/*index = cache.getIndex();
-				for(int i=index;i<list.size();i++){
-					list.remove(i);
-				}*/
+			list = cache.getList();
+		} else {
+			list = cache.getList();
+
+			// 当中断前进后退操作时，删除这部之后所有的记录
+			if (!("undo".equals(methodName) || "redo".equals(methodName))) {
+
+				/*
+				 * index = cache.getIndex(); for(int i=index;i<list.size();i++){
+				 * list.remove(i); }
+				 */
 				cache.setList(list);
-				redis.set(excelId, cache);
+				redis.set(bookId, cache);
 			}
-			
-	   }
-		
+
+		}
+
 		if (null != Constant.unRecordAction.get(methodName)) {
 			return;
 		}
 
-		
-		
-
-		rowIdList = new ArrayList<String>();
-		mrowList = new ArrayList<MRow>();
-
-		colIdList = new ArrayList<String>();
-		mcolList = new ArrayList<MCol>();
-
-		cellIdList = new ArrayList<String>();
-		mcellList = new ArrayList<MCell>();
-
-		mrowColCellIdList = new ArrayList<String>();
-		mrowColCellList = new ArrayList<MRowColCell>();
-
-		delList = new ArrayList<Object>();
-
-		rowList = new ArrayList<MRowColList>();
-		colList = new ArrayList<MRowColList>();
-
-		history = new History();
-		record = history.getRecord();
+		History history = new History();
 		history.setName(methodName);
-		history.setExcelId(excelId);
-		MRowBefore mrow = new MRowBefore(rowIdList, mrowList);
-		MColBefore mcol = new MColBefore(colIdList, mcolList);
-		MCellBefore mcell = new MCellBefore(cellIdList, mcellList);
-		MRowColCellBefore mrowColCell = new MRowColCellBefore(mrowColCellIdList,
-				mrowColCellList);
-		com.acmr.excel.model.history.Before before = history.getBefore();
-		before.setMrow(mrow);
-		before.setMcol(mcol);
-		before.setMcell(mcell);
-		before.setMrowColCell(mrowColCell);
-		before.setColList(colList);
-		before.setRowList(rowList);
-		before.setDelList(delList);
-        
+		history.setExcelId(bookId);
 		list.add(history);
-		index=list.size();
+
+		int index = list.size();
 		cache.setList(list);
 		cache.setIndex(index);
-		
-		
+
+		thCache = new ThreadLocal<HistoryCache>();
+		thCache.set(cache);// 放入线程局部变量载体
+
+		redis.set(bookId, cache);
 	}
 
-	@Before("pointCut2()")
-	public void beforeService(JoinPoint joinPoint){
-		
-	}
-	
 	@Before("pointCut1()")
 	public void beforeDao(JoinPoint joinPoint) {
-		if(null==excelId){
-			return;
-		}
-		
-		if ((null == methodName)||(null != Constant.unRecordAction.get(methodName))) {
+
+		if (null == thCache) {
 			return;
 		}
 
-		String target = joinPoint.getTarget().getClass().getSimpleName();
+		String target = joinPoint.getTarget().getClass().getSimpleName();// 目标类名
 		Object[] arg = joinPoint.getArgs();
-		String name = joinPoint.getSignature().getName();
-		String shortName = joinPoint.getStaticPart().toShortString();
+		String name = joinPoint.getSignature().getName();// 方法名
+		String shortName = joinPoint.getStaticPart().toShortString();// 类名
 		if (shortName.indexOf("MSheetDao") > -1 || name.indexOf("get") > -1
 				|| (shortName.indexOf("BaseDao") > -1
 						&& arg[1].getClass() == MSheet.class)) {
 			return;
 		}
+		HistoryCache cache = thCache.get();// 从线程局部变量中拿出对象
+		
+		if (null == cache) {
+			return;
+		}
+
+		History history = cache.getList().get(cache.getIndex() - 1);
 
 		Param param = new Param(target, name, arg);
-		record.getParam().add(param);
+		history.getRecord().getParam().add(param);
 
-		recordBeford(shortName, name, arg);
-		
-		redis.set(excelId, cache);//存入redis
+		recordBeford(shortName, name, arg, history);
+
+		thCache.set(cache);
+
+		redis.set(history.getExcelId(), cache);// 存入redis
 
 	}
 
-	private void recordBeford(String shortName, String methodName,
-			Object[] arg) {
+	private void recordBeford(String shortName, String methodName, Object[] arg,
+			History history) {
+		com.acmr.excel.model.history.Before before = history.getBefore();
+		String excelId = history.getExcelId();
+		String sheetId = excelId + 0;
+
+		MCellBefore mcellBefore = before.getMcell();
+		List<String> cellIdList = mcellBefore.getIdList();
+		List<MCell> mcellList = mcellBefore.getMcellList();
+
 		if (shortName.indexOf("MRowDao") > -1) {
+
+			MRowBefore mrowBefore = before.getMrow();
+			List<String> rowIdList = mrowBefore.getIdList();
+			List<MRow> mrowList = mrowBefore.getMrowList();
+
 			if ("updateContent".equals(methodName)) {
 				rowIdList.addAll((ArrayList) arg[4]);
 				List<MRow> list = mrowDao.getMRowList(excelId, excelId + 0,
@@ -241,11 +209,16 @@ public class HistoryAop2 {
 				} else {
 					rowIdList.addAll((ArrayList) arg[2]);
 					List<MRow> list = mrowDao.getMRowList(excelId, excelId + 0,
-							(ArrayList) arg[4]);
+							(ArrayList) arg[2]);
 					mrowList.addAll(list);
 				}
 			}
 		} else if (shortName.indexOf("MColDao") > -1) {
+
+			MColBefore mcolBefore = before.getMcol();
+			List<String> colIdList = mcolBefore.getIdList();
+			List<MCol> mcolList = mcolBefore.getMcolList();
+
 			if ("updateContent".equals(methodName)) {
 				colIdList.addAll((ArrayList) arg[4]);
 				List<MCol> list = mcolDao.getMColList(excelId, excelId + 0,
@@ -259,11 +232,15 @@ public class HistoryAop2 {
 				} else {
 					colIdList.addAll((ArrayList) arg[2]);
 					List<MCol> list = mcolDao.getMColList(excelId, excelId + 0,
-							(ArrayList) arg[4]);
+							(ArrayList) arg[2]);
 					mcolList.addAll(list);
 				}
 			}
 		} else if (shortName.indexOf("MRowColDao") > -1) {
+
+			List<MRowColList> rowList = before.getRowList();
+			List<MRowColList> colList = before.getColList();
+
 			if ("updateRowCol".equals(methodName)
 					|| "updateRowColLength".equals(methodName)) {
 				String id = (String) arg[2];
@@ -290,6 +267,7 @@ public class HistoryAop2 {
 				}
 			}
 		} else if (shortName.indexOf("MCellDao") > -1) {
+
 			if ("updateContent".equals(methodName)) {
 				cellIdList.addAll((ArrayList) arg[4]);
 				List<MCell> list = mcellDao.getMCellList(excelId, excelId + 0,
@@ -309,6 +287,12 @@ public class HistoryAop2 {
 				}
 			}
 		} else if (shortName.indexOf("MRowColCellDao") > -1) {
+
+			MRowColCellBefore mrowColCellBefore = before.getMrowColCell();
+			List<MRowColCell> mrowColCellList = mrowColCellBefore
+					.getMrowColCellList();
+			List<String> mrowColCellIdList = mrowColCellBefore.getIdList();
+
 			if ("delMRowColCell".equals(methodName)) {
 				List<MRowColCell> list = mrowColCellDao.getMRowColCellList(
 						excelId, excelId + 0, (String) arg[3], (String) arg[2]);
@@ -330,7 +314,11 @@ public class HistoryAop2 {
 				mrowColCellList.addAll(list);
 			}
 		} else if (shortName.indexOf("BaseDao") > -1) {
-			if ("insert".equals(methodName)||"insertList".equals(methodName)) {
+
+			List<Object> delList = before.getDelList();
+
+			if ("insert".equals(methodName)
+					|| "insertList".equals(methodName)) {
 				if (arg[1].getClass() == ArrayList.class) {
 					delList.addAll((ArrayList) arg[1]);
 				} else {

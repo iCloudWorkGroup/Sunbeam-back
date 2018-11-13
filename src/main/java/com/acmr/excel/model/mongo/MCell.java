@@ -16,6 +16,8 @@ public class MCell implements Serializable {
 	private Integer rowspan;
 	/* 合并几列 */
 	private Integer colspan;
+	/* 有效性指针 */
+	private Integer ruleIndex;
 	/* 边框 */
 	private Border border = new Border();
 	/* 内容 */
@@ -135,6 +137,14 @@ public class MCell implements Serializable {
 
 	public void setOccupy(Occupy occupy) {
 		this.occupy = occupy;
+	}
+
+	public Integer getRuleIndex() {
+		return ruleIndex;
+	}
+
+	public void setRuleIndex(Integer ruleIndex) {
+		this.ruleIndex = ruleIndex;
 	}
 
 }

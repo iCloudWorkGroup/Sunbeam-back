@@ -8,11 +8,13 @@ import acmr.excel.pojo.ExcelBook;
 
 public class Test2 {
 	public static void main(String[] args) {
-       ExcelBook excel = new ExcelBook();
+       /*ExcelBook excel = new ExcelBook();
        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("/config/mongodb.xml");
 		//ApplicationContext app = new ClassPathXmlApplicationContext("/config/applicationContext-core.xml");
 		MongoTemplate mongoTemplate = (MongoTemplate) applicationContext.getBean("mongoTemplate");
-		mongoTemplate.insert(excel);
-       
-	}
+		mongoTemplate.insert(excel);*/
+		for(int i = 0;i<10;i++){
+			System.out.println(System.nanoTime());
+		}
+  }
 }

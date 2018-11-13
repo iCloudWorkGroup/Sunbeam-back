@@ -122,14 +122,37 @@ public class SheetController extends BaseController {
 	public void paste(HttpServletRequest req, HttpServletResponse resp)
 			throws Exception {
 		String excelId = req.getHeader("X-Book-Id");
-		if (StringUtil.isEmpty(excelId)) {
+		String curStep = req.getHeader("X-Step");
+
+		if (StringUtil.isEmpty(excelId) || StringUtil.isEmpty(curStep)) {
 			resp.setStatus(400);
 			return;
 		}
-		OuterPaste outerPaste = getJsonDataParameter(req, OuterPaste.class);
+		String sheetId = excelId + 0;
+		int memStep = 0;
+		int cStep = 0;
 
-		boolean isAblePasteResult = msheetService.isAblePaste(outerPaste,
-				excelId);
+		if (!StringUtil.isEmpty(curStep)) {
+			cStep = Integer.valueOf(curStep);
+		}
+		OuterPaste outerPaste = getJsonDataParameter(req, OuterPaste.class);
+		boolean isAblePasteResult = false;
+		for (int i = 0; i < 1000; i++) {
+			memStep = msheetService.getStep(excelId, sheetId);
+			if (cStep != memStep+1) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} else {
+				isAblePasteResult = msheetService.isAblePaste(outerPaste,
+						excelId);
+				break;
+			}
+		}
+
 		AnsycDataReturn ansycDataReturn = new AnsycDataReturn();
 		if (isAblePasteResult) {
 			this.assembleData(req, resp, outerPaste, OperatorConstant.paste);
@@ -151,12 +174,36 @@ public class SheetController extends BaseController {
 	public void copy(HttpServletRequest req, HttpServletResponse resp)
 			throws Exception {
 		String excelId = req.getHeader("X-Book-Id");
-		if (StringUtil.isEmpty(excelId)) {
+		String curStep = req.getHeader("X-Step");
+
+		if (StringUtil.isEmpty(excelId) || StringUtil.isEmpty(curStep)) {
 			resp.setStatus(400);
 			return;
 		}
+		String sheetId = excelId + 0;
+		int memStep = 0;
+		int cStep = 0;
+
+		if (!StringUtil.isEmpty(curStep)) {
+			cStep = Integer.valueOf(curStep);
+		}
 		Copy copy = getJsonDataParameter(req, Copy.class);
-		boolean isAblePasteResult = msheetService.isCopy(copy, excelId);
+		boolean isAblePasteResult = false;
+		for (int i = 0; i < 1000; i++) {
+			memStep = msheetService.getStep(excelId, sheetId);
+			if (cStep != memStep+1) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} else {
+				isAblePasteResult = msheetService.isCopy(copy, excelId);
+				break;
+			}
+		}
+
 		AnsycDataReturn ansycDataReturn = new AnsycDataReturn();
 		if (isAblePasteResult) {
 			this.assembleData(req, resp, copy, OperatorConstant.copy);
@@ -178,13 +225,36 @@ public class SheetController extends BaseController {
 	public void cut(HttpServletRequest req, HttpServletResponse resp)
 			throws Exception {
 		String excelId = req.getHeader("X-Book-Id");
-		if (StringUtil.isEmpty(excelId)) {
+		String curStep = req.getHeader("X-Step");
+
+		if (StringUtil.isEmpty(excelId) || StringUtil.isEmpty(curStep)) {
 			resp.setStatus(400);
 			return;
 		}
-		Copy copy = getJsonDataParameter(req, Copy.class);
+		String sheetId = excelId + 0;
+		int memStep = 0;
+		int cStep = 0;
 
-		boolean isAblePasteResult = msheetService.isCut(copy, excelId);
+		if (!StringUtil.isEmpty(curStep)) {
+			cStep = Integer.valueOf(curStep);
+		}
+		Copy copy = getJsonDataParameter(req, Copy.class);
+		boolean isAblePasteResult = false;
+		for (int i = 0; i < 1000; i++) {
+			memStep = msheetService.getStep(excelId, sheetId);
+			if (cStep != memStep+1) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} else {
+				isAblePasteResult = msheetService.isCut(copy, excelId);
+				break;
+			}
+		}
+
 		AnsycDataReturn ansycDataReturn = new AnsycDataReturn();
 		if (isAblePasteResult) {
 			this.assembleData(req, resp, copy, OperatorConstant.cut);
@@ -279,9 +349,41 @@ public class SheetController extends BaseController {
 	@RequestMapping("/protect")
 	public void protect(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
+		
 		String excelId = req.getHeader("X-Book-Id");
+		String curStep = req.getHeader("X-Step");
+
+		if (StringUtil.isEmpty(excelId) || StringUtil.isEmpty(curStep)) {
+			resp.setStatus(400);
+			return;
+		}
+		String sheetId = excelId + 0;
+		int memStep = 0;
+		int cStep = 0;
+
+		if (!StringUtil.isEmpty(curStep)) {
+			cStep = Integer.valueOf(curStep);
+		}
 		MSheet msheet = getJsonDataParameter(req, MSheet.class);
-		msheetService.updateProtect(excelId, msheet);
+		boolean isLegal = false;
+		for (int i = 0; i < 1000; i++) {
+			memStep = msheetService.getStep(excelId, sheetId);
+			if (cStep != memStep) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} else {
+				isLegal = msheetService.updateProtect(excelId, msheet);
+				break;
+			}
+		}
+
+		AnsycDataReturn ansycDataReturn = new AnsycDataReturn();
+		ansycDataReturn.setIsLegal(isLegal);
+		this.sendJson(resp, ansycDataReturn);
 
 	}
 

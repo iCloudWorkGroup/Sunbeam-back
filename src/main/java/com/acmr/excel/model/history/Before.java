@@ -1,25 +1,26 @@
 package com.acmr.excel.model.history;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.acmr.excel.model.mongo.MRowColList;
 
 public class Before implements Serializable{
 
-	private MColBefore mcol;
+	private MColBefore mcol = new MColBefore();
 	
-	private MRowBefore mrow;
+	private MRowBefore mrow = new MRowBefore();
 	
-	private MCellBefore mcell;
+	private MCellBefore mcell = new MCellBefore();
 	
-	private MRowColCellBefore mrowColCell;
+	private MRowColCellBefore mrowColCell = new MRowColCellBefore();
 	//简化行列表
-	private List<MRowColList> rowList;
+	private List<MRowColList> rowList = new ArrayList<MRowColList>();
 	//简化列列表
-	private List<MRowColList> colList;
+	private List<MRowColList> colList = new ArrayList<MRowColList>();
 	
-	private List<Object> delList;
+	private List<Object> delList = new ArrayList<Object>();
 	//标识，这步操作是否可以执行  1 可以  2 可以
 	private int sure = 1;
 

@@ -1,6 +1,11 @@
 package com.acmr.excel.model.mongo;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.acmr.excel.model.complete.Rule;
+import com.acmr.excel.model.complete.Validate;
 
 public class MSheet implements Serializable {
 	/* sheetId */
@@ -29,6 +34,8 @@ public class MSheet implements Serializable {
 	private Boolean protect;
 	
 	private String  passwd;
+	
+	private List<Rule> rule = new ArrayList<Rule>();
 
 	public String getId() {
 		return id;
@@ -132,6 +139,14 @@ public class MSheet implements Serializable {
 
 	public void setPasswd(String passwd) {
 		this.passwd = passwd;
+	}
+
+	public List<Rule> getRule() {
+		return rule;
+	}
+
+	public void setRule(List<Rule> rule) {
+		this.rule = rule;
 	}
 	
 }

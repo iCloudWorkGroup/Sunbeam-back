@@ -51,5 +51,7 @@ public interface MBookService {
 	 * @return
 	 */
 	List<String> getExcels();
+	
+	void delCollections();
 
 }

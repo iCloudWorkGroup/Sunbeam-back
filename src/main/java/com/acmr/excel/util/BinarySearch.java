@@ -131,9 +131,9 @@ public class BinarySearch {
 					break;
 				}
 				start = index;
-			} else if (objList.get(index).getTop() > top) {
+			} else if (objList.get(index).getTop() >= top) {
 				end = index;
-			} else {
+			}else {
 				// System.out.println(array[index] + "找到了，在数组下标为" + index +
 				// "的地方,查找了" + count + "次。");
 				result = index;

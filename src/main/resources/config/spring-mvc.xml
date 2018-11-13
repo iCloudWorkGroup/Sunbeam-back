@@ -3,7 +3,8 @@
 	xmlns:mvc="http://www.springframework.org/schema/mvc" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:aop="http://www.springframework.org/schema/aop"  
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:task="http://www.springframework.org/schema/task"  
 	xsi:schemaLocation="
 	http://www.springframework.org/schema/beans
 	http://www.springframework.org/schema/beans/spring-beans.xsd
@@ -13,6 +14,8 @@
 	http://www.springframework.org/schema/mvc/spring-mvc.xsd
 	http://www.springframework.org/schema/aop 
 	http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+	http://www.springframework.org/schema/task 
+    http://www.springframework.org/schema/task/spring-task-4.0.xsd
 	">
 	<mvc:annotation-driven /> 
 	<!-- 方法解析器，controller根据页面传来的method的值决定调用哪个函数，默认调用list函数
@@ -32,6 +35,9 @@
 	</context:component-scan>
 	
 	<aop:aspectj-autoproxy proxy-target-class="true" />
+	
+	<!-- 定时器开关--> 
+    <task:annotation-driven />
 	
 	<!-- 视图解析器 -->
 	<bean

@@ -49,7 +49,7 @@ public class MColServiceImpl implements MColService {
 	private MRowColCellDao mrowColCellDao;
 
 	@Override
-	public void insertCol(ColOperate colOperate, String excelId, Integer step) {
+	public void insertCol(String excelId,ColOperate colOperate,  Integer step) {
 		String sheetId = excelId + 0;
 		List<RowCol> sortRcList = new ArrayList<RowCol>();
 		List<RowCol> sortClList = new ArrayList<RowCol>();
@@ -374,7 +374,7 @@ public class MColServiceImpl implements MColService {
 	}
 
 	@Override
-	public void addCol(int num, String excelId, Integer step) {
+	public void addCol( String excelId,int num, Integer step) {
 		String sheetId = excelId + 0;
 		MSheet msheet = msheetDao.getMSheet(excelId, sheetId);
 		int maxCol = msheet.getMaxcol();
@@ -406,7 +406,7 @@ public class MColServiceImpl implements MColService {
 	}
 
 	@Override
-	public void delCol(ColOperate colOperate, String excelId, Integer step) {
+	public void delCol(String excelId,ColOperate colOperate,  Integer step) {
 		String sheetId = excelId + 0;
 		List<RowCol> sortRList = new ArrayList<RowCol>();
 		List<RowCol> sortCList = new ArrayList<RowCol>();
@@ -555,7 +555,7 @@ public class MColServiceImpl implements MColService {
 	}
 
 	@Override
-	public void hideCol(ColOperate colOperate, String excelId, Integer step) {
+	public void hideCol( String excelId,ColOperate colOperate, Integer step) {
 		String sheetId = excelId + 0;
 		List<RowCol> sortCList = new ArrayList<RowCol>();
 		mrowColDao.getColList(sortCList, excelId, sheetId);
@@ -569,7 +569,7 @@ public class MColServiceImpl implements MColService {
 	}
 
 	@Override
-	public void showCol(ColOperate colOperate, String excelId, Integer step) {
+	public void showCol(String excelId,ColOperate colOperate,  Integer step) {
 		String sheetId = excelId + 0;
 		List<RowCol> sortCList = new ArrayList<RowCol>();
 		mrowColDao.getColList(sortCList, excelId, sheetId);
@@ -584,8 +584,7 @@ public class MColServiceImpl implements MColService {
 	}
 
 	@Override
-	public void updateColWidth(ColWidth colWidth, String excelId,
-			Integer step) {
+	public void updateColWidth( String excelId,ColWidth colWidth,Integer step) {
 		String sheetId = excelId + 0;
 		List<RowCol> sortCList = new ArrayList<RowCol>();
 		mrowColDao.getColList(sortCList, excelId, sheetId);
@@ -635,8 +634,7 @@ public class MColServiceImpl implements MColService {
 	}
 
 	@Override
-	public void insertColDis(ColOperate colOperate, String excelId,
-			Integer step) {
+	public void insertColDis( String excelId,ColOperate colOperate,Integer step) {
 		// TODO Auto-generated method stub
 		
 	}

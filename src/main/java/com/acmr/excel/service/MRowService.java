@@ -13,7 +13,7 @@ public interface MRowService {
 	 * @param step
 	 *            步骤
 	 */
-	void insertRow(RowOperate rowOperate, String excelId, Integer step);
+	void insertRow(String excelId,RowOperate rowOperate,  Integer step);
 	
 	/**
 	 * 批量增加行
@@ -21,7 +21,7 @@ public interface MRowService {
 	 * @param excelId
 	 * @param step
 	 */
-	void addRow(int num,String excelId,Integer step);
+	void addRow(String excelId,int num,Integer step);
 
 	/**
 	 * 删除一行
@@ -31,7 +31,7 @@ public interface MRowService {
 	 * @param step
 	 *            步骤
 	 */
-	void delRow(RowOperate rowOperate, String excelId, Integer step);
+	void delRow(String excelId,RowOperate rowOperate,  Integer step);
 
 	/**
 	 * 隐藏行
@@ -41,7 +41,7 @@ public interface MRowService {
 	 * @param step
 	 *            步骤
 	 */
-	void hideRow(RowOperate rowOperate, String excelId, Integer step);
+	void hideRow(String excelId,RowOperate rowOperate,  Integer step);
 
 	/**
 	 * 取消隐藏
@@ -51,7 +51,7 @@ public interface MRowService {
 	 * @param step
 	 *            步骤
 	 */
-	void showRow(RowOperate rowOperate, String excelId, Integer step);
+	void showRow(String excelId,RowOperate rowOperate,  Integer step);
 
 	/**
 	 * 更新行长度
@@ -60,5 +60,5 @@ public interface MRowService {
 	 * @param excelId
 	 * @param step
 	 */
-	void updateRowHeight(RowHeight rowHeight, String excelId, Integer step);
+	void updateRowHeight(String excelId,RowHeight rowHeight,  Integer step);
 }

@@ -5,6 +5,7 @@
 	xmlns:tx="http://www.springframework.org/schema/tx" 
 	xmlns:aop="http://www.springframework.org/schema/aop" 
 	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	
 	xsi:schemaLocation="
 	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
 	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd

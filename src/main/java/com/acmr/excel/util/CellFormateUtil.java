@@ -23,6 +23,7 @@ import com.acmr.excel.model.mongo.MCell;
 
 import acmr.excel.pojo.Constants.CELLTYPE;
 import acmr.excel.pojo.ExcelCell;
+import acmr.excel.pojo.ExcelCellStyle;
 import acmr.excel.pojo.ExcelColor;
 import acmr.excel.pojo.ExcelFormat;
 
@@ -254,26 +255,6 @@ public class CellFormateUtil {
 	}
 
 	/**
-	 * 日期校验
-	 * 
-	 * @param date
-	 * @param pattern
-	 * @return
-	 */
-	public static Date getDate(String date, String pattern) {
-		// boolean convertSuccess = true;
-		Date retDate = null;
-		SimpleDateFormat format = new SimpleDateFormat(pattern);
-		try {
-			format.setLenient(false);
-			retDate = format.parse(date);
-		} catch (ParseException e) {
-			// convertSuccess = false;
-		}
-		return retDate;
-	}
-
-	/**
 	 * 设置数字格式
 	 * 
 	 * @param decimalPoint
@@ -397,24 +378,6 @@ public class CellFormateUtil {
 	}
 
 	/**
-	 * 判断是否为数字
-	 * 
-	 * @param str
-	 * @return
-	 */
-	public static boolean isNumeric(String str) {
-		// [-+]?\\d*\\.?\\d+, ^[0-9]+(\\.[0-9]+){0,1}$
-		// Pattern pattern = Pattern.compile("-?[0-9]+[.]?[0-9]+");
-		Pattern pattern = Pattern.compile("[-+]?\\d*\\.?\\d+");
-		Matcher isNum = pattern.matcher(str);
-		if (!isNum.matches()) {
-			return false;
-		}
-		return true;
-		// return NumberUtils.isNumber(str);
-	}
-
-	/**
 	 * 自动识别
 	 * 
 	 * @param content
@@ -454,130 +417,6 @@ public class CellFormateUtil {
 			// excelCell.setShowText(content);
 			excelCell.getExps().put("displayText", content);
 		}
-	}
-
-	/**
-	 * 自动识别
-	 * 
-	 * @param content
-	 */
-
-	public static void autoRecognise(String text, MCell mcell) {
-		String pattern1 = "yyyy年MM月dd日";
-		String pattern2 = "yyyy年MM月";
-		String pattern3 = "yyyy/MM/dd";
-		Date d1 = getDate(text, pattern1);
-		Date d2 = getDate(text, pattern2);
-		Date d3 = getDate(text, pattern3);
-		Content content = mcell.getContent();
-		if (isNumeric(text)) {
-			text = getPrettyNumber(text);
-			content.setType(CELLTYPE.NUMERIC.name());
-			content.setExpress("General");
-
-		} else if (d1 != null) {
-			content.setType(CELLTYPE.DATE.name());
-			content.setExpress("[$-F800]dddd\\,\\ mmmm\\ dd\\,\\ yyyy");
-
-		} else if (d2 != null) {
-			content.setType(CELLTYPE.DATE.name());
-			content.setExpress("yyyy\"年\"m\"月\";@");
-
-		} else if (d3 != null) {
-			content.setType(CELLTYPE.DATE.name());
-			content.setExpress("m/d/yy");
-
-		}
-	}
-
-	public static void setShowText(Content content) {
-		try {
-			String type = content.getType();
-			if ("date".equals(type)) {
-				String text = content.getTexts();
-				String express = content.getExpress();
-				String pattern2 = "yyyy/MM/dd";
-				String pattern1 = "yyyy年MM月dd日";
-				String pattern3 = "yyyy/M/d";
-				String pattern4 = "yyyy年M月d日";
-				if ("yyyy/mm/dd".equals(express)) {
-					Date d1 = getDate(text, pattern1);
-					if (null == d1) {
-						Date d3 = getDate(text,pattern3);
-						if(null==d3){
-							content.setDisplayTexts(text);
-							return;
-						}else{
-							SimpleDateFormat format = new SimpleDateFormat(pattern2);
-							String display = format.format(d3);
-							content.setDisplayTexts(display);
-							return;
-						}
-					} else {
-						SimpleDateFormat format = new SimpleDateFormat(pattern2);
-						String display = format.format(d1);
-						content.setDisplayTexts(display);
-						return;
-					}
-				}else{
-					Date d1 = getDate(text, pattern2);
-					if (null == d1) {
-						Date d4 = getDate(text,pattern4);
-						if(null==d4){
-							content.setDisplayTexts(text);
-							return;
-						}else{
-							SimpleDateFormat format = new SimpleDateFormat(pattern1);
-							String display = format.format(d4);
-							content.setDisplayTexts(display);
-							return;
-						}
-					} else {
-						SimpleDateFormat format = new SimpleDateFormat(pattern1);
-						String display = format.format(d1);
-						content.setDisplayTexts(display);
-						return;
-					}
-				}
-			}
-			XSSFWorkbook wb = new XSSFWorkbook();
-			XSSFSheet sheet = wb.createSheet();
-			XSSFRow row = sheet.createRow(0);
-			XSSFCell cell = row.createCell(0);
-
-			switch (type) {
-			case "routine":
-			case "text":
-				cell.setCellValue(content.getTexts());
-				break;
-			case "number":
-			case "currency":
-			case "percent":
-				try {
-					cell.setCellValue(Double.valueOf(content.getTexts()));
-				} catch (Exception e) {
-					cell.setCellValue(content.getTexts());
-				}
-				break;
-			default:
-				break;
-			}
-			XSSFCellStyle style = cell.getCellStyle();
-			XSSFDataFormat format = wb.createDataFormat();
-			style.setDataFormat(format.getFormat(content.getExpress()));
-			cell.setCellStyle(style);
-			DataFormatter f = new DataFormatter();
-			String text = f.formatCellValue(cell);
-			if ("".equals(text) || null == text) {
-				content.setDisplayTexts(content.getTexts());
-			} else {
-				content.setDisplayTexts(text);
-			}
-			
-		} catch (Exception e) {
-			content.setDisplayTexts(content.getTexts());
-		}
-	
 	}
 
 	public static void setShowText(ExcelCell excelCell, Content content) {
@@ -879,30 +718,921 @@ public class CellFormateUtil {
 		return type;
 	}
 
-	public static void main(String[] args) throws ParseException {
-		/*
-		 * XSSFWorkbook wb = new XSSFWorkbook(); XSSFSheet sheet =
-		 * wb.createSheet(); XSSFRow row = sheet.createRow(0); XSSFCell cell =
-		 * row.createCell(0);
-		 * 
-		 * SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy/MM/dd");
-		 * Date date = simpleDateFormat.parse("2018/8/8");
-		 * 
-		 * cell.setCellValue("2018/8/8"); XSSFCellStyle style =
-		 * cell.getCellStyle(); XSSFDataFormat format= wb.createDataFormat();
-		 * style.setDataFormat(format.getFormat("yyyy\"年\"m\"月\"d\"日\";@"));
-		 * cell.setCellStyle(style); DataFormatter f = new DataFormatter();
-		 * String text = f.formatCellValue(cell); System.out.println(text);
-		 */
+	/**
+	 * 日期校验
+	 * 
+	 * @param date
+	 * @param pattern
+	 * @return
+	 */
+	public static Date getDate(String date, String pattern) {
+		// boolean convertSuccess = true;
+		Date retDate = null;
+		SimpleDateFormat format = new SimpleDateFormat(pattern);
+		try {
+			format.setLenient(false);
+			retDate = format.parse(date);
+		} catch (Exception e) {
+			// convertSuccess = false;
+		}
+		return retDate;
+	}
 
-		String pattern1 = "yyyy年MM月dd日";
-		String pattern2 = "yyyy年MM月";
-		String pattern3 = "yyyy/MM/dd";
-		String content = "2010/3/8";
-		Date d1 = getDate(content, pattern1);
-		Date d2 = getDate(content, pattern2);
-		Date d3 = getDate(content, pattern3);
-		System.out.println(d3);
+	/**
+	 * 判断是否为数字
+	 * 
+	 * @param str
+	 * @return
+	 */
+	public static boolean isNumeric(String str) {
+		try {
+			Pattern pattern = Pattern.compile("[-+]?\\d*\\.?\\d+");
+			Matcher isNum = pattern.matcher(str);
+			if (!isNum.matches()) {
+				return false;
+			}
+		} catch (Exception e) {
+			return false;
+		}
+		
+		return true;
+		// return NumberUtils.isNumber(str);
+	}
+
+	/**
+	 * 判断是否为货币
+	 * 
+	 * @param str
+	 * @return
+	 */
+	public static boolean isCurrencyEn(String str) {
+		try {
+			Pattern pattern = Pattern.compile("\\$[-+]?\\d*\\.?\\d+");
+			Matcher isNum = pattern.matcher(str);
+			if (!isNum.matches()) {
+				return false;
+			}
+		} catch (Exception e) {
+			return false;
+		}
+		
+		return true;
+
+	}
+
+	/**
+	 * 判断是否为货币
+	 * 
+	 * @param str
+	 * @return
+	 */
+	public static boolean isCurrencyZh(String str) {
+		try {
+			Pattern pattern = Pattern.compile("\\￥|¥[-+]?\\d*\\.?\\d+");
+			Matcher isNum = pattern.matcher(str);
+			if (!isNum.matches()) {
+				return false;
+			}
+		} catch (Exception e) {
+			return false;
+		}
+		
+		return true;
+
+	}
+
+	/**
+	 * 判断是否为货币
+	 * 
+	 * @param str
+	 * @return
+	 */
+	public static boolean isPercent(String str) {
+		try {
+			Pattern pattern = Pattern.compile("[-+]?\\d*\\.?\\d+\\%");
+			Matcher isNum = pattern.matcher(str);
+			if (!isNum.matches()) {
+				return false;
+			}
+		} catch (Exception e) {
+			return false;
+		}
+		
+		return true;
+
+	}
+
+	/**
+	 * 将字符串除以100后，转换成保留两位有效数字的字符串
+	 * 
+	 * @param text
+	 * @param type
+	 *            1 除以100 判断是否需要除以100
+	 */
+	public static String DigitalConversion(String text, int type) {
+		Double cny = Double.parseDouble(text);// 转换成Double
+		if (1 == type) {
+			cny = cny / 100;// 转换成Double
+		}
+		text = String.valueOf(cny);
+		return text;
+	}
+
+	/**
+	 * 将字符串转换成保留两位有效数字的字符串
+	 * 
+	 * @param text
+	 * @param type
+	 *            1 除以100 判断是否需要除以100
+	 */
+	public static String DigitalConversion(String text) {
+		Double cny = Double.parseDouble(text);// 转换成Double
+		DecimalFormat df = new DecimalFormat("0.00");// 格式化
+		text = df.format(cny);
+		return text;
+	}
+
+	/**
+	 * 自动识别
+	 * 
+	 * @param content
+	 */
+
+	public static void autoRecognise(String text, MCell mcell) {
+		Content content = mcell.getContent();
+		if ("text".equals(content.getType())) {
+			content.setAlignRowFormat("left");
+			content.setDisplayTexts(text);
+			content.setTexts(text);
+			return;
+		}
+		String pattern1 = "yyyy年M月d日";
+		String pattern2 = "yyyy年M月";
+		String pattern3 = "yyyy/M/d";
+		Date d1 = getDate(text, pattern1);
+		Date d2 = getDate(text, pattern2);
+		Date d3 = getDate(text, pattern3);
+
+		if (isNumeric(text)) {
+			String texts = getPrettyNumber(text);
+			content.setTexts(texts);
+			content.setAlignRowFormat("right");
+			if (null == content.getType() || "routine".equals(content.getType())
+					|| "General".equals(content.getExpress())) {
+				content.setType("number");
+				content.setExpress("General");
+
+				content.setDisplayTexts(texts);
+			} else {
+				if ("date".equals(content.getType())) {
+					if ("m/d/yy".equals(content.getExpress())) {
+						content.setDisplayTexts("1970/1/1");
+						return;
+					} else if ("yyyy\"年\"m\"月\"".equals(content.getExpress())) {
+						content.setDisplayTexts("1970年1月");
+						return;
+					} else {
+						content.setDisplayTexts("1970年1月1日");
+						return;
+					}
+				} else {
+					setDisplay(content);
+				}
+			}
+
+		} else if (d1 != null) {
+			content.setAlignRowFormat("right");
+			if (null == content.getType() || "routine".equals(content.getType())
+					|| "General".equals(content.getExpress())) {
+				content.setType("date");
+				content.setExpress("yyyy\"年\"m\"月\"d\"日\"");
+				content.setTexts(text);
+				content.setDisplayTexts(text);
+			} else {
+				content.setTexts(text);
+				setDisplay(content);
+				
+				
+			}
+
+		} else if (d2 != null) {
+			content.setAlignRowFormat("right");
+			if (null == content.getType() || "routine".equals(content.getType())
+					|| "General".equals(content.getExpress())) {
+				content.setType("date");
+				content.setExpress("yyyy\"年\"m\"月\"");
+				content.setTexts(text);
+				content.setDisplayTexts(text);
+
+			} else {
+				content.setTexts(text);
+				setDisplay(content);
+			}
+
+		} else if (d3 != null) {
+			content.setAlignRowFormat("right");
+			if (null == content.getType() || "routine".equals(content.getType())
+					|| "General".equals(content.getExpress())) {
+				content.setType("date");
+				content.setExpress("m/d/yy");
+				content.setTexts(text);
+				content.setDisplayTexts(text);
+			} else {
+				content.setTexts(text);
+				setDisplay(content);
+			}
+
+		} else if (isCurrencyEn(text)) {
+			content.setAlignRowFormat("right");
+			String num = text.replace("$", "");
+			num = getPrettyNumber(num);
+			content.setTexts(num);
+			String texts = DigitalConversion(num);
+			if (null == content.getType() || "routine".equals(content.getType())
+					|| "General".equals(content.getExpress())) {
+				content.setType("currency");
+				content.setExpress("$#,##0.00");
+
+				texts = "$" + texts;
+				content.setDisplayTexts(texts);
+			} else {
+				if ("date".equals(content.getType())) {
+					if ("m/d/yy".equals(content.getExpress())) {
+						content.setDisplayTexts("1970/1/1");
+						return;
+					} else if ("yyyy\"年\"m\"月\"".equals(content.getExpress())) {
+						content.setDisplayTexts("1970年1月");
+						return;
+					} else {
+						content.setDisplayTexts("1970年1月1日");
+						return;
+					}
+				} else {
+					setDisplay(content);
+				}
+			}
+
+		} else if (isCurrencyZh(text)) {
+			content.setAlignRowFormat("right");
+			String num = text.replace("￥", "");
+			num = text.replace("¥", "");
+			num = getPrettyNumber(num);
+			content.setTexts(num);
+			String texts = DigitalConversion(num);
+			if (null == content.getType() || "routine".equals(content.getType())
+					|| "General".equals(content.getExpress())) {
+				content.setType("currency");
+				content.setExpress("¥#,##0.00");
+				texts = "¥" + texts;
+				content.setDisplayTexts(texts);
+			} else {
+				if ("date".equals(content.getType())) {
+					if ("m/d/yy".equals(content.getExpress())) {
+						content.setDisplayTexts("1970/1/1");
+						return;
+					} else if ("yyyy\"年\"m\"月\"".equals(content.getExpress())) {
+						content.setDisplayTexts("1970年1月");
+						return;
+					} else {
+						content.setDisplayTexts("1970年1月1日");
+						return;
+					}
+				} else {
+					setDisplay(content);
+				}
+			}
+
+		} else if (isPercent(text)) {
+			content.setAlignRowFormat("right");
+			String num = text.replace("%", "");
+			String texts = DigitalConversion(num, 1);
+			content.setTexts(texts);
+			String display = DigitalConversion(texts);
+			
+			if (null == content.getType() || "routine".equals(content.getType())
+					|| "General".equals(content.getExpress())) {
+				content.setType("percent");
+				content.setExpress("0.00%");
+				String displays = display + "%";
+				content.setDisplayTexts(displays);
+			} else {
+				if ("date".equals(content.getType())) {
+					if ("m/d/yy".equals(content.getExpress())) {
+						content.setDisplayTexts("1970/1/1");
+						return;
+					} else if ("yyyy\"年\"m\"月\"".equals(content.getExpress())) {
+						content.setDisplayTexts("1970年1月");
+						return;
+					} else {
+						content.setDisplayTexts("1970年1月1日");
+						return;
+					}
+				} else {
+					setDisplay(content);
+				}
+			}
+
+		} else {
+			content.setTexts(text);
+			content.setAlignRowFormat("left");
+			if (null == content.getType()
+					|| "routine".equals(content.getType())) {
+				content.setType("routine");
+				content.setExpress("General");
+				content.setDisplayTexts(text);
+			} else {
+				content.setDisplayTexts(text);
+			}
+		}
+	}
+
+	public static void setDisplay(Content content) {
+		try {
+			String type = content.getType();
+			String express = content.getExpress();
+			if ("date".equals(type)) {
+				String text = content.getTexts();
+				
+				String pattern2 = "yyyy/MM/dd";
+				String pattern1 = "yyyy年MM月dd日";
+				String pattern3 = "yyyy/M/d";
+				String pattern4 = "yyyy年M月d日";
+				String pattern5 = "yyyy年M月";
+				if ("m/d/yy".equals(express)) {
+					Date d1 = getDate(text, pattern1);
+					Date d2 = getDate(text, pattern2);
+					Date d4 = getDate(text, pattern4);
+					Date d5 = getDate(text, pattern5);
+					String display = null;
+					if (null != d1) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern3);
+						display = format.format(d1);
+					} else if (null != d2) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern3);
+						display = format.format(d2);
+					} else if (null != d4) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern3);
+						display = format.format(d4);
+					} else if (null != d5) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern3);
+						display = format.format(d5);
+					} else {
+						display = text;
+					}
+
+					content.setDisplayTexts(display);
+					return;
+				} else if ("yyyy\"年\"m\"月\"".equals(express)) {
+					Date d1 = getDate(text, pattern1);
+					Date d2 = getDate(text, pattern2);
+					Date d3 = getDate(text, pattern3);
+					Date d4 = getDate(text, pattern4);
+					String display = null;
+					if (null != d1) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern5);
+						display = format.format(d1);
+					} else if (null != d2) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern5);
+						display = format.format(d2);
+					} else if (null != d3) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern5);
+						display = format.format(d3);
+					} else if (null != d4) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern5);
+						display = format.format(d4);
+					} else {
+						display = text;
+					}
+
+					content.setDisplayTexts(display);
+					return;
+				} else if ("yyyy\"年\"m\"月\"".equals(express)) {
+					Date d1 = getDate(text, pattern1);
+					Date d2 = getDate(text, pattern2);
+					Date d3 = getDate(text, pattern3);
+					Date d5 = getDate(text, pattern5);
+					String display = null;
+					if (null != d1) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern4);
+						display = format.format(d1);
+					} else if (null != d2) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern4);
+						display = format.format(d2);
+					} else if (null != d3) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern4);
+						display = format.format(d3);
+					} else if (null != d5) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern4);
+						display = format.format(d5);
+					} else {
+						display = text;
+					}
+
+					content.setDisplayTexts(display);
+					return;
+				}
+			}
+
+			switch (type) {
+			case "routine":
+				content.setDisplayTexts(content.getTexts());
+				break;
+			case "number":
+			case "currency":
+			case "percent":
+				try {
+					XSSFWorkbook wb = new XSSFWorkbook();
+					XSSFSheet sheet = wb.createSheet();
+					XSSFRow row = sheet.createRow(0);
+					XSSFCell cell = row.createCell(0);
+
+					cell.setCellValue(Double.valueOf(content.getTexts()));
+
+					XSSFCellStyle style = cell.getCellStyle();
+					XSSFDataFormat format = wb.createDataFormat();
+					style.setDataFormat(format.getFormat(content.getExpress()));
+					cell.setCellStyle(style);
+					DataFormatter f = new DataFormatter();
+					String text = f.formatCellValue(cell);
+					if ("".equals(text) || null == text) {
+						content.setDisplayTexts(content.getTexts());
+					} else {
+						content.setDisplayTexts(text);
+					}
+				} catch (Exception e) {
+                    if("number".equals(type)){
+                    	if("0".equals(express)){
+                    		content.setTexts("0");
+                    		content.setDisplayTexts("0");
+                    	}else if("0.0".equals(express)){
+                    		content.setTexts("0");
+                    		content.setDisplayTexts("0.0");
+                    	}else if("0.00".equals(express)){
+                    		content.setTexts("0");
+                    		content.setDisplayTexts("0.00");
+                    	}else if("0.000".equals(express)){
+                    		content.setTexts("0");
+                    		content.setDisplayTexts("0.000");
+                    	}else if("0.0000".equals(express)){
+                    		content.setTexts("0");
+                    		content.setDisplayTexts("0.000");
+                    	}
+                    }else if("currency".equals(type)){
+                    	if("$#,##0.00".equals(express)){
+                    		content.setTexts("0");
+                    		content.setDisplayTexts("$0.00");
+                    	}else if("¥#,##0.00".equals(express)){
+                    		content.setTexts("0");
+                    		content.setDisplayTexts("¥0.00");
+                    	}
+                   }else if("percent".equals(type)){
+                	  content.setTexts("0");
+               		  content.setDisplayTexts("0.00%");
+                   }
+				}
+				break;
+			default:
+				break;
+			}
+
+		} catch (Exception e){
+			content.setDisplayTexts(content.getTexts());
+		}
+
+	}
+
+	public static void DateToExcel(ExcelCell cell, Content content,
+			ExcelCellStyle style) {
+		String format = content.getExpress();
+		String date = content.getDisplayTexts();
+		String pattern1 = "yyyy年M月";
+		String pattern2 = "yyyy/M/d";
+		String pattern3 = "yyyy年M月d日";
+		switch (format) {
+		case "yyyy\"年\"m\"月\"":
+			Date d1 = getDate(date, pattern1);
+			style.setDataformat("yyyy\"年\"m\"月\";@");
+			if (null == d1) {
+				if(null!=date){
+					cell.setCellValue(date);
+				}
+				cell.setText(date);
+			} else {
+				cell.setCellValue(d1);
+				
+				cell.setText(date);
+			}
+			break;
+		case "m/d/yy":
+			Date d2 = getDate(date, pattern2);
+			if (null == d2) {
+				if(null!=date){
+					cell.setCellValue(date);
+				}
+				cell.setText(date);
+			} else {
+				cell.setCellValue(d2);
+				cell.setText(date);
+			}
+			break;
+		case "yyyy\"年\"m\"月\"d\"日\"":
+			Date d3 = getDate(date, pattern3);
+			style.setDataformat("yyyy\"年\"m\"月\"d\"日\";@");
+			if (null == d3) {
+				if(null!=date){
+					cell.setCellValue(date);
+				}
+				cell.setText(date);
+			} else {
+				cell.setCellValue(d3);
+				cell.setText(date);
+			}
+			break;
+		default:
+			if(null!=date){
+				cell.setCellValue(date);
+				cell.setText(date);
+			}
+		}
+
+	}
+	
+	public static void NumToExcel(ExcelCellStyle style) {
+		String format = style.getDataformat();
+		switch (format) {
+		case "0":
+			style.setDataformat("0_ ");
+			break;
+		case "0.0":
+			style.setDataformat("0.0_ ");
+			break;
+		case "0.00":
+			style.setDataformat("0.00_ ");
+			break;
+		case "0.000":
+			style.setDataformat("0.000_ ");
+			break;
+		case "0.0000":
+			style.setDataformat("0.0000_ ");
+			break;
+		case "¥#,##0.00":
+			style.setDataformat("\"¥\"#,##0.00;\"¥\"-#,##0.00");
+			break;
+		case "$#,##0.00":
+			style.setDataformat("$#,##0.00;-$#,##0.00");
+			break;
+		default:
+			break;
+		}
+
+	}
+
+	public static void setShowText(Content content, Object date) {
+		try {
+			String type = content.getType();
+			if ("date".equals(type)) {
+				content.setAlignRowFormat("right");
+				String express = content.getExpress();
+
+				String pattern2 = "yyyy年M月";
+				String pattern3 = "yyyy/M/d";
+				String pattern4 = "yyyy年M月d日";
+
+				if ("m/d/yy".equals(express) || "yyyy/m/d;@".equals(express)) {
+					SimpleDateFormat format = new SimpleDateFormat(pattern3);
+					String display = format.format(date);
+					content.setDisplayTexts(display);
+					content.setTexts(display);
+					content.setExpress("m/d/yy");
+					return;
+				} else
+					if ("[$-F800]dddd\\,\\ mmmm\\ dd\\,\\ yyyy".equals(express)
+							|| "yyyy\"年\"m\"月\"d\"日\";@".equals(express)) {
+					SimpleDateFormat format = new SimpleDateFormat(pattern4);
+					String display = format.format(date);
+					content.setDisplayTexts(display);
+					content.setTexts(display);
+					content.setExpress("yyyy\"年\"m\"月\"d\"日\"");
+					return;
+				} else {
+					SimpleDateFormat format = new SimpleDateFormat(pattern2);
+					String display = format.format(date);
+					content.setDisplayTexts(display);
+					content.setTexts(display);
+					content.setExpress("yyyy\"年\"m\"月\"");
+					return;
+				}
+			}
+			XSSFWorkbook wb = new XSSFWorkbook();
+			XSSFSheet sheet = wb.createSheet();
+			XSSFRow row = sheet.createRow(0);
+			XSSFCell cell = row.createCell(0);
+
+			switch (type) {
+			case "routine":
+				cell.setCellValue(content.getTexts());
+				break;
+			case "text":
+				cell.setCellValue(content.getTexts());
+				content.setAlignRowFormat("left");
+				break;
+			case "number":
+				cell.setCellValue(Double.valueOf(content.getTexts()));
+				content.setAlignRowFormat("right");
+				switch(content.getExpress()){
+				case "0_);[Red]\\(0\\)":
+					content.setExpress("0_ ");
+					break;
+				case "0.0_);[Red]\\(0.0\\)":
+					content.setExpress("0.0_ ");
+					break;
+				case "0.00_);[Red]\\(0.00\\)":
+					content.setExpress("0.00_ ");
+					break;
+				case "0.000_);[Red]\\(0.000\\)":
+					content.setExpress("0.000_ ");
+					break;
+				case "0.0000_);[Red]\\(0.0000\\)":
+					content.setExpress("0.0000_ ");
+					break;
+				}
+				break;
+			case "currency":
+				cell.setCellValue(Double.valueOf(content.getTexts()));
+				content.setAlignRowFormat("right");
+				if(content.getExpress().indexOf("¥")>0){
+					content.setExpress("\"¥\"#,##0.00;\"¥\"-#,##0.00");
+				}else{
+					content.setExpress("$#,##0.00;-$#,##0.00");
+				}
+				break;
+			case "percent":
+				cell.setCellValue(Double.valueOf(content.getTexts()));
+				content.setAlignRowFormat("right");
+				break;
+			default:
+				break;
+			}
+			XSSFCellStyle style = cell.getCellStyle();
+			XSSFDataFormat format = wb.createDataFormat();
+			style.setDataFormat(format.getFormat(content.getExpress()));
+			cell.setCellStyle(style);
+			DataFormatter f = new DataFormatter();
+			String text = f.formatCellValue(cell);
+			if ("".equals(text) || null == text) {
+				content.setDisplayTexts(content.getTexts());
+			} else {
+				content.setDisplayTexts(text);
+			}
+
+		} catch (Exception e) {
+			content.setDisplayTexts(content.getTexts());
+		}
+
+	}
+
+	public static void setShowTextFormat(MCell mc,String orType) {
+		Content content = mc.getContent();
+		String type = content.getType();
+		String express = content.getExpress();
+	   
+		if ("date".equals(type)) {
+				content.setAlignRowFormat("right");
+
+				String text = content.getTexts();
+				
+				String pattern2 = "yyyy/MM/dd";
+				String pattern1 = "yyyy年MM月dd日";
+				String pattern3 = "yyyy/M/d";
+				String pattern4 = "yyyy年M月d日";
+				String pattern5 = "yyyy年M月";
+				if ("m/d/yy".equals(express)) {
+					Date d1 = getDate(text, pattern1);
+					Date d2 = getDate(text, pattern2);
+					Date d4 = getDate(text, pattern4);
+					Date d5 = getDate(text, pattern5);
+					String display = null;
+					if (null != d1) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern3);
+						display = format.format(d1);
+					} else if (null != d2) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern3);
+						display = format.format(d2);
+					} else if (null != d4) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern3);
+						display = format.format(d4);
+					} else if (null != d5) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern3);
+						display = format.format(d5);
+					} else {
+						if("routine".equals(orType)||"text".equals(orType)){
+							 content.setAlignRowFormat("left");
+							 display = content.getTexts();
+						 }else{
+							if ("m/d/yy".equals(content.getExpress())) {
+								display ="1970/1/1";
+								
+							} else if ("yyyy\"年\"m\"月\"".equals(content.getExpress())) {
+								display ="1970年1月";
+								
+							} else {
+								display ="1970年1月1日";
+							}
+					  }	
+					}
+
+					content.setDisplayTexts(display);
+					return;
+				} else if ("yyyy\"年\"m\"月\"".equals(express)) {
+					Date d1 = getDate(text, pattern1);
+					Date d2 = getDate(text, pattern2);
+					Date d3 = getDate(text, pattern3);
+					Date d4 = getDate(text, pattern4);
+					String display = null;
+					if (null != d1) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern5);
+						display = format.format(d1);
+					} else if (null != d2) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern5);
+						display = format.format(d2);
+					} else if (null != d3) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern5);
+						display = format.format(d3);
+					} else if (null != d4) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern5);
+						display = format.format(d4);
+					} else {
+						if("routine".equals(orType)||"text".equals(orType)){
+							 content.setAlignRowFormat("left");
+							 display = content.getTexts();
+						 }else{
+							if ("m/d/yy".equals(content.getExpress())) {
+								display ="1970/1/1";
+								
+							} else if ("yyyy\"年\"m\"月\"".equals(content.getExpress())) {
+								display ="1970年1月";
+								
+							} else {
+								display ="1970年1月1日";
+							}
+					  }
+					}
+
+					content.setDisplayTexts(display);
+					return;
+				} else {
+					Date d1 = getDate(text, pattern1);
+					Date d2 = getDate(text, pattern2);
+					Date d3 = getDate(text, pattern3);
+					Date d5 = getDate(text, pattern5);
+					String display = null;
+					if (null != d1) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern4);
+						display = format.format(d1);
+					} else if (null != d2) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern4);
+						display = format.format(d2);
+					} else if (null != d3) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern4);
+						display = format.format(d3);
+					} else if (null != d5) {
+						SimpleDateFormat format = new SimpleDateFormat(
+								pattern4);
+						display = format.format(d5);
+					} else {
+						
+						if("routine".equals(orType)||"text".equals(orType)){
+							 content.setAlignRowFormat("left");
+							 display = content.getTexts();
+						 }else{
+							if ("m/d/yy".equals(content.getExpress())) {
+								display ="1970/1/1";
+								
+							} else if ("yyyy\"年\"m\"月\"".equals(content.getExpress())) {
+								display ="1970年1月";
+								
+							} else {
+								display ="1970年1月1日";
+							}
+					  }
+					}
+					content.setDisplayTexts(display);
+					return;
+				}
+			} else if ("routine".equals(type)) {
+				autoRecognise(content.getTexts(), mc);
+				return;
+			}
+
+			XSSFWorkbook wb = new XSSFWorkbook();
+			XSSFSheet sheet = wb.createSheet();
+			XSSFRow row = sheet.createRow(0);
+			XSSFCell cell = row.createCell(0);
+		 try {
+			switch (type) {
+			case "text":
+				content.setAlignRowFormat("left");
+				content.setDisplayTexts(content.getTexts());
+				break;
+			case "number":
+			case "currency":
+			case "percent":
+				
+				if (null == content.getTexts()|| "".equals(content.getTexts())) {
+
+				}else{
+					cell.setCellValue(Double.valueOf(content.getTexts()));
+				}
+				content.setAlignRowFormat("right");
+				break;
+			default:
+				break;
+			}
+			XSSFCellStyle style = cell.getCellStyle();
+			XSSFDataFormat format = wb.createDataFormat();
+			style.setDataFormat(format.getFormat(content.getExpress()));
+			cell.setCellStyle(style);
+			DataFormatter f = new DataFormatter();
+			String text = f.formatCellValue(cell);
+			if ("".equals(text) || null == text) {
+				content.setDisplayTexts(content.getTexts());
+			} else {
+				content.setDisplayTexts(text);
+			}
+		 } catch (Exception e) {
+			 if("routine".equals(orType)||"text".equals(orType)){
+				 content.setAlignRowFormat("left");
+			 }else{
+			 content.setAlignRowFormat("right");
+			 if("number".equals(type)){
+             	if("0".equals(express)){
+             		content.setTexts("0");
+             		content.setDisplayTexts("0");
+             	}else if("0.0".equals(express)){
+             		content.setTexts("0");
+             		content.setDisplayTexts("0.0");
+             	}else if("0.00".equals(express)){
+             		content.setTexts("0");
+             		content.setDisplayTexts("0.00");
+             	}else if("0.000".equals(express)){
+             		content.setTexts("0");
+             		content.setDisplayTexts("0.000");
+             	}else if("0.0000".equals(express)){
+             		content.setTexts("0");
+             		content.setDisplayTexts("0.000");
+             	}
+             }else if("currency".equals(type)){
+             	if("$#,##0.00".equals(express)){
+             		content.setTexts("0");
+             		content.setDisplayTexts("$0.00");
+             	}else if("¥#,##0.00".equals(express)){
+             		content.setTexts("0");
+             		content.setDisplayTexts("¥0.00");
+             	}
+            }else if("percent".equals(type)){
+         	  content.setTexts("0");
+         	  content.setDisplayTexts("0.00%");
+            }
+		  }
+		 }
+	}
+
+	public static void main(String[] args) throws ParseException {
+
+		/*
+		 * boolean a = isCurrency("$001$"); String test = "$000002434"; MCell mc
+		 * = new MCell(); Content content = mc.getContent();
+		 * content.setTexts("12.445"); content.setType("percent");
+		 * content.setExpress("0.00_)"); System.out.println(mc);
+		 */
+		String text = "00012.556";
+		text = getPrettyNumber(text);
+		String t = DigitalConversion("0001.24235234", 1);
+		System.out.println(text);
+		System.out.println(t);
 
 	}
 }

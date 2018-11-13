@@ -6,6 +6,7 @@ public class Rule {
 	private String formula2;
 	private Integer index;
 	private Integer type;
+	private int count;
 
 	public String getFormula1() {
 		return formula1;
@@ -39,4 +40,11 @@ public class Rule {
 		this.type = type;
 	}
 
+	public int getCount() {
+		return count;
+	}
+
+	public void setCount(int count) {
+		this.count = count;
+	}
 }

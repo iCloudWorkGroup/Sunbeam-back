@@ -13,7 +13,15 @@ public interface MCellService {
 	 * @param step
 	 * @param excelId
 	 */
-	void saveContent(CellContent cell, int step, String excelId);
+	void saveContent(String excelId,CellContent cell, int step);
+	
+	/**
+	 * 清除单元格
+	 * @param excelId
+	 * @param cell
+	 * @param step
+	 */
+	void clearContent(String excelId,Cell cell, int step);
 
 	/**
 	 * 更新字体
@@ -22,7 +30,7 @@ public interface MCellService {
 	 * @param step
 	 * @param excelId
 	 */
-	void updateFontFamily(Cell cell, int step, String excelId);
+	void updateFontFamily(String excelId,Cell cell, int step);
 
 	/**
 	 * 更新字体大小
@@ -31,7 +39,7 @@ public interface MCellService {
 	 * @param step
 	 * @param excelId
 	 */
-	void updateFontSize(Cell cell, int step, String excelId);
+	void updateFontSize(String excelId,Cell cell, int step);
 
 	/**
 	 * 更新字体weight
@@ -40,7 +48,7 @@ public interface MCellService {
 	 * @param step
 	 * @param excelId
 	 */
-	void updateFontWeight(Cell cell, int step, String excelId);
+	void updateFontWeight(String excelId,Cell cell, int step);
 
 	/**
 	 * 更新字体是否斜体
@@ -49,7 +57,7 @@ public interface MCellService {
 	 * @param step
 	 * @param excelId
 	 */
-	void updateFontItalic(Cell cell, int step, String excelId);
+	void updateFontItalic(String excelId,Cell cell, int step);
 
 	/**
 	 * 更新字体颜色
@@ -58,7 +66,7 @@ public interface MCellService {
 	 * @param step
 	 * @param excelId
 	 */
-	void updateFontColor(Cell cell, int step, String excelId);
+	void updateFontColor(String excelId,Cell cell, int step);
 
 	/**
 	 * 更新字体是否自动换行
@@ -67,7 +75,7 @@ public interface MCellService {
 	 * @param step
 	 * @param excelId
 	 */
-	void updateWordwrap(Cell cell, int step, String excelId);
+	void updateWordwrap(String excelId,Cell cell, int step);
 
 	/**
 	 * 更新背景颜色
@@ -76,7 +84,7 @@ public interface MCellService {
 	 * @param step
 	 * @param excelId
 	 */
-	void updateBgColor(Cell cell, int step, String excelId);
+	void updateBgColor(String excelId,Cell cell, int step);
 
 	/**
 	 * 更新水平对齐方向
@@ -85,7 +93,7 @@ public interface MCellService {
 	 * @param step
 	 * @param excelId
 	 */
-	void updateAlignlevel(Cell cell, int step, String excelId);
+	void updateAlignlevel(String excelId,Cell cell, int step);
 
 	/**
 	 * 更新垂直对齐方向
@@ -94,7 +102,7 @@ public interface MCellService {
 	 * @param step
 	 * @param excelId
 	 */
-	void updateAlignvertical(Cell cell, int step, String excelId);
+	void updateAlignvertical(String excelId,Cell cell, int step);
 	
 	/**
 	 * 更新字体下滑线状况
@@ -102,7 +110,7 @@ public interface MCellService {
 	 * @param step
 	 * @param excelId
 	 */
-	void updateFontUnderline(Cell cell,int step,String excelId);
+	void updateFontUnderline(String excelId,Cell cell,int step);
 
 	/**
 	 * 合并单元格
@@ -111,7 +119,7 @@ public interface MCellService {
 	 * @param step
 	 * @param excelId
 	 */
-	void mergeCell(Cell cell, int step, String excelId);
+	void mergeCell(String excelId,Cell cell, int step);
 
 	/**
 	 * 拆分单元格
@@ -120,7 +128,7 @@ public interface MCellService {
 	 * @param step
 	 * @param excelId
 	 */
-	void splitCell(Cell cell, int step, String excelId);
+	void splitCell(String excelId,Cell cell, int step);
 	
 	/**
 	 * 设置边框样式
@@ -128,7 +136,7 @@ public interface MCellService {
 	 * @param step
 	 * @param excelId
 	 */
-	void updateBorder(Cell cell,int step,String excelId);
+	void updateBorder(String excelId,Cell cell,int step);
 	
 	/**
 	 * 设置单元格样式
@@ -136,7 +144,7 @@ public interface MCellService {
 	 * @param step
 	 * @param excelId
 	 */
-	void updateFormat(CellFormate cellFormate,int step,String excelId);
+	void updateFormat(String excelId,CellFormate cellFormate,int step);
 	
 	/**
 	 * 设置批注
@@ -144,7 +152,7 @@ public interface MCellService {
 	 * @param step
 	 * @param excelId
 	 */
-	void updateComment(Cell cell,int step,String excelId);
+	void updateComment(String excelId,Cell cell,int step);
 	
 	/**
 	 * 设置锁定状态
@@ -152,6 +160,6 @@ public interface MCellService {
 	 * @param step
 	 * @param excelId
 	 */
-	void updateLock(Cell cell,int step,String excelId);
+	void updateLock(String excelId,Cell cell,int step);
 
 }

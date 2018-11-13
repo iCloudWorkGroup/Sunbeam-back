@@ -86,6 +86,11 @@ public class ExcelController extends BaseController {
 			@PathVariable String excelId) {
 		String sheetId = excelId + 0;
 		ExcelBook excelBook = mbookService.getExcelBook(excelId, sheetId);
+		try {
+			excelBook.saveExcel("D://456.xlsx");
+		} catch (ExcelException e) {
+			e.printStackTrace();
+		}
 		if (excelBook != null) {
 			try {
 				OutputStream out = resp.getOutputStream();
@@ -265,7 +270,8 @@ public class ExcelController extends BaseController {
 		 * (colSize < 26) { for (int i = colSize; i < 26; i++) {
 		 * excelSheet.addColumn(); } }
 		 */
-		String excelId = UUIDUtil.getUUID();
+		/*String excelId = UUIDUtil.getUUID();*/
+		String excelId = "1234aaaa";
 
 		JsonReturn data = new JsonReturn("");
 

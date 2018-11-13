@@ -51,7 +51,7 @@ public class MRowServiceImpl implements MRowService {
 	@Resource
 	private MRowColCellDao mrowColCellDao;
 
-	public void insertRow(RowOperate rowOperate, String excelId, Integer step) {
+	public void insertRow(String excelId,RowOperate rowOperate,  Integer step) {
 		String sheetId = excelId + 0;
 		List<RowCol> sortRcList = new ArrayList<RowCol>();
 		List<RowCol> sortClList = new ArrayList<RowCol>();
@@ -257,7 +257,7 @@ public class MRowServiceImpl implements MRowService {
 	}
 
 	@Override
-	public void addRow(int num, String excelId, Integer step) {
+	public void addRow(String excelId,int num,  Integer step) {
 		String sheetId = excelId + 0;
 		MSheet msheet = msheetDao.getMSheet(excelId, sheetId);
 		int maxRow = msheet.getMaxrow();
@@ -290,7 +290,7 @@ public class MRowServiceImpl implements MRowService {
 	}
 
 	@Override
-	public void delRow(RowOperate rowOperate, String excelId, Integer step) {
+	public void delRow(String excelId,RowOperate rowOperate,  Integer step) {
 		String sheetId = excelId + 0;
 		List<RowCol> sortRList = new ArrayList<RowCol>();
 		List<RowCol> sortCList = new ArrayList<RowCol>();
@@ -439,7 +439,7 @@ public class MRowServiceImpl implements MRowService {
 	}
 
 	@Override
-	public void hideRow(RowOperate rowOperate, String excelId, Integer step) {
+	public void hideRow( String excelId,RowOperate rowOperate, Integer step) {
 		String sheetId = excelId + 0;
 		List<RowCol> sortRList = new ArrayList<RowCol>();
 		mrowColDao.getRowList(sortRList, excelId, sheetId);
@@ -452,7 +452,7 @@ public class MRowServiceImpl implements MRowService {
 	}
 
 	@Override
-	public void showRow(RowOperate rowOperate, String excelId, Integer step) {
+	public void showRow( String excelId,RowOperate rowOperate, Integer step) {
 		String sheetId = excelId + 0;
 		List<RowCol> sortRList = new ArrayList<RowCol>();
 		mrowColDao.getRowList(sortRList, excelId, sheetId);
@@ -469,7 +469,7 @@ public class MRowServiceImpl implements MRowService {
 	}
 
 	@Override
-	public void updateRowHeight(RowHeight rowHeight, String excelId,
+	public void updateRowHeight( String excelId,RowHeight rowHeight,
 			Integer step) {
 		String sheetId = excelId + 0;
 		List<RowCol> sortRList = new ArrayList<RowCol>();

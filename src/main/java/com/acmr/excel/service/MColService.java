@@ -14,9 +14,9 @@ public interface MColService {
 	 * @param step
 	 *            步骤
 	 */
-	void insertCol(ColOperate colOperate, String excelId, Integer step);
+	void insertCol(String excelId,ColOperate colOperate,  Integer step);
 	
-	void insertColDis(ColOperate colOperate, String excelId, Integer step);
+	void insertColDis(String excelId,ColOperate colOperate,  Integer step);
 	
 	/**
 	 * 批量增加列
@@ -24,7 +24,7 @@ public interface MColService {
 	 * @param excelId
 	 * @param step
 	 */
-	void addCol(int num,String excelId,Integer step);
+	void addCol(String excelId,int num,Integer step);
 
 	/**
 	 * 删除一列
@@ -34,7 +34,7 @@ public interface MColService {
 	 * @param step
 	 *            步骤
 	 */
-	void delCol(ColOperate colOperate, String excelId, Integer step);
+	void delCol(String excelId,ColOperate colOperate,  Integer step);
 
 	/**
 	 * 隐藏列
@@ -44,7 +44,7 @@ public interface MColService {
 	 * @param step
 	 *            步骤
 	 */
-	void hideCol(ColOperate colOperate, String excelId, Integer step);
+	void hideCol(String excelId,ColOperate colOperate,  Integer step);
 
 	/**
 	 * 取消隐藏
@@ -54,7 +54,7 @@ public interface MColService {
 	 * @param step
 	 *            步骤
 	 */
-	void showCol(ColOperate colOperate, String excelId, Integer step);
+	void showCol(String excelId,ColOperate colOperate,  Integer step);
 
 	/**
 	 * 更新列宽度
@@ -63,6 +63,6 @@ public interface MColService {
 	 * @param excelId
 	 * @param step
 	 */
-	void updateColWidth(ColWidth colWidth, String excelId, Integer step);
+	void updateColWidth(String excelId,ColWidth colWidth,  Integer step);
 
 }

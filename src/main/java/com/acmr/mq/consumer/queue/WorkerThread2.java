@@ -2,6 +2,7 @@ package com.acmr.mq.consumer.queue;
 
 import org.apache.log4j.Logger;
 
+import com.acmr.excel.dao.MSheetDao;
 import com.acmr.excel.model.Cell;
 import com.acmr.excel.model.CellContent;
 import com.acmr.excel.model.CellFormate;
@@ -34,10 +35,13 @@ public class WorkerThread2 implements Runnable {
 	private MColService mcolService;
 	
 	private MSheetService msheetService;
+	
+	private MSheetDao msheetDao;
 
 	public WorkerThread2(int step, String key, Model model,
 			MCellService mcellService, MRowService mrowService,
-			MColService mcolService, MSheetService msheetService) {
+			MColService mcolService, MSheetService msheetService,
+			MSheetDao msheetDao) {
 
 		this.step = step;
 		this.key = key;
@@ -46,6 +50,7 @@ public class WorkerThread2 implements Runnable {
 		this.mrowService = mrowService;
 		this.mcolService = mcolService;
 		this.msheetService = msheetService;
+		this.msheetDao = msheetDao;
 	}
 	
 	public WorkerThread2(int step, String key, Model model) {
@@ -63,7 +68,7 @@ public class WorkerThread2 implements Runnable {
 	@Override
 	public void run() {
 		while (true) {
-			int memStep = msheetService.getStep(key, key + 0);
+			int memStep = msheetService.getStep(key, key+0);
 			if (memStep + 1 == step) {
 				System.out.println(step + "开始执行");
 				logger.info("begin excelId:" + model.getExcelId() + ";step:"
@@ -99,76 +104,80 @@ public class WorkerThread2 implements Runnable {
 		switch (reqPath) {
 		case OperatorConstant.textData:
 			CellContent cellContent = (CellContent) model.getObject();
-			mcellService.saveContent(cellContent, step, excelId);
+			mcellService.saveContent(excelId,cellContent, step);
+			break;
+		case OperatorConstant.clearCell:
+			cell = (Cell) model.getObject();
+			mcellService.clearContent(excelId,cell, step);
 			break;
 		case OperatorConstant.fontsize:
 			cell = (Cell) model.getObject();
-			mcellService.updateFontSize(cell, step, excelId);
+			mcellService.updateFontSize(excelId,cell, step);
 			break;
 		case OperatorConstant.fontfamily:
 			cell = (Cell) model.getObject();
-			mcellService.updateFontFamily(cell, step, excelId);
+			mcellService.updateFontFamily(excelId,cell, step);
 			break;
 		case OperatorConstant.fontweight:
 			cell = (Cell) model.getObject();
-			mcellService.updateFontWeight(cell, step, excelId);
+			mcellService.updateFontWeight(excelId,cell, step);
 			break;
 		case OperatorConstant.fontitalic:
 			cell = (Cell) model.getObject();
-			mcellService.updateFontItalic(cell, step, excelId);
+			mcellService.updateFontItalic(excelId,cell, step);
 			break;
 		case OperatorConstant.fontcolor:
 			cell = (Cell) model.getObject();
-			mcellService.updateFontColor(cell, step, excelId);
+			mcellService.updateFontColor(excelId,cell, step);
 			break;
 		case OperatorConstant.wordWrap:
 			cell = (Cell) model.getObject();
-			mcellService.updateWordwrap(cell, step, excelId);
+			mcellService.updateWordwrap(excelId,cell, step);
 			break;
 
 		case OperatorConstant.fillbgcolor:
 			cell = (Cell) model.getObject();
-			mcellService.updateBgColor(cell, step, excelId);
+			mcellService.updateBgColor(excelId,cell, step);
 			break;
 		case OperatorConstant.textDataformat:
 			CellFormate cellFormate = (CellFormate) model.getObject();
-			mcellService.updateFormat(cellFormate, step, excelId);
+			mcellService.updateFormat(excelId,cellFormate, step);
 			break;
 		case OperatorConstant.underline:
 			cell = (Cell) model.getObject();
-			mcellService.updateFontUnderline(cell, step, excelId);
+			mcellService.updateFontUnderline(excelId,cell, step);
 			break;
 		 case OperatorConstant.commentset:
 		   cell = (Cell) model.getObject();
-		   mcellService.updateComment(cell, step, excelId);
+		   mcellService.updateComment(excelId,cell, step);
 		   break;
 		case OperatorConstant.merge:
 			cell = (Cell) model.getObject();
-			mcellService.mergeCell(cell, step, excelId);
+			mcellService.mergeCell(excelId,cell, step);
 			break;
 		case OperatorConstant.mergedelete:
 			cell = (Cell) model.getObject();
-			mcellService.splitCell(cell, step, excelId);
+			mcellService.splitCell(excelId,cell, step);
 			break;
 		case OperatorConstant.frame:
 			cell = (Cell) model.getObject();
-			mcellService.updateBorder(cell, step, excelId);
+			mcellService.updateBorder(excelId,cell, step);
 			break;
 		case OperatorConstant.alignlevel:
 			cell = (Cell) model.getObject();
-			mcellService.updateAlignlevel(cell, step, excelId);
+			mcellService.updateAlignlevel(excelId,cell, step);
 			break;
 		case OperatorConstant.alignvertical:
 			cell = (Cell) model.getObject();
-			mcellService.updateAlignvertical(cell, step, excelId);
+			mcellService.updateAlignvertical(excelId,cell, step);
 			break;
 		case OperatorConstant.rowsinsert:
 			RowOperate rowOperate = (RowOperate) model.getObject();
-			mrowService.insertRow(rowOperate, excelId, step);
+			mrowService.insertRow(excelId,rowOperate, step);
 			break;
 		case OperatorConstant.rowsdelete:
 			RowOperate rowOperate2 = (RowOperate) model.getObject();
-			mrowService.delRow(rowOperate2, excelId, step);
+			mrowService.delRow(excelId,rowOperate2,step);
 			break;
 		case OperatorConstant.colsinsert:
 			ColOperate colOperate = (ColOperate) model.getObject();
@@ -188,62 +197,62 @@ public class WorkerThread2 implements Runnable {
 			dis.add(target3);
 			dis.exec();*/
 			
-			mcolService.insertCol(colOperate, excelId, step);
+			mcolService.insertCol(excelId,colOperate,  step);
 			break;
 		case OperatorConstant.colsdelete:
 			ColOperate colOperate2 = (ColOperate) model.getObject();
-			mcolService.delCol(colOperate2, excelId, step);
+			mcolService.delCol(excelId,colOperate2,  step);
 			break;
 		case OperatorConstant.paste:
 			OuterPaste outerPaste = (OuterPaste) model.getObject();
-			msheetService.paste(outerPaste, excelId, step);
+			msheetService.paste(excelId,outerPaste, step);
 			break;
 		case OperatorConstant.copy:
 			Copy copy = (Copy) model.getObject();
-			msheetService.copy(copy, excelId, step);
+			msheetService.copy(excelId,copy,  step);
 			break;
 		case OperatorConstant.cut:
 			Copy copy2 = (Copy) model.getObject();
-			msheetService.cut(copy2, excelId, step);
+			msheetService.cut( excelId,copy2, step);
 			break;
 		case OperatorConstant.frozen:
 			Frozen frozen = (Frozen) model.getObject();
-			msheetService.frozen(frozen, excelId, step);
+			msheetService.frozen(excelId,frozen,  step);
 			break;
 		case OperatorConstant.unFrozen:
 			msheetService.unFrozen(excelId, step);
 			break;
 		case OperatorConstant.colswidth:
 			ColWidth colWidth = (ColWidth) model.getObject();
-			mcolService.updateColWidth(colWidth, excelId, step);
+			mcolService.updateColWidth(excelId,colWidth,  step);
 			break;
 		case OperatorConstant.colshide:
 			ColOperate colHide = (ColOperate) model.getObject();
-			mcolService.hideCol(colHide, excelId, step);
+			mcolService.hideCol( excelId,colHide, step);
 			break;
 		case OperatorConstant.rowshide:
 			RowOperate rowHide = (RowOperate) model.getObject();
-			mrowService.hideRow(rowHide, excelId, step);
+			mrowService.hideRow(excelId,rowHide,  step);
 			break;
 		case OperatorConstant.colhideCancel:
 			ColOperate colhideCancel = (ColOperate) model.getObject();
-			mcolService.showCol(colhideCancel, excelId, step);
+			mcolService.showCol( excelId,colhideCancel, step);
 			break;
 		case OperatorConstant.rowhideCancel:
 			RowOperate rowhideCancel = (RowOperate) model.getObject();
-			mrowService.showRow(rowhideCancel, excelId, step);
+			mrowService.showRow(excelId,rowhideCancel,  step);
 			break;
 		case OperatorConstant.rowsheight:
 			RowHeight rowHeight = (RowHeight) model.getObject();
-			mrowService.updateRowHeight(rowHeight, excelId, step);
+			mrowService.updateRowHeight( excelId,rowHeight, step);
 			break;
 		case OperatorConstant.expand:
 			RowOrColExpand expand = (RowOrColExpand) model.getObject();
 			String type = expand.getType();
 			if ("row".equals(type)) {
-				mrowService.addRow(expand.getNum(), excelId, step);
+				mrowService.addRow(excelId,expand.getNum(),  step);
 			} else {
-				mcolService.addCol(expand.getNum(), excelId, step);
+				mcolService.addCol(excelId,expand.getNum(),  step);
 			}
 			break;
 		// case OperatorConstant.addRowLine:
@@ -267,7 +276,7 @@ public class WorkerThread2 implements Runnable {
 		break;
 		case OperatorConstant.cellLock:
 			cell = (Cell) model.getObject();
-			mcellService.updateLock(cell, step, excelId);
+			mcellService.updateLock(excelId,cell, step);
 		break;
 		// case OperatorConstant.batchcolorset:
 		// ColorSet colorSet= (ColorSet) model.getObject();

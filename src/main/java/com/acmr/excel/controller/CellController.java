@@ -200,6 +200,18 @@ public class CellController extends BaseController {
     	CellContent cell = getJsonDataParameter(req, CellContent.class);
 		this.assembleData(req, resp, cell, OperatorConstant.textData);
 	}
+    
+    /**
+	 * 清除单元格中数据内容
+	 * 
+	 * @throws IOException
+	 */
+    @RequestMapping("/data-clean")
+	public void data_clear(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    	Cell cell = getJsonDataParameter(req, Cell.class);
+		this.assembleData(req, resp, cell, OperatorConstant.clearCell);
+	}
+    
 	/**
 	 * 设置内容数据类型
 	 * 

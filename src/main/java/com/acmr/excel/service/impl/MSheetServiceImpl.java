@@ -41,6 +41,7 @@ import com.acmr.excel.model.mongo.MRowColCell;
 import com.acmr.excel.model.mongo.MRowColList;
 import com.acmr.excel.model.mongo.MSheet;
 import com.acmr.excel.service.MSheetService;
+import com.acmr.excel.util.CellFormateUtil;
 import com.acmr.redis.Redis;
 
 @Service("msheetService")
@@ -65,7 +66,7 @@ public class MSheetServiceImpl implements MSheetService {
 	private String flag = "";
 
 	@Override
-	public void frozen(Frozen frozen, String excelId, Integer step) {
+	public void frozen( String excelId,Frozen frozen, Integer step) {
 		String sheetId = excelId + 0;
 		List<RowCol> sortRList = new ArrayList<RowCol>();
 		List<RowCol> sortCList = new ArrayList<RowCol>();
@@ -113,7 +114,7 @@ public class MSheetServiceImpl implements MSheetService {
 	}
 
 	@Override
-	public void paste(OuterPaste outerpaste, String excelId, Integer step) {
+	public void paste(String excelId,OuterPaste outerpaste, Integer step) {
 		String sheetId = excelId + 0;
 		List<RowCol> sortRList = new ArrayList<RowCol>();
 		List<RowCol> sortCList = new ArrayList<RowCol>();
@@ -289,8 +290,10 @@ public class MSheetServiceImpl implements MSheetService {
 				mrcc.setSheetId(sheetId);
 				tempList.add(mrcc);
 			} else {
-				mc.getContent().setDisplayTexts(data.getContent());
+				
 				mc.getContent().setTexts(data.getContent());
+				CellFormateUtil.autoRecognise(data.getContent(), mc);
+				
 				baseDao.update(excelId, mc);
 			}
 		}
@@ -545,7 +548,7 @@ public class MSheetServiceImpl implements MSheetService {
 		for (MCell mc : mcellList) {
 
 			if (mc.getColspan() > 1 || mc.getRowspan() > 1) {
-				String[] ids = mc.getId().split("_");
+				/*String[] ids = mc.getId().split("_");
 				int rowIndex = rowMap.get(ids[0]);
 				int colIndex = colMap.get(ids[1]);
 				if (rowIndex + mc.getRowspan() > targetStartRowIndex + rowRange
@@ -557,7 +560,10 @@ public class MSheetServiceImpl implements MSheetService {
 						+ 1) {
 					canPaste = false;
 					break;
-				}
+				}*/
+				
+				canPaste = false;
+				break;
 			}
 
 			if ((null!=msheet.getPasswd())&&(msheet.getProtect())) {
@@ -573,13 +579,13 @@ public class MSheetServiceImpl implements MSheetService {
 	}
 
 	@Override
-	public void cut(Copy copy, String excelId, Integer step) {
+	public void cut( String excelId,Copy copy, Integer step) {
 		String sheetId = excelId + 0;
 		copyOrCut(copy, excelId, sheetId, step, 1);
 	}
 
 	@Override
-	public void copy(Copy copy, String excelId, Integer step) {
+	public void copy(String excelId,Copy copy,  Integer step) {
 		String sheetId = excelId + 0;
 		copyOrCut(copy, excelId, sheetId, step, 0);
 	}
@@ -780,7 +786,7 @@ public class MSheetServiceImpl implements MSheetService {
 				OuterPasteData outData = new OuterPasteData();
 				outData.setRow(i);
 				outData.setCol(j);
-				outData.setContent(colData[j]);
+				outData.setContent(colData[j].replaceAll("/\n|\r|\n\r/g", ""));
 				contentList.add(outData);
 			}
 		}
@@ -913,15 +919,18 @@ public class MSheetServiceImpl implements MSheetService {
 	}
 
 	@Override
-	public void updateProtect(String excelId, MSheet msheet) {
+	public boolean updateProtect(String excelId, MSheet msheet) {
 		String sheetId = excelId + 0;
 		if (msheet.getProtect()) {
 			msheetDao.updateMSheetByObject(excelId, sheetId, msheet);
+			return true;
 		} else {
 			MSheet ms = msheetDao.getMSheet(excelId, sheetId);
-			if (null == ms.getPasswd()
-					|| msheet.getPasswd().equals(ms.getPasswd())) {
+			if (null == ms.getPasswd()||ms.getPasswd().equals(msheet.getPasswd())) {
 				msheetDao.updateMSheetByObject(excelId, sheetId, msheet);
+				return true;
+			}else{
+				return false;
 			}
 		}
 

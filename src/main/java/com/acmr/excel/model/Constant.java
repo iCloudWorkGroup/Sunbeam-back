@@ -47,19 +47,19 @@ public class Constant {
 		accessControlAllowOriginList.add("http://192.168.3.154:8080");
 		
 		
-		unRecordAction.put("redo", true);
-		unRecordAction.put("undo", true);
-		unRecordAction.put("position", true);
-		unRecordAction.put("area", true);
-		unRecordAction.put("upload", true);
+		unRecordAction.put("reload", true);
 		unRecordAction.put("frozen", true);
 		unRecordAction.put("unFrozen", true);
-		unRecordAction.put("cols_hide", true);
-		unRecordAction.put("cols_cancelhide", true);
-		unRecordAction.put("rows_hide", true);
-		unRecordAction.put("rows_show", true);
-		unRecordAction.put("welcom", true);
-		unRecordAction.put("main", true);
+		unRecordAction.put("redo", true);
+		unRecordAction.put("undo", true);
+		unRecordAction.put("addRow", true);
+		unRecordAction.put("addCol", true);
+		unRecordAction.put("hideRow", true);
+		unRecordAction.put("showRow", true);
+		unRecordAction.put("hideCol", true);
+		unRecordAction.put("showCol", true);
+		unRecordAction.put("updateLock", true);
+		unRecordAction.put("updateProtect", true);
 		unRecordAction.put("download", true);
 		unRecordAction.put("clear_queue", true);
 		

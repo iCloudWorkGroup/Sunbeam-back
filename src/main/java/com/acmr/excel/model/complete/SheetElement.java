@@ -20,7 +20,7 @@ public class SheetElement implements Serializable {
 	private List<Glx> gridLineCol = new ArrayList<Glx>();
 	private Integer sort = 0;
 	private Boolean protect = false;
-	private List<Validate> validate = new ArrayList<Validate>();
+	private List<Rule> validate = new ArrayList<Rule>();
 	private Frozen frozen = new Frozen();
 
 	public String getName() {
@@ -119,11 +119,11 @@ public class SheetElement implements Serializable {
 		this.protect = protect;
 	}
 
-	public List<Validate> getValidate() {
+	public List<Rule> getValidate() {
 		return validate;
 	}
 
-	public void setValidate(List<Validate> validate) {
+	public void setValidate(List<Rule> validate) {
 		this.validate = validate;
 	}
 
@@ -147,7 +147,7 @@ public class SheetElement implements Serializable {
 		} else {
 			this.frozen = null;
 		}
-
+		this.protect = msheet.getProtect();
 	}
 
 	public SheetElement() {

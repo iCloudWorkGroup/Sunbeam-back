@@ -17,6 +17,7 @@ import javax.jms.TextMessage;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
+import com.acmr.excel.dao.MSheetDao;
 import com.acmr.excel.service.MCellService;
 import com.acmr.excel.service.MColService;
 import com.acmr.excel.service.MRowService;
@@ -41,6 +42,8 @@ public class QueueReceiver implements MessageListener {
 	private MColService mcolService;
 	@Resource
 	private MSheetService msheetService;
+	@Resource
+	private MSheetDao msheetDao;
 
 	
 
@@ -55,7 +58,7 @@ public class QueueReceiver implements MessageListener {
 				logger.info("接收：excelId:" + excelId+ ";step:" + step + ";reqPath:"+ model.getReqPath());
 				ExecutorService executor = Executors.newFixedThreadPool(1);
 				Runnable worker = new WorkerThread2(step, excelId, model,
-						mcellService, mrowService, mcolService, msheetService);
+						mcellService, mrowService, mcolService, msheetService,msheetDao);
 				//Runnable worker = new WorkerThread2(step, excelId, model);
 				/*handle.setKey(excelId);
 				handle.setModel(model);
